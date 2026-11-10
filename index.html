@@ -233,6 +233,9 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .lnk{background:none;border:0;padding:0;color:var(--brand);font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .lnk:disabled{opacity:.5}
 .landing-ic{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;margin:0 auto}
+.fila{display:flex;flex-direction:column;gap:8px}.filarow{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.filainfo{display:flex;flex-direction:column;gap:2px;min-width:0}.filainfo b{word-break:break-all}.filaact{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.filaact input,.filaact select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:var(--ink)}
+@media (max-width:820px){.filaact{width:100%}.filaact input{flex:1 1 100%}.filaact select{flex:1 1 100%}.filaact .btn{flex:1}}
 </style>
 </head>
 <body>
@@ -492,7 +495,7 @@ const CA=Object.fromEntries(CAUSES.map(c=>[c.id,c]));
 const CLOUD_CFG={url:"https://okcnwdoxxwslmpptlyhs.supabase.co",key:"sb_publishable_9UT4r3EM6HE2E-kkmxxz0w_RPtpKQAh"};
 const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","meta"],TABLES=["inspecoes","investigacoes","produtos"];
 const S={inspecoes:[],investigacoes:[],produtos:[],meta:{}};
-let idb=null,sb=null,user=null,colab=null,cloudState="off",cloudMsg="";
+let idb=null,sb=null,user=null,colab=null,colabStatus="",pendentes=[],cloudState="off",cloudMsg="";
 const localMode=()=>{try{return sessionStorage.getItem("jsp-modo-local")==="1"}catch(e){return false}};
 function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,1);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
 function tx(store,mode,fn){return new Promise((res,rej)=>{if(!idb){res(null);return}const t=idb.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);t.onerror=()=>rej(t.error)})}
@@ -579,11 +582,17 @@ async function initCloud(){
 }
 async function checkColab(){
   try{const {data,error}=await sb.from("colaboradores").select("email,nome,papel,ativo").eq("email",(user.email||"").toLowerCase()).maybeSingle();if(error)throw error;
-    if(!data||!data.ativo){colab=null;setCloud("negado");return}
-    colab=data;setCloud("ok");
-    const full=S.meta.cloudUser!==user.email||!S.meta.lastPull;if(full){await setMeta("lastPull",null)}
-    await setMeta("cloudUser",user.email);await flushQueue();await pullCloud(full);await ensureProducts();
+    if(!data||!data.ativo){colab=null;colabStatus=data?"bloqueado":"pendente";setCloud("negado");return}
+    colab=data;colabStatus="ok";setCloud("ok");
+    const novaConta=S.meta.cloudUid!==user.id;
+    if(novaConta)await setMeta("fila",[]);
+    const full=novaConta||S.meta.cloudUser!==user.email||!S.meta.lastPull;if(full){await setMeta("lastPull",null)}
+    await setMeta("cloudUser",user.email);await setMeta("cloudUid",user.id);await flushQueue();await pullCloud(full);await ensureProducts();await loadPendentes();
   }catch(e){setCloud("offline","Sem conexão com o banco: usando a cópia deste aparelho.")}
+}
+async function loadPendentes(){
+  if(!sb||colab?.papel!=="admin"){pendentes=[];return}
+  try{const {data,error}=await sb.rpc("acessos_pendentes");if(error)throw error;pendentes=data||[]}catch(e){}
 }
 async function signOut(){try{await sb?.auth.signOut()}catch(e){}user=null;colab=null;try{sessionStorage.removeItem("jsp-modo-local")}catch(e){}location.hash="";location.reload()}
 function updateDbStatus(){
@@ -700,7 +709,7 @@ window.addEventListener("hashchange",()=>{const [p,id]=location.hash.slice(1).sp
 function renderNav(){
   let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
     const act=route.p===p.id||(route.p==="inspecao"&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes");
-    const badge=p.id==="investigacoes"?pendingTrees().length:0;
+    const badge=p.id==="investigacoes"?pendingTrees().length:p.id==="dados"?pendentes.length:0;
     h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="Árvores não preenchidas">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
 }
@@ -724,11 +733,12 @@ function pgLogin(){
   head("Acesso","Entrar no sistema");$("#nav").innerHTML="";
   const neg=cloudState==="negado";if(loginMode==="senha")loginMode="entrar";
   let h=`<div class="login"><div class="card"><div class="logo2"><div class="mk">JSP</div><div><b>Qualidade · Amostragem</b><div class="muted small">Banco de dados compartilhado da JSP</div></div></div>`;
-  if(neg)h+=`<div class="banner nc"><span>O e-mail <b>${esc(user?.email)}</b> ainda não está autorizado. Peça ao administrador do sistema para incluí-lo em “Colaboradores”.</span></div><div class="row"><button class="btn" id="lgOut">Entrar com outro e-mail</button><button class="btn" id="lgRetry">Já fui autorizado</button></div>`;
+  if(neg&&colabStatus==="bloqueado")h+=`<div class="banner nc"><span>O acesso do e-mail <b>${esc(user?.email)}</b> não foi liberado pelo administrador do sistema. Se acha que é um engano, fale com o responsável pela Qualidade.</span></div>`+`<div class="row"><button class="btn" id="lgOut">Entrar com outro e-mail</button></div>`;
+  else if(neg)h+=`<div class="banner info"><span><b>Pedido de acesso enviado.</b> Sua conta <b>${esc(user?.email)}</b> foi criada e está na fila de aprovação. Assim que o administrador aceitar, é só clicar em “Verificar liberação”.</span></div><div class="row"><button class="btn" id="lgOut">Entrar com outro e-mail</button><button class="btn primary" id="lgRetry">Verificar liberação</button></div>`;
   else h+=`<div class="tabs" style="margin-top:6px"><button data-lm="entrar" aria-selected="${loginMode==="entrar"}">Entrar</button><button data-lm="criar" aria-selected="${loginMode==="criar"}">Criar conta</button></div>
     <label class="f">E-mail<input id="lgEmail" type="email" autocomplete="username" inputmode="email" value="${esc(loginEmail)}"></label>
     <label class="f" style="margin-top:10px">${loginMode==="criar"?"Crie uma senha (mínimo 8 caracteres)":"Senha"}<input id="lgPass" type="password" autocomplete="${loginMode==="criar"?"new-password":"current-password"}"></label>
-    ${loginMode==="entrar"?`<div style="margin-top:8px"><button class="lnk" id="lgForgot" type="button">Esqueci a senha</button></div>`:`<p class="hint" style="margin-top:8px">Use o e-mail cadastrado pelo administrador. Você receberá um e-mail com o link para confirmar a conta.</p><div><button class="lnk" id="lgResend" type="button">Não recebeu o e-mail? Reenviar confirmação</button></div>`}
+    ${loginMode==="entrar"?`<div style="margin-top:8px"><button class="lnk" id="lgForgot" type="button">Esqueci a senha</button></div>`:`<p class="hint" style="margin-top:8px">Depois de criar a conta, confirme pelo link enviado ao seu e-mail. O administrador recebe o seu pedido e libera o acesso.</p><div><button class="lnk" id="lgResend" type="button">Não recebeu o e-mail? Reenviar confirmação</button></div>`}
     <p id="lgMsg" class="small" style="color:var(--nc);min-height:18px;margin-top:8px"></p>
     <p class="hint">Acesso restrito a colaboradores autorizados.</p>`;
   h+=`<details style="margin-top:14px"><summary class="muted small">Sem acesso ao banco?</summary><p class="small muted" style="margin:8px 0">O modo local permite usar e demonstrar o sistema neste aparelho, sem compartilhar os dados.</p><button class="btn sm" id="lgLocal">Usar modo local (demonstração)</button></details></div></div>`;
@@ -747,11 +757,11 @@ function pgLogin(){
   if($("#lgGo"))$("#lgGo").onclick=async()=>{const email=em(),pass=$("#lgPass")?.value||"";if(!email){msg("Informe o e-mail.");return}
     $("#lgGo").disabled=true;
     try{if(loginMode==="entrar"){const {data,error}=await sb.auth.signInWithPassword({email,password:pass});if(error)throw error;user=data.user;await checkColab();await ensureProducts();route={p:"painel",id:null};render()}
-      else{if(pass.length<8){msg("A senha deve ter pelo menos 8 caracteres.");$("#lgGo").disabled=false;return}const {error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:authRedirect()}});if(error)throw error;msg("Conta criada. Abra o e-mail que enviamos para "+email+" e clique no link para confirmar.",true)}
+      else{if(pass.length<8){msg("A senha deve ter pelo menos 8 caracteres.");$("#lgGo").disabled=false;return}const {error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:authRedirect()}});if(error)throw error;msg("Conta criada. Abra o e-mail que enviamos para "+email+" e clique no link para confirmar. Depois, aguarde a liberação do administrador.",true)}
     }catch(e){msg(errMsg(e))}
     if($("#lgGo"))$("#lgGo").disabled=false};
   if($("#lgOut"))$("#lgOut").onclick=signOut;
-  if($("#lgRetry"))$("#lgRetry").onclick=async()=>{await checkColab();await ensureProducts();render()};
+  if($("#lgRetry"))$("#lgRetry").onclick=async()=>{await checkColab();if(cloudState==="negado"&&colabStatus==="pendente")toast("Ainda aguardando a aprovação do administrador.");else{await ensureProducts();render()}};
   $("#lgLocal").onclick=async()=>{try{sessionStorage.setItem("jsp-modo-local","1")}catch(e){}setCloud("local");await ensureProducts();route={p:"painel",id:null};render()};
 }
 function pgAuthLanding(){
@@ -763,7 +773,7 @@ function pgAuthLanding(){
   if(a.tipo==="confirmada"){
     head("Acesso","Conta confirmada");
     const liberado=cloudState==="ok";
-    setPage(box(ok,"var(--ok)","Conta confirmada!!",`Seu e-mail <b>${esc(user?.email||"")}</b> foi confirmado com sucesso. ${liberado?"Seu acesso ao sistema já está liberado.":"Se o administrador ainda não liberou o seu e-mail em “Colaboradores”, peça para ele incluir você."}`));
+    setPage(box(ok,"var(--ok)","Conta confirmada!!",`Seu e-mail <b>${esc(user?.email||"")}</b> foi confirmado com sucesso. ${liberado?"Seu acesso ao sistema já está liberado.":"Seu pedido de acesso foi enviado ao administrador. Assim que ele aceitar, você já consegue usar o sistema."}`));
     setBar(`<div class="bar-info">Tudo certo com a sua conta</div><button class="btn primary" id="lnGo">Entrar no sistema →</button>`);
   }else if(a.tipo==="senha"){
     head("Acesso","Nova senha");
@@ -796,6 +806,7 @@ function pgPainel(){
   const open=S.investigacoes.filter(v=>(v.conclusao?.status||"aberta")!=="concluida").length;
   const sumN=I.reduce((a,x)=>a+(x.n||0),0),sumD=I.reduce((a,x)=>a+(x.d||0),0);
   let h="";
+  if(pendentes.length&&colab?.papel==="admin")h+=`<div class="banner info"><span><b>${pendentes.length} pedido(s) de acesso aguardando aprovação.</b> ${pendentes.slice(0,3).map(p=>esc(p.email)).join(", ")}${pendentes.length>3?"…":""}</span><button class="btn sm primary" data-go2="dados">Ver pedidos</button></div>`;
   if(!tot)h+=`<div class="banner info"><span><b>Nenhuma inspeção registrada ainda.</b> Comece em “Nova inspeção”: informe o lote, o tamanho do lote e o NQA, e o sistema calcula o plano de amostragem pela NBR 5426. Para conhecer o sistema sem dados reais, carregue a demonstração em “Dados e configuração”.</span></div>`;
   h+=`<div class="grid g4" style="margin-bottom:14px">
    <div class="kpi"><div class="l">Lotes inspecionados</div><div class="v">${orig.length}</div><div class="s">${tot-orig.length} reapresentação(ões)</div></div>
@@ -1144,7 +1155,8 @@ function pgDados(){
    <div class="card"><h2>Backup e exportação</h2><p class="muted small" style="margin-bottom:12px">O backup em JSON guarda todo o banco e pode ser importado em outro computador (os registros são mesclados, sem duplicar). Os CSV abrem no Excel.</p>
    <div class="row"><button class="btn primary" id="bk">Baixar backup (JSON)</button><button class="btn" id="imp">Importar backup</button><input type="file" id="impF" accept=".json,application/json" hidden></div>
    <div class="row" style="margin-top:10px"><button class="btn" data-x="I">CSV inspeções</button><button class="btn" data-x="V">CSV árvores de falha</button><button class="btn" data-x="B">CSV biblioteca</button></div></div></div>`;
-  if(adm)h+=`<div class="card"><h2>Colaboradores com acesso</h2><p class="muted small" style="margin-bottom:10px">Só e-mails desta lista conseguem ver e registrar dados. Depois de incluído, o colaborador faz o “Primeiro acesso” na tela de entrada com o mesmo e-mail.</p><div id="colabList" class="muted small">Carregando…</div>
+  if(adm)h+=`<div class="card" id="filaCard"><h2>Pedidos de acesso</h2><p class="muted small" style="margin-bottom:10px">Quem cria uma conta pela tela de entrada aparece aqui. Aceite escolhendo o papel ou recuse. Recusados ficam na lista de colaboradores como bloqueados e podem ser liberados depois.</p><div id="filaList" class="muted small">Carregando…</div></div>`;
+  if(adm)h+=`<div class="card"><h2>Colaboradores com acesso</h2><p class="muted small" style="margin-bottom:10px">Só e-mails desta lista conseguem ver e registrar dados. Normalmente a pessoa cria a conta e você aceita em “Pedidos de acesso”; aqui também dá para cadastrar um e-mail antes.</p><div id="colabList" class="muted small">Carregando…</div>
     <div class="grid g4" style="margin-top:12px;grid-template-columns:2fr 2fr 1fr auto"><label class="f">E-mail<input id="cbEmail" type="email"></label><label class="f">Nome<input id="cbNome"></label><label class="f">Papel<select id="cbPapel"><option value="inspetor">Inspetor(a)</option><option value="admin">Administrador</option></select></label><div style="align-self:end"><button class="btn primary" id="cbAdd">Incluir</button></div></div></div>`;
   h+=`<div class="card"><h2>Produtos e pré-definições de amostragem</h2><p class="muted small" style="margin-bottom:10px">Cada produto tem, por ponto de inspeção, um tamanho de lote, nível e NQA pré-definidos. Esses valores preenchem a nova inspeção automaticamente e podem ser alterados em cada lote. O NQA deve ser confirmado pela Qualidade da JSP ou pelo contrato com o cliente (NBR 5426, 4.2); o valor marcado como “proposta” foi sugerido pelo grupo.</p>
    <div class="tw"><table class="t"><thead><tr><th>Produto</th><th>Ponto de inspeção</th><th>Lote padrão (peças)</th><th>Nível</th><th>NQA</th><th>Plano resultante (normal)</th><th></th></tr></thead><tbody>${S.produtos.map(p=>Object.entries(POINTS).map(([k,pt],ix)=>{const ps=presetOf(p,k),pl=ps.N&&ps.nqa!=null?samplingPlan(ps.N,ps.nivel,ps.nqa,"N"):null;return `<tr>${ix===0?`<td rowspan="3"><b>${esc(p.id)}</b><br>${esc(p.nome)}<div class="hint">${esc(p.cliente)} · ${esc(p.codCliente)} · ${esc(p.maquina||"")}</div>${p.ref?'<span class="pill brand">Referência</span>':`<button class="btn sm danger" data-delp="${p.id}" style="margin-top:6px">Remover</button>`}</td>`:""}<td>${pt.nome}</td><td><input type="number" min="1" data-pp="${p.id}" data-pt="${k}" data-f="N" value="${ps.N??""}" placeholder="A definir" style="margin:0;width:120px"></td><td><select data-pp="${p.id}" data-pt="${k}" data-f="nivel" style="margin:0">${LEVELS.map(l=>`<option ${l===ps.nivel?"selected":""}>${l}</option>`).join("")}</select></td><td><select data-pp="${p.id}" data-pt="${k}" data-f="nqa" style="margin:0"><option value="">A definir</option>${NQA_P.map((v,i)=>`<option value="${i}" ${ps.nqa===i?"selected":""}>${v}</option>`).join("")}</select>${ps.proposta?'<div><span class="pill warn">proposta · validar</span></div>':""}</td><td class="small">${pl?`Letra ${pl.letter} · n = ${pl.n} · Ac ${pl.ac} / Re ${pl.re}`:'<span class="muted">Informe lote e NQA</span>'}</td><td></td></tr>`}).join("")).join("")}</tbody></table></div>
@@ -1160,7 +1172,12 @@ function pgDados(){
   if(adm){const loadC=async()=>{const {data,error}=await sb.from("colaboradores").select("*").order("nome");if(error){$("#colabList").textContent="Não foi possível carregar.";return}
       $("#colabList").innerHTML=`<div class="tw"><table class="t"><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Acesso</th></tr></thead><tbody>${data.map(c=>`<tr><td>${esc(c.nome||"")}</td><td>${esc(c.email)}</td><td>${c.papel==="admin"?"Administrador":"Inspetor(a)"}</td><td>${c.email===user.email?'<span class="muted">você</span>':`<button class="btn sm ${c.ativo?"danger":""}" data-cbt="${esc(c.email)}" data-on="${c.ativo?0:1}">${c.ativo?"Bloquear":"Liberar"}</button>`}</td></tr>`).join("")}</tbody></table></div>`;
       $$("[data-cbt]").forEach(b=>b.onclick=async()=>{await sb.from("colaboradores").update({ativo:b.dataset.on==="1"}).eq("email",b.dataset.cbt);loadC()})};
-    loadC();$("#cbAdd").onclick=async()=>{const email=$("#cbEmail").value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email)){toast("Informe um e-mail válido.");return}const {error}=await sb.from("colaboradores").upsert({email,nome:$("#cbNome").value.trim(),papel:$("#cbPapel").value,ativo:true});if(error){toast("Não foi possível incluir: "+error.message);return}$("#cbEmail").value="";$("#cbNome").value="";toast("Colaborador incluído.");loadC()}}
+    const loadF=async()=>{await loadPendentes();renderNav();const el=$("#filaList");if(!el)return;
+      if(!pendentes.length){el.innerHTML='<span class="muted">Nenhum pedido aguardando.</span>';return}
+      el.innerHTML=`<div class="fila">${pendentes.map((p,i)=>`<div class="filarow"><div class="filainfo"><b>${esc(p.email)}</b><span class="small muted">Pedido em ${new Date(p.criado_em).toLocaleString("pt-BR")} · ${p.confirmado?'<span style="color:var(--ok)">e-mail confirmado</span>':'<span style="color:var(--warn)">e-mail ainda não confirmado</span>'}</span></div><div class="filaact"><input data-fnome="${i}" placeholder="Nome (opcional)"><select data-fpapel="${i}"><option value="inspetor">Inspetor(a)</option><option value="admin">Administrador</option></select><button class="btn sm primary" data-faceitar="${i}">Aceitar</button><button class="btn sm danger" data-frecusar="${i}">Recusar</button></div></div>`).join("")}</div>`;
+      const act=async(i,ativo)=>{const p=pendentes[i];if(!ativo&&!confirm("Recusar o acesso de "+p.email+"?"))return;const {error}=await sb.from("colaboradores").upsert({email:p.email,nome:($(`[data-fnome="${i}"]`)?.value||"").trim()||null,papel:ativo?$(`[data-fpapel="${i}"]`).value:"inspetor",ativo});if(error){toast("Não foi possível salvar: "+error.message);return}toast(ativo?"Acesso liberado para "+p.email+".":"Pedido recusado.");loadF();loadC()};
+      $$("[data-faceitar]").forEach(b=>b.onclick=()=>act(+b.dataset.faceitar,true));$$("[data-frecusar]").forEach(b=>b.onclick=()=>act(+b.dataset.frecusar,false))};
+    loadF();loadC();$("#cbAdd").onclick=async()=>{const email=$("#cbEmail").value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email)){toast("Informe um e-mail válido.");return}const {error}=await sb.from("colaboradores").upsert({email,nome:$("#cbNome").value.trim(),papel:$("#cbPapel").value,ativo:true});if(error){toast("Não foi possível incluir: "+error.message);return}$("#cbEmail").value="";$("#cbNome").value="";toast("Colaborador incluído.");loadC()}}
   $("#bk").onclick=()=>download(`JSP_backup_${today()}.json`,JSON.stringify(snapshot(),null,1),"application/json");
   $("#imp").onclick=()=>$("#impF").click();
   $("#impF").onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(!j.inspecoes)throw 0;const n=await mergeIn(j);toast(n+" registro(s) importado(s).");render()}catch(err){alert("Arquivo inválido: use um backup exportado por este sistema.")}};
@@ -1197,7 +1214,7 @@ $("#logout").onclick=signOut;
   if(cloudState!=="login"&&cloudState!=="negado")await ensureProducts();
   const [p,id]=location.hash.slice(1).split("/");if(p&&PAGES.concat([{id:"inspecao"},{id:"arvore"}]).some(x=>x.id===p))route={p,id:id||null};
   render();
-  setInterval(async()=>{if(document.visibilityState!=="visible")return;if(cloudState==="ok"||cloudState==="offline"){const before=JSON.stringify([S.inspecoes.length,S.investigacoes.length,S.meta.lastPull]);await pullCloud(false);if(cloudState==="ok")await flushQueue();if(JSON.stringify([S.inspecoes.length,S.investigacoes.length,S.meta.lastPull])!==before&&!["nova","arvore"].includes(route.p))render();else updateDbStatus()}},20000);
+  setInterval(async()=>{if(document.visibilityState!=="visible")return;if(cloudState==="ok"||cloudState==="offline"){const before=JSON.stringify([S.inspecoes.length,S.investigacoes.length,S.meta.lastPull]);await pullCloud(false);if(cloudState==="ok"){await flushQueue();const np=pendentes.length;await loadPendentes();if(np!==pendentes.length){renderNav();if(route.p==="painel")render()}}if(JSON.stringify([S.inspecoes.length,S.investigacoes.length,S.meta.lastPull])!==before&&!["nova","arvore"].includes(route.p))render();else updateDbStatus()}},20000);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&cloudState==="ok")pullCloud(false).then(()=>{if(!["nova","arvore"].includes(route.p))render()})});
 })();
 </script>
