@@ -266,6 +266,9 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .tw table.t{min-width:560px}.tw table.t.wide{min-width:980px}
 #demoBanner{font-size:12px;padding:8px 10px;display:block}#demoBanner b{display:block}}
 @media print{.actionbar,#demoBanner{display:none!important}}
+.backbtn{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 8px;margin:0 10px 6px 0;font:inherit;font-size:12.5px;font-weight:600;color:var(--brand);cursor:pointer}
+.backbtn:hover{background:var(--brand-soft)}
+@media (max-width:820px){.backbtn{display:flex;width:max-content;padding:8px 14px 8px 10px;font-size:13.5px;margin-bottom:8px}}
 </style>
 </head>
 <body>
@@ -784,8 +787,20 @@ const PAGES=[
  {id:"ajuda",t:"Como usar",ic:"help",grp:"Referência"}
 ];
 let route={p:"painel",id:null};
-function go(p,id=null){route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
-window.addEventListener("hashchange",()=>{const [p,id]=location.hash.slice(1).split("/");if(p&&(p!==route.p||id!==route.id)){route={p,id:id||null};render()}});
+// Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
+const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1};
+const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
+function backTarget(peek){
+  for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
+    const ok=t.p!=="nova"&&t.p!=="produto"&&!(t.p===route.p&&t.id===route.id)&&!(t.p==="inspecao"&&!S.inspecoes.some(x=>x.id===t.id))&&!(t.p==="arvore"&&!S.investigacoes.some(v=>v.id===t.id));
+    if(ok){if(!peek)navStack.length=i;return t}}
+  if(!peek)navStack.length=0;
+  if(route.p==="arvore"){const v=S.investigacoes.find(v=>v.id===route.id);if(v&&S.inspecoes.some(x=>x.id===v.inspecaoId))return {p:"inspecao",id:v.inspecaoId,y:0};return {p:"investigacoes",id:null,y:0}}
+  return {p:route.p==="produto"?"cadastros":"inspecoes",id:null,y:0};
+}
+function goBack(){const t=backTarget(false);route={p:t.p,id:t.id||null};location.hash=t.p+(t.id?"/"+t.id:"");render();window.scrollTo(0,t.y||0)}
+window.addEventListener("hashchange",()=>{const [p,id0]=location.hash.slice(1).split("/"),id=id0||null;if(p&&(p!==route.p||id!==route.id)){const top=navStack[navStack.length-1];let y=0;if(top&&top.p===p&&(top.id||null)===id){y=top.y||0;navStack.pop()}else navStack.push({p:route.p,id:route.id,y:window.scrollY});route={p,id};render();window.scrollTo(0,y)}});
 function renderNav(){
   let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
     const act=route.p===p.id||(route.p==="inspecao"&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros");
@@ -793,7 +808,8 @@ function renderNav(){
     h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
 }
-function head(crumb,title,right=""){$("#crumb").textContent=crumb;$("#title").textContent=title;$("#topright").innerHTML=right;document.title="JSP · "+title}
+function head(crumb,title,right=""){$("#crumb").textContent=crumb;
+  if(DETAIL[route.p]){const t=backTarget(true);$("#crumb").insertAdjacentHTML("afterbegin",`<button class="backbtn noprint" id="backB" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Voltar para ${esc(PNAME[t.p]||"a lista")}</button>`);$("#backB").onclick=goBack}$("#title").textContent=title;$("#topright").innerHTML=right;document.title="JSP · "+title}
 function render(){
   renderNav();updateDbStatus();setBar("");
   if(authLanding){pgAuthLanding();return}
