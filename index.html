@@ -1116,7 +1116,7 @@ function treeFilled(v){const qs=presenceQs(v);const locOK=qs.every(q=>(v.presenc
 function pendingTrees(){return S.investigacoes.filter(v=>!v.demo&&!treeFilled(v)&&(v.conclusao?.status||"aberta")!=="concluida")}
 
 /* =========================================================================
-   9. ÁRVORE DE FALHA REVERSA (do ponto de detecção de volta à origem)
+   9. ÁRVORE DE FALHA (do ponto de detecção de volta à origem)
    ========================================================================= */
 function presenceQs(v){
   const q=[];
@@ -1132,7 +1132,7 @@ function origin(v){
 }
 function originLabel(v){const o=origin(v);return o==="MOLD"?"Moldagem / molde / matéria-prima":o==="EST"?"Estufa":o==="FL"?"Final de linha":"Não localizada"}
 function stagesFor(v){
-  // etapas a montante do ponto de detecção, em ordem reversa
+  // etapas a montante do ponto de detecção, da última para a primeira
   const all=v.ponto==="FL"?["FL","EST",...MOLD_STAGES]:v.ponto==="EST"?["EST",...MOLD_STAGES]:MOLD_STAGES;
   return all.filter(s=>CAUSES.some(c=>c.st===s&&c.defs.includes(v.defeito)));
 }
@@ -1143,7 +1143,7 @@ function treeSVG(v){
   const stages=stagesFor(v),rows=[];stages.forEach(s=>causesFor(v,s).forEach(c=>rows.push({s,c})));
   const RH=44,top=24,H=Math.max(160,top*2+rows.length*RH),W=1100,midY=H/2;
   const css=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
-  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:820px;height:auto" role="img" aria-label="Árvore de falha reversa">`;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:820px;height:auto" role="img" aria-label="Árvore de falha">`;
   const d=DEF[v.defeito];
   svg+=`<rect x="10" y="${midY-34}" width="200" height="68" rx="10" fill="${css("--nc-soft")}" stroke="${css("--nc")}" stroke-width="1.5"/><text x="22" y="${midY-14}" font-size="10" font-weight="700" fill="${css("--nc")}">EFEITO · ${esc(POINTS[v.ponto].nome.toUpperCase())}</text>`;
   wrapT(d.nome,26).slice(0,3).forEach((l,i)=>svg+=`<text x="22" y="${midY+3+i*14}" font-size="12.5" font-weight="600" fill="${css("--ink")}">${esc(l)}</text>`);
@@ -1168,7 +1168,7 @@ function pgArvore(){
   let h=`<div class="flowbar noprint"><div><p class="sec-title" style="margin:0 0 6px">Árvores de falha do lote ${esc(x?.lote||"")} · ${irmas.filter(treeFilled).length} de ${irmas.length} preenchida(s)</p><div class="row">${irmas.map((i,ix)=>`<a class="fstep ${i.id===v.id?"cur":""} ${treeFilled(i)?"ok":""}" href="#arvore/${i.id}">${treeFilled(i)?"✓":ix+1} · ${esc(DEF[i.defeito]?.nome)} <small>(${x?.defeitos?.[i.defeito]||i.pecas||0} pç)</small></a>`).join("")}</div></div>
     </div>`;
   h+=`<div class="grid g4 kpis" style="margin-bottom:14px"><div class="kpi"><div class="l">Detectado em</div><div class="v" style="font-size:18px">${POINTS[v.ponto].nome}</div><div class="s">${x?`<a href="#inspecao/${x.id}">Lote ${esc(x.lote)} · ${fmtD(x.data)}</a>`:""}</div></div><div class="kpi"><div class="l">Especificação</div><div class="s" style="font-size:13px;color:var(--ink)">${esc(defSpec(v.defeito,prod(x?.productId)))}</div><div class="s">${esc(d.src)}</div></div><div class="kpi"><div class="l">Origem localizada</div><div class="v" style="font-size:18px">${esc(originLabel(v))}</div></div><div class="kpi"><div class="l">Status</div><div class="v" style="font-size:18px">${invPill(c.status)}</div><div class="s">${probable(v).length} desvio(s) observado(s)</div></div></div>`;
-  h+=`<div class="card"><h2>Árvore de falha reversa</h2><p class="muted" style="margin-bottom:10px">Do efeito (à esquerda) de volta às etapas do processo e às causas possíveis. Clique numa causa para ir até ela. Vermelho = desvio observado; verde = descartada; tracejado = fora da etapa de origem.</p><p class="hint onlym" style="margin:-4px 0 8px">Arraste o desenho para o lado para ver as causas.</p><div class="treebox">${treeSVG(v)}</div></div>`;
+  h+=`<div class="card"><h2>Árvore de falha</h2><p class="muted" style="margin-bottom:10px">Do efeito (à esquerda) de volta às etapas do processo e às causas possíveis. Clique numa causa para ir até ela. Vermelho = desvio observado; verde = descartada; tracejado = fora da etapa de origem.</p><p class="hint onlym" style="margin:-4px 0 8px">Arraste o desenho para o lado para ver as causas.</p><div class="treebox">${treeSVG(v)}</div></div>`;
   const qs=presenceQs(v);
   h+=`<div class="card"><p class="sec-title">Passo 1 · Localizar a origem (voltar no processo)</p>${qs.length?qs.map(q=>{const a=(v.presenca||{})[q.id]||"";return `<div class="cause"><div class="top2"><div><h3>${esc(q.t)}</h3><p class="hint">Evidência: ${esc(q.ev)}</p></div><div class="seg" role="group">${[["S","Sim"],["N","Não"],["X","Sem registro"]].map(([k,l])=>`<button data-pres="${q.id}" data-v="${k}" aria-pressed="${a===k}">${l}</button>`).join("")}</div></div>${a==="S"?`<p class="small" style="margin-top:6px;color:var(--brand)">→ ${esc(q.yes)}</p>`:a==="N"?`<p class="small" style="margin-top:6px;color:var(--brand)">→ ${esc(q.no)}</p>`:""}</div>`}).join(""):`<p class="muted">Defeito detectado na própria moldagem: a origem está nos parâmetros da máquina, no molde/setup ou na matéria-prima.</p>`}</div>`;
   h+=`<div class="card"><p class="sec-title">Passo 2 · Verificar as causas possíveis com evidência</p><p class="muted small">Para cada causa: houve desvio dessa condição no período do lote? Responda com base em registro, não em suposição. Uma condição observada no mesmo período não comprova sozinha a causa.</p>`;
@@ -1425,7 +1425,7 @@ function pgAjuda(){
     ${g("Nível de inspeção","Define o tamanho da amostra para o mesmo lote. O nível II é o padrão da norma.")}
     ${g("Regime","Normal, severo ou atenuado. O sistema muda sozinho: 2 lotes rejeitados em 5 levam ao severo; 5 aceitos seguidos voltam ao normal.")}
     ${g("FTP","Ficha Técnica de Processo: os valores nominais e as faixas de cada parâmetro do produto.")}
-    ${g("Árvore de falha reversa","Investigação que parte do defeito encontrado e volta pelo processo, etapa por etapa, até a causa.")}</dl></div>
+    ${g("Árvore de falha","Investigação que parte do defeito encontrado e volta pelo processo, etapa por etapa, até a causa.")}</dl></div>
    <div class="card"><h2>Dúvidas comuns</h2>
     ${q("Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica guardado no aparelho e é enviado sozinho quando a conexão voltar. O ponto colorido no menu mostra a situação do banco.")}
     ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
