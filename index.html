@@ -371,7 +371,8 @@ function machineOptions(cur){const L=[...S.maquinas].sort((a,b)=>a.codigo.locale
   if(cur&&!L.some(m=>m.codigo===cur))o+=`<option value="${esc(cur)}" selected>${esc(cur)} (não cadastrada)</option>`;return o}
 function presetOf(p,pt){const ps=p?.preset?.[pt]||{};return {N:ps.N??null,nivel:ps.nivel||p?.nivel||"II",nqa:ps.nqa??(p?.nqa?.[pt]??null),proposta:!!ps.proposta}}
 function applyPreset(d){const p=prod(d.productId),ps=presetOf(p,d.ponto);const last=S.meta["lastN|"+d.productId+"|"+d.ponto];
-  d.N=ps.N!=null?String(ps.N):(last!=null?String(last):"");d.nivel=ps.nivel;d.nqa=ps.nqa!=null?String(ps.nqa):"";if(p)d.maquina=p.maquina||d.maquina;return d}
+  if(!p||!d.ponto){d.N="";d.nivel="";d.nqa="";return d}
+  d.N=ps.N!=null?String(ps.N):(last!=null?String(last):"");d.nivel=ps.nivel;d.nqa=ps.nqa!=null?String(ps.nqa):"";return d}
 // Defeitos: nomes da FS 070 (Moldagem e Final de Linha) + características do Plano de Controle
 const DEFECTS=[
  {id:"rebarba",nome:"Rebarba acima do especificado",pts:["MOLD","FL"],spec:"Até 3 mm, conforme desenho; calibrador P/NP (OK/NOK). Remover sem prejudicar geometria e aparência.",src:"Plano de Controle op. 30/50 · FS 070"},
@@ -890,10 +891,10 @@ function pgPainel(){
    7. PÁGINA: NOVA INSPEÇÃO (lote → plano → amostra → decisão)
    ========================================================================= */
 let draft=null;
-function newDraft(base){const p=S.produtos.find(p=>p.ref)||S.produtos[0];const d={id:uid(),productId:p?.id||"",ponto:"FL",data:today(),turno:"",maquina:p?.maquina||"",molde:"",op:"",lote:"",inspetor:S.meta.lastInspector||"",N:"",nivel:"II",nqa:"",regime:null,applyR:false,defeitos:{},dOverride:null,obs:"",reap:false,refId:null,irregular:false};if(!base)applyPreset(d);return Object.assign(d,base||{})}
+function newDraft(base){const d={id:uid(),productId:"",ponto:"",data:"",turno:"",maquina:"",molde:"",op:"",lote:"",inspetor:"",N:"",nivel:"",nqa:"",regime:null,applyR:false,defeitos:{},dOverride:null,obs:"",reap:false,refId:null,irregular:false};return Object.assign(d,base||{})}
 function pgNova(){
   if(!S.produtos.length){head("Operação","Nova inspeção por amostragem");setPage(`<div class="card"><h2>Nenhum produto cadastrado</h2><p class="muted" style="margin:6px 0 12px">Cadastre pelo menos um produto para registrar inspeções.</p><button class="btn primary" id="toCad">Ir para Cadastros</button></div>`);$("#toCad").onclick=()=>{cadTab="produtos";go("cadastros")};return}
-  if(!draft||!prod(draft.productId))draft=newDraft();
+  if(!draft||(draft.productId&&!prod(draft.productId)))draft=newDraft();
   head("Operação","Nova inspeção por amostragem",`<button class="btn" id="clr">Limpar formulário</button>`);
   const d=draft,p=prod(d.productId);d._rN=d.N;
   const nqaVal=d.nqa===""||d.nqa==null?"":+d.nqa;
@@ -916,20 +917,21 @@ function pgNova(){
   if(d.editOf)h+=`<div class="banner info"><span><b>Corrigindo a inspeção do lote ${esc(d.lote)} (${fmtD(d.data)}).</b> Ajuste o que estiver errado e salve: o registro original é substituído e a correção fica registrada com seu usuário e o motivo. As árvores de falha já preenchidas são mantidas.</span><button class="btn sm" id="cancEdit">Cancelar correção</button></div>`;
   if(d.reap)h+=`<div class="banner warn"><span><b>Reapresentação do lote ${esc(prevReap?.lote||"")}.</b> Só reapresente depois de reexaminar todas as unidades e retirar ou reparar as defeituosas (4.12.4). Reapresentações não contam para as regras de comutação.</span></div>`;
   h+=`<div class="card"><p class="sec-title">1 · Identificação do lote</p><div class="grid g3">
-    <label class="f">Produto <span class="req">*</span><select id="f_productId">${S.produtos.map(x=>`<option value="${x.id}" ${x.id===d.productId?"selected":""}>${esc(x.id+" · "+x.nome)}</option>`).join("")}</select></label>
-    <label class="f">Ponto de inspeção <span class="req">*</span><select id="f_ponto">${Object.entries(POINTS).map(([k,v])=>`<option value="${k}" ${k===d.ponto?"selected":""}>${v.nome} (${v.op})</option>`).join("")}</select></label>
+    <label class="f">Produto <span class="req">*</span><select id="f_productId"><option value="">Selecione o produto…</option>${S.produtos.map(x=>`<option value="${x.id}" ${x.id===d.productId?"selected":""}>${esc(x.id+" · "+x.nome)}</option>`).join("")}</select></label>
+    <label class="f">Ponto de inspeção <span class="req">*</span><select id="f_ponto"><option value="">Selecione o ponto…</option>${Object.entries(POINTS).map(([k,v])=>`<option value="${k}" ${k===d.ponto?"selected":""}>${v.nome} (${v.op})</option>`).join("")}</select></label>
     <label class="f">Data <span class="req">*</span><input type="date" id="f_data" value="${esc(d.data)}"></label>
     <label class="f">OP<input id="f_op" value="${esc(d.op)}" placeholder="Nº da OP"></label>
     <label class="f">Lote / rack <span class="req">*</span><input id="f_lote" value="${esc(d.lote)}" placeholder="Identificação do lote"></label>
-    <label class="f">Turno<select id="f_turno"><option value="">—</option>${["1º","2º","3º","ADM"].map(t=>`<option ${t===d.turno?"selected":""}>${t}</option>`).join("")}</select></label>
-    <label class="f">Máquina<select id="f_maquina"><option value="">—</option>${machineOptions(d.maquina)}</select></label>
+    <label class="f">Turno <span class="req">*</span><select id="f_turno"><option value="">Selecione…</option>${["1º","2º","3º","ADM"].map(t=>`<option ${t===d.turno?"selected":""}>${t}</option>`).join("")}</select></label>
+    <label class="f">Máquina <span class="req">*</span><select id="f_maquina"><option value="">Selecione a máquina…</option>${machineOptions(d.maquina)}</select></label>
     <label class="f">Molde / ferramenta<input id="f_molde" value="${esc(d.molde)}"></label>
     <label class="f">Inspetor(a) <span class="req">*</span><input id="f_inspetor" value="${esc(d.inspetor)}"></label></div>
-    <p class="hint" style="margin-top:10px"><b>Controle atual no ${POINTS[d.ponto].nome} (Plano de Controle):</b> ${esc(POINTS[d.ponto].atual)}</p></div>`;
+    ${d.ponto?`<p class="hint" style="margin-top:10px"><b>Controle atual no ${POINTS[d.ponto].nome} (Plano de Controle):</b> ${esc(POINTS[d.ponto].atual)}</p>`:""}</div>`;
   const ps=presetOf(p,d.ponto),lastN=S.meta["lastN|"+d.productId+"|"+d.ponto];
   const difN=ps.N!=null&&String(ps.N)!==String(d.N),difNiv=ps.nivel!==d.nivel,difNqa=ps.nqa!=null&&String(ps.nqa)!==String(d.nqa);
   const tag=(dif,txt)=>dif?`<span class="pill warn" style="margin-left:6px">alterado · padrão ${txt}</span>`:`<span class="pill" style="margin-left:6px">pré-definido</span>`;
-  h+=`<div class="card"><p class="sec-title">2 · Parâmetros da amostragem (NBR 5426)</p>
+  if(!p||!d.ponto)h+=`<div class="card"><p class="sec-title">2 · Parâmetros da amostragem (NBR 5426)</p><div class="pcempty">Escolha o <b>produto</b> e o <b>ponto de inspeção</b> na etapa 1. O tamanho do lote, o nível e o NQA são preenchidos com as especificações cadastradas para o produto.</div></div>`;
+  else   h+=`<div class="card"><p class="sec-title">2 · Parâmetros da amostragem (NBR 5426)</p>
     <div class="banner info" style="margin-bottom:12px"><span><b>Pré-definição de ${esc(p?.nome||"produto")} · ${POINTS[d.ponto].nome}:</b> lote ${ps.N!=null?"<b>"+ps.N+" peças</b>":lastN!=null?"<b>"+lastN+" peças</b> (último usado)":"<b>a definir</b>"}, nível <b>${ps.nivel}</b>, NQA <b>${ps.nqa!=null?NQA[ps.nqa]:"a definir"}</b>${ps.proposta?' <span class="pill warn">NQA proposto pelo grupo · validar com a Qualidade</span>':""}. Os valores já vêm preenchidos; altere se a situação do lote for diferente. O plano (n, Ac, Re) é calculado automaticamente, seguindo as setas da tabela.</span></div>
     <div class="grid g3">
     <label class="f">Tamanho do lote (N) <span class="req">*</span>${d.N!==""?tag(difN,ps.N):""}<input id="f_N" type="number" min="1" step="1" value="${esc(d.N)}" placeholder="Nº de peças do lote"><span class="hint">Lote homogêneo: mesmo produto, mesmas condições e período (4.4).</span></label>
@@ -957,17 +959,20 @@ function pgNova(){
     <p class="hint" style="margin-top:10px">Amostragem simples por atributos, NBR 5426 (equivalente à MIL-STD-105D). Cada peça da amostra é classificada como conforme ou não conforme; d é o número de peças não conformes. NQA em % de peças defeituosas (0,010 a 10).</p></div></div>`;
   setPage(h);
   if($("#cancEdit"))$("#cancEdit").onclick=()=>{const id=d.editOf;draft=null;go("inspecao",id)};
-  const ready=!!(plan&&d.lote&&d.inspetor&&d.data&&!semFalha);
-  const falta=!plan?"Informe tamanho do lote e NQA":!(d.lote&&d.inspetor&&d.data)?"Preencha lote, data e inspetor(a)":semFalha?semFalha+" peça(s) sem falha marcada":"";
+  const REQ1=[["productId","produto"],["ponto","ponto"],["data","data"],["lote","lote"],["turno","turno"],["maquina","máquina"],["inspetor","inspetor(a)"]];
+  const falta1=()=>REQ1.filter(([k])=>!String(d[k]||"").trim()).map(([,n])=>n);
+  const faltaTxt=()=>{const f=falta1();return f.length?"Preencha na etapa 1: "+f.join(", "):!plan?"Informe tamanho do lote e NQA":semFalha?semFalha+" peça(s) sem falha marcada":""};
+  const ready=!!(plan&&!falta1().length&&!semFalha);
+  const falta=faltaTxt();
   setBar(`<div class="bar-info">${plan?`<span class="bar-plan">n <b>${plan.n}</b> · Ac <b>${plan.ac}</b> · Re <b>${plan.re}</b> · d <b>${dd}</b></span> <span class="pill ${result==="R"?"nc":result==="AR"?"warn":"ok"}">${result==="R"?"Rejeitar lote":"Aceitar lote"}</span>`:""}<span class="bar-hint" id="saveHint">${falta||(dd?"A seguir: árvore de falha de cada falha encontrada":"")}</span></div>
     ${plan?`<button class="btn" id="barAdd" ${dd<plan.n?"":"disabled"}>+ Peça NC</button>`:""}<button class="btn primary" id="save" ${ready?"":"disabled"}>${d.editOf?"Salvar correção →":dd?"Registrar e ir para as árvores →":"Registrar inspeção →"}</button>`);
-  const canSave=()=>{const b=$("#save");if(!b)return;const ok=!!(plan&&d.lote&&d.inspetor&&d.data&&!semFalha);b.disabled=!ok;const hn=$("#saveHint");if(hn)hn.textContent=!plan?"Informe tamanho do lote e NQA":!(d.lote&&d.inspetor&&d.data)?"Preencha lote, data e inspetor(a)":semFalha?semFalha+" peça(s) sem falha marcada":(dd?"A seguir: árvore de falha de cada falha encontrada":"")};
+  const canSave=()=>{const b=$("#save");if(!b)return;const ok=!!(plan&&!falta1().length&&!semFalha);b.disabled=!ok;const hn=$("#saveHint");if(hn)hn.textContent=faltaTxt()||(dd?"A seguir: árvore de falha de cada falha encontrada":"")};
   ["data","op","lote","maquina","molde","inspetor"].forEach(k=>{const el=$("#f_"+k);el.oninput=el.onchange=e=>{d[k]=e.target.value;canSave()}});
-  ["productId","ponto","nqa","nivel","turno"].forEach(k=>{$("#f_"+k).onchange=e=>{d[k]=e.target.value;if(k==="productId"||k==="ponto")applyPreset(d);if(k!=="turno")pgNova()}});
+  ["productId","ponto","nqa","nivel","turno"].forEach(k=>{const el=$("#f_"+k);if(el)el.onchange=e=>{d[k]=e.target.value;if(k==="productId"||k==="ponto")applyPreset(d);if(k!=="turno")pgNova();else canSave()}});
   if($("#setDefault"))$("#setDefault").onclick=async()=>{p.preset=p.preset||{};p.preset[d.ponto]={N:d.N===""?null:+d.N,nivel:d.nivel,nqa:d.nqa===""?null:+d.nqa,proposta:false};await persist("produtos",p);toast("Pré-definição salva para "+POINTS[d.ponto].nome+".");pgNova()};
   if($("#useDefault"))$("#useDefault").onclick=()=>{const keep={...d};applyPreset(d);if(d.N==="")d.N=keep.N;pgNova()};
-  $("#f_N").oninput=e=>{d.N=e.target.value;clearTimeout(window._nt);window._nt=setTimeout(()=>{pgNova();const n=$("#f_N");n.focus();try{n.setSelectionRange(99,99)}catch(_){}},500)};
-  $("#f_N").onchange=e=>{d.N=e.target.value;clearTimeout(window._nt);if(d.N!==d._rN)pgNova()};
+  if($("#f_N"))$("#f_N").oninput=e=>{d.N=e.target.value;clearTimeout(window._nt);window._nt=setTimeout(()=>{pgNova();const n=$("#f_N");n.focus();try{n.setSelectionRange(99,99)}catch(_){}},500)};
+  if($("#f_N"))$("#f_N").onchange=e=>{d.N=e.target.value;clearTimeout(window._nt);if(d.N!==d._rN)pgNova()};
   $("#f_obs").oninput=e=>d.obs=e.target.value;
 
   if($("#f_applyR"))$("#f_applyR").onchange=e=>{d.applyR=e.target.checked;pgNova()};
