@@ -684,10 +684,11 @@ function updateDbStatus(){
 const seriesKey=r=>[r.productId,r.ponto,r.nqa].join("|");
 const byTime=(a,b)=>(a.data||"").localeCompare(b.data||"")||(a.createdAt-b.createdAt);
 // comDemo: true = conta lotes DEMO; false = ignora; sem valor = conta só se a série não tiver lote real
-function regimeState(productId,ponto,nqa,excludeId,comDemo){
+function regimeState(productId,ponto,nqa,excludeId,comDemo,antesDe){
   const key=[productId,ponto,nqa].join("|");
   let lots=S.inspecoes.filter(x=>seriesKey(x)===key&&!x.reap&&x.result&&x.id!==excludeId).sort(byTime);
   if(comDemo===false||(comDemo==null&&lots.some(x=>!x.demo)))lots=lots.filter(x=>!x.demo);
+  if(antesDe)lots=lots.filter(x=>byTime(x,antesDe)<0);
   let reg="N",reason="Início da inspeção em regime normal (5.2.1).",win=[],nRun=[],tAcc=0,tCount=0;
   for(const x of lots){
     const used=x.regime||"N";reg=used;
@@ -1262,7 +1263,7 @@ function pgDados(){
    <div class="row"><button class="btn primary" id="bk">Baixar backup (JSON)</button><button class="btn" id="imp">Importar backup</button><input type="file" id="impF" accept=".json,application/json" hidden></div>
    <div class="row" style="margin-top:10px"><button class="btn" data-x="I">CSV inspeções</button><button class="btn" data-x="V">CSV árvores de falha</button><button class="btn" data-x="B">CSV biblioteca</button></div></div></div>`;
   h+=`<div class="card"><h2>Produtos, máquinas e usuários</h2><p class="muted small" style="margin-bottom:10px">Cadastro de produtos (com a FTP e as pré-definições de amostragem), máquinas e, para administradores, usuários e pedidos de acesso.</p><button class="btn" id="toCad2">Abrir Cadastros</button></div>`;
-  h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes e árvores fictícios, marcados como DEMO, para treinar inspetores e apresentar o sistema (inclui uma sequência que aciona a inspeção severa).</p><p class="small" style="margin-bottom:10px"><span class="pill ok">Só neste aparelho</span> Os dados DEMO não são enviados ao banco, não aparecem para os outros usuários e não entram na contagem de regime das inspeções reais.</p><div class="row"><button class="btn" id="demoOn">Carregar demonstração</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
+  h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes e árvores de falha fictícios, sorteados a partir dos produtos, das pré-definições e das máquinas cadastradas. Cada clique acrescenta cerca de um mês de histórico, anterior ao que já existe, como se o sistema estivesse em uso há mais tempo.</p><p class="small" style="margin-bottom:10px"><span class="pill ok">Só neste aparelho</span> Os dados DEMO não são enviados ao banco e não entram na contagem de regime das inspeções reais. Ao remover, somem por completo.${S.inspecoes.some(x=>x.demo)?` <b>${S.inspecoes.filter(x=>x.demo).length} lotes e ${S.investigacoes.filter(x=>x.demo).length} árvores DEMO carregados.</b>`:""}</p><div class="row"><button class="btn" id="demoOn">${S.inspecoes.some(x=>x.demo)?"Gerar mais um mês de demonstração":"Carregar demonstração"}</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
    <div class="card"><h2>Zona de risco</h2><p class="muted small" style="margin-bottom:12px">${cloudState==="ok"?"Apaga apenas a cópia guardada neste aparelho; o banco compartilhado não é alterado e é baixado de novo.":"Apaga todas as inspeções e árvores deste aparelho. Baixe um backup antes."}</p><button class="btn danger" id="wipe">Limpar dados deste aparelho</button></div></div>
    <div class="card"><h2>Sobre o sistema</h2><p class="small muted">Desenvolvido pelo Grupo 2 (Gestão de Processos e Qualidade) para a JSP Brasil. Amostragem simples por atributos conforme NBR 5426 (Tabelas 1 a 4 e 17; regras de comutação 5.3). Defeitos conforme FS 070 rev. 06/07 e Plano de Controle 64993-BZ100; reação conforme FS 342 / PR 8.7. As relações de causa e efeito marcadas como hipótese devem ser validadas pela Engenharia de Processos antes do uso como padrão. Arquivo único; o banco compartilhado é o Supabase da JSP e cada aparelho mantém uma cópia para uso sem internet.</p></div>`;
   setPage(h);
@@ -1276,7 +1277,10 @@ function pgDados(){
   $("#impF").onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(!j.inspecoes)throw 0;const n=await mergeIn(j);toast(n+" registro(s) importado(s).");render()}catch(err){alert("Arquivo inválido: use um backup exportado por este sistema.")}};
   $$("[data-x]").forEach(b=>b.onclick=()=>{const k=b.dataset.x;if(k==="I"){go("inspecoes");setTimeout(()=>$("#exI").click(),50)}else if(k==="V"){go("investigacoes");setTimeout(()=>$("#exV").click(),50)}else{go("biblioteca");setTimeout(()=>$("#exB").click(),50)}});
   $("#demoOn").onclick=loadDemo;
-  $("#demoOff").onclick=async()=>{for(const v of S.investigacoes.filter(v=>v.demo))await remove("investigacoes",v.id);for(const x of S.inspecoes.filter(x=>x.demo))await remove("inspecoes",x.id);toast("Dados DEMO removidos.");render()};
+  $("#demoOff").onclick=async()=>{const n=S.inspecoes.filter(x=>x.demo).length;if(!confirm(`Remover os ${n} lotes DEMO e as árvores deles? Eles somem por completo.`))return;
+    for(const v of S.investigacoes.filter(v=>v.demo))await delLocal("investigacoes",v.id);for(const x of S.inspecoes.filter(x=>x.demo))await delLocal("inspecoes",x.id);
+    const f=(S.meta.fila||[]).filter(q=>S[q.store]?.some(r=>r.id===q.id)||q.del);if(f.length!==(S.meta.fila||[]).length)await setMeta("fila",f);
+    if(draft?.demo)draft=null;toast("Dados DEMO removidos.");render()};
   $("#wipe").onclick=async()=>{if(!confirm(cloudState==="ok"?"Limpar a cópia deste aparelho e baixar de novo do banco?":"Apagar TODAS as inspeções e árvores deste aparelho?"))return;if(cloudState!=="ok"&&prompt('Digite APAGAR para confirmar')!=="APAGAR")return;for(const v of [...S.investigacoes])await delLocal("investigacoes",v.id);for(const x of [...S.inspecoes])await delLocal("inspecoes",x.id);await setMeta("lastPull",null);if(cloudState==="ok")await pullCloud(true);toast("Dados deste aparelho limpos.");render()};
 }
 /* =========================================================================
@@ -1420,24 +1424,55 @@ function pgAjuda(){
     ${st("B","Acompanhe o painel","Pareto de falhas, resultado por ponto e por máquina, regime de cada série e árvores em aberto. Use os filtros de período e produto.")}
     ${st("C","Faça backup","Em Dados e configuração, baixe o backup em JSON uma vez por mês e exporte os CSV quando precisar analisar no Excel.")}</div></div>`);
 }
+// Demonstração: lotes fictícios sorteados a partir dos cadastros (produtos, pré-definições e máquinas).
+// Cada clique acrescenta cerca de um mês de histórico, anterior ao que já existe. Fica só neste aparelho.
 async function loadDemo(){
-  if(S.inspecoes.some(x=>x.demo)&&!confirm("Já existem dados DEMO. Gerar mais?"))return;
-  const p=S.produtos.find(p=>p.ref)||S.produtos[0];if(!p){toast("Cadastre um produto antes de carregar a demonstração.");return}
-  const b=$("#demoOn");if(b){b.disabled=true;b.textContent="Gerando…"}const base=new Date();base.setDate(base.getDate()-20);
-  const mk=(dayOff,ponto,N,nqa,defs,turno,extra={})=>{const dt=new Date(base);dt.setDate(dt.getDate()+dayOff);const data=dt.toISOString().slice(0,10);return {ponto,N,nqa,defs,turno,data,...extra}};
-  const seq=[mk(0,"FL",500,10,{rebarba:1},"1º"),mk(1,"FL",480,10,{},"2º"),mk(2,"FL",520,10,{rebarba:3,corte:2,deformada:1},"1º"),mk(3,"FL",500,10,{rebarba:2},"3º"),mk(4,"FL",510,10,{rebarba:5,inchaco:2},"1º"),mk(5,"FL",500,10,{rebarba:1},"2º"),mk(6,"FL",500,10,{},"1º"),
-    mk(1,"MOLD",300,13,{esfarelamento:1},"1º"),mk(3,"MOLD",320,13,{falha_injecao:1,murcha:1},"2º"),mk(5,"MOLD",300,13,{},"1º"),mk(2,"EST",150,13,{inchaco:1},"1º")];
-  for(const s of seq){
-    const rs=regimeState(p.id,s.ponto,s.nqa,null,true);const pl=samplingPlan(s.N,"II",s.nqa,rs.reg);const pecas=[];Object.entries(s.defs).forEach(([k,v])=>{for(let q=0;q<v;q++)pecas.push({n:pecas.length+1,def:[k],cav:""})});if(s.defs.corte&&s.defs.rebarba){const ci=pecas.findIndex(pc=>pc.def[0]==="corte");pecas.splice(ci,1);pecas[0].def.push("corte");pecas.forEach((pc,ix)=>pc.n=ix+1)}const d=pecas.length;const defeitos={};pecas.forEach(pc=>pc.def.forEach(k=>defeitos[k]=(defeitos[k]||0)+1));
-    const result=d<=pl.ac?"A":d>=pl.re?"R":"AR";
-    await persist("inspecoes",{id:uid(),createdAt:Date.now()+Math.random(),productId:p.id,produto:p.nome,ponto:s.ponto,data:s.data,turno:s.turno,maquina:"K1014 (DEMO)",molde:"DEMO",op:"DEMO-"+(1000+Math.floor(Math.random()*9000)),lote:"DEMO-"+s.data.slice(5).replace("-",""),inspetor:"Demonstração",N:s.N,nivel:"II",nqa:s.nqa,regime:rs.reg,letra0:pl.letter0,letra:pl.letter,n:pl.n,ac:pl.ac,re:pl.re,inspecao100:pl.full,pecas,defeitos,d,result,obs:"Registro fictício para demonstração.",reap:false,reacao:{},demo:true});
+  if(!S.produtos.length){toast("Cadastre um produto antes de gerar a demonstração.");return}
+  const b=$("#demoOn");if(b){b.disabled=true;b.textContent="Gerando…"}
+  const rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)],chance=p=>Math.random()<p;
+  const wpick=pairs=>{let t=pairs.reduce((a,x)=>a+x[1],0),r=Math.random()*t;for(const [v,w] of pairs){r-=w;if(r<=0)return v}return pairs[0][0]};
+  const binom=(n,p)=>{let k=0;for(let i=0;i<n;i++)if(Math.random()<p)k++;return k};
+  const iso=dt=>new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const demos=S.inspecoes.filter(x=>x.demo),DIAS=30;
+  const fim=demos.length?new Date(demos.map(x=>x.data).sort()[0]+"T12:00:00"):new Date();if(demos.length)fim.setDate(fim.getDate()-1);
+  const nomes=["Ana (DEMO)","Bruno (DEMO)","Carla (DEMO)","Diego (DEMO)"],turnos=["1º","2º","3º"],maqs=S.maquinas.map(m=>m.codigo);
+  const pesoDef={rebarba:6,esfarelamento:3,falha_injecao:3,murcha:2,inchaco:3,corte:3,deformada:2,peso_umido:2,peso_seco:2,dimensional:2};
+  const novos=[];
+  for(let dia=DIAS-1;dia>=0;dia--){
+    const dt=new Date(fim);dt.setDate(dt.getDate()-dia);if(dt.getDay()===0)continue;
+    const qtd=dt.getDay()===6?rnd(2):1+rnd(3);
+    for(let q=0;q<qtd;q++){
+      const p=pick(S.produtos),ponto=wpick([["FL",5],["MOLD",3],["EST",2]]),ps=presetOf(p,ponto);
+      const N=ps.N??pick([150,280,300,480,500,520,800,1200]),nivel=ps.nivel||"II",nqa=ps.nqa??10;
+      const maquina=p.maquina&&chance(.7)?p.maquina:(maqs.length?pick(maqs):p.maquina||"");
+      novos.push({id:uid(),createdAt:dt.getTime()+q*3600e3+rnd(3000e3),productId:p.id,produto:p.nome,ponto,data:iso(dt),turno:pick(turnos),maquina,molde:"",op:"DEMO-"+(1000+rnd(9000)),lote:"DEMO-"+iso(dt).slice(5).replace("-","")+"-"+(q+1),inspetor:pick(nomes),N,nivel,nqa,
+        _frac:(parseFloat(String(NQA[nqa]).replace(",","."))/100)*(chance(.18)?3+Math.random()*4:.2+Math.random()*.9),obs:"Registro fictício para demonstração.",reap:false,reacao:{},demo:true});
+    }
   }
-  const rejs=S.inspecoes.filter(x=>x.demo&&x.result==="R").sort(byTime);let nfe=0;
-  for(const x of rejs)for(const k of Object.keys(x.defeitos||{}).slice(0,2)){const v=await createInvestigation(x,k);
-    if(nfe===0&&k==="rebarba"){v.presenca={fl:"S",est:"S"};v.respostas={setup_fech:{a:"S",obs:"Travessa desalinhada após troca de molde (dado fictício)."},ench_alto:{a:"N"},mp_dens:{a:"N"},setup_topo:{a:"X"}};
-      v.conclusao={status:"concluida",classif:"confirmada",resp:"Área de Moldes (DEMO)",prazo:x.data,contencao:"Lote segregado e inspecionado 100% (dado fictício).",acao:"Realinhar a travessa e padronizar o calço no setup (dado fictício).",eficacia:"5 lotes seguintes sem rebarba acima de 3 mm (dado fictício)."};await persist("investigacoes",v);nfe++}
-    else if(nfe===1){v.presenca={fl:"S",est:"S"};const cs=CAUSES.filter(c=>c.defs.includes(k)&&MOLD_STAGES.includes(c.st));if(cs[0])v.respostas={[cs[0].id]:{a:"S"}};v.conclusao={status:"andamento"};await persist("investigacoes",v);nfe++}}
-  toast("Demonstração carregada.");go("painel");
+  novos.forEach(x=>S.inspecoes.push(x));
+  // percorre todo o histórico DEMO em ordem de data para o regime (normal/severa/atenuada) ficar coerente
+  const todos=S.inspecoes.filter(x=>x.demo&&!x.reap).sort(byTime);todos.forEach(x=>{if(novos.includes(x))x.result=null});
+  for(const x of todos){
+    const p=prod(x.productId),rs=regimeState(x.productId,x.ponto,x.nqa,x.id,true,x),pl=samplingPlan(x.N,x.nivel,x.nqa,rs.reg);if(!pl){x.result="A";continue}
+    const novo=novos.includes(x);
+    if(novo){const defs=DEFECTS.filter(d=>d.pts.includes(x.ponto)).map(d=>[d.id,pesoDef[d.id]||1]);const d=Math.min(pl.n,binom(pl.n,x._frac));x.pecas=[];
+      for(let i=0;i<d;i++){const k=wpick(defs),pc={n:i+1,def:[k],cav:""};if(chance(.15)){const k2=wpick(defs);if(k2!==k)pc.def.push(k2)}
+        pc.def.forEach(k=>{if(WEIGHT_DEFS.includes(k)){const f=ftpParam(p,k),mx=numIn(f?.max),mn=numIn(f?.min);if(mx!=null&&mn!=null){const v=chance(.5)?mx*(1.01+Math.random()*.04):mn*(.95+Math.random()*.04);(pc.med=pc.med||{})[k]=v.toFixed(3).replace(".",",")}}});x.pecas.push(pc)}
+      delete x._frac}
+    else if((x.pecas||[]).length>pl.n)x.pecas=x.pecas.slice(0,pl.n);
+    const d=(x.pecas||[]).length,defeitos={};x.pecas.forEach(pc=>pc.def.forEach(k=>defeitos[k]=(defeitos[k]||0)+1));
+    const mudou=novo||x.regime!==rs.reg||x.n!==pl.n||x.ac!==pl.ac||x.re!==pl.re;
+    Object.assign(x,{regime:rs.reg,letra0:pl.letter0,letra:pl.letter,n:pl.n,ac:pl.ac,re:pl.re,inspecao100:pl.full,d,defeitos,result:d<=pl.ac?"A":d>=pl.re?"R":"AR"});
+    if(mudou)await persist("inspecoes",x);
+  }
+  // árvores de falha: lotes rejeitados sempre; aceitos com falha, às vezes
+  for(const x of novos){const tipos=Object.keys(x.defeitos||{});if(!tipos.length||(x.result!=="R"&&!chance(.35)))continue;
+    for(const k of tipos.slice(0,2)){const v=await createInvestigation(x,k);v.createdAt=x.createdAt+1;const est=wpick([["concluida",4],["andamento",3],["aberta",3]]);
+      if(est!=="aberta"){v.presenca=x.ponto==="FL"?{fl:"S",est:"S"}:x.ponto==="EST"?{est:"S"}:{};const cs=CAUSES.filter(c=>c.defs.includes(k)&&stageActive(v,c.st));
+        if(cs.length){const c=pick(cs);v.respostas={[c.id]:{a:"S",obs:"Desvio fictício para demonstração."}};cs.filter(o=>o!==c).slice(0,2).forEach(o=>v.respostas[o.id]={a:"N"});
+          v.conclusao=est==="concluida"?{status:"concluida",classif:"confirmada",resp:c.resp+" (DEMO)",prazo:x.data,contencao:REACT[c.st]||REACT[x.ponto]||"",acao:c.acao,eficacia:c.efic}:{status:"andamento",classif:"provavel",resp:c.resp+" (DEMO)"}}}
+      await persist("investigacoes",v)}}
+  toast(`${novos.length} lotes fictícios gerados${demos.length?" (histórico acumulado: "+(demos.length+novos.length)+")":""}.`);go("painel");
 }
 
 /* =========================================================================
