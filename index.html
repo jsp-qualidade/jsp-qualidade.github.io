@@ -248,6 +248,24 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .fjudge{font-weight:600;color:var(--nc)}
 @media (max-width:820px){.caditem{flex-direction:column;align-items:stretch}.cadact .btn{flex:1}.presets{grid-template-columns:1fr}
 .ftprow{grid-template-columns:repeat(3,minmax(0,1fr)) auto}.ftpname{grid-column:1/-1}.ftpwide{grid-column:span 3}}
+.onlym{display:none}.mcards{display:none}
+.pfilt{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:14px}.pfilt label{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:600;color:var(--muted)}.pfilt select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);max-width:320px}
+.filtgrid{grid-template-columns:2fr 1fr 1fr 1fr 1fr}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.steps.col{grid-template-columns:1fr;gap:12px}
+.step{display:flex;gap:12px;align-items:flex-start}.step p{margin:3px 0 8px;color:var(--muted);font-size:13.5px;line-height:1.45}.steps.col .step p{margin-bottom:0}
+.stepn{flex:0 0 30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;display:grid;place-items:center;font-size:14px}
+.card.start{border-left:4px solid var(--brand);margin-bottom:14px}
+.gloss{margin:8px 0 0}.gl{padding:9px 0;border-top:1px solid var(--line)}.gl:first-child{border-top:0}.gl dt{font-weight:700}.gl dd{margin:2px 0 0;color:var(--muted);font-size:13.5px;line-height:1.45}
+.faq{border-top:1px solid var(--line);padding:10px 0}.faq:first-of-type{border-top:0}.faq summary{font-weight:600;cursor:pointer}.faq p{margin:6px 0 0;color:var(--muted);font-size:13.5px;line-height:1.45}
+.mcard{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:12px;padding:11px 13px;font:inherit;color:var(--ink);cursor:pointer}.mcard.rej{border-left-color:var(--nc)}
+.mc1{display:flex;justify-content:space-between;gap:8px;align-items:center}.mc2{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.4}
+@media (max-width:820px){.onlym{display:block}.hidem{display:none}.mcards{display:flex;flex-direction:column;gap:8px}
+.grid.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.kpis .kpi{padding:12px}.kpis .kpi .v{font-size:22px}
+.filtgrid{grid-template-columns:1fr 1fr}.filtgrid>label:first-child{grid-column:1/-1}
+.steps{grid-template-columns:1fr}.pfilt label{flex:1 1 140px}.pfilt select{max-width:none;width:100%}
+.tw table.t{min-width:560px}.tw table.t.wide{min-width:980px}
+#demoBanner{font-size:12px;padding:8px 10px;display:block}#demoBanner b{display:block}}
+@media print{.actionbar,#demoBanner{display:none!important}}
 </style>
 </head>
 <body>
@@ -648,7 +666,7 @@ async function loadPendentes(){
   if(!sb||colab?.papel!=="admin"){pendentes=[];return}
   try{const {data,error}=await sb.rpc("acessos_pendentes");if(error)throw error;pendentes=data||[]}catch(e){}
 }
-async function signOut(){try{await sb?.auth.signOut()}catch(e){}user=null;colab=null;try{sessionStorage.removeItem("jsp-modo-local")}catch(e){}location.hash="";location.reload()}
+async function signOut(){try{await sb?.auth.signOut()}catch(e){}try{clearTimeout(window._dt);await setMeta("rascunho",null)}catch(e){}user=null;colab=null;try{sessionStorage.removeItem("jsp-modo-local")}catch(e){}location.hash="";location.reload()}
 function updateDbStatus(){
   const dot=$("#dbdot"),st=$("#dbstatus");if(!dot)return;
   const fila=(S.meta.fila||[]).length;
@@ -747,6 +765,7 @@ const ICON={
  tree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-2.5h14V17M12 12v2.5"/></svg>',
  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
  table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>',
+ help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></svg>',
  cad:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg>',
  db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'
 };
@@ -758,7 +777,8 @@ const PAGES=[
  {id:"biblioteca",t:"Biblioteca causa/efeito",ic:"book",grp:"Análise"},
  {id:"cadastros",t:"Cadastros",ic:"cad",grp:"Referência"},
  {id:"planos",t:"Planos NBR 5426",ic:"table",grp:"Referência"},
- {id:"dados",t:"Dados e configuração",ic:"db",grp:"Referência"}
+ {id:"dados",t:"Dados e configuração",ic:"db",grp:"Referência"},
+ {id:"ajuda",t:"Como usar",ic:"help",grp:"Referência"}
 ];
 let route={p:"painel",id:null};
 function go(p,id=null){route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
@@ -776,7 +796,7 @@ function render(){
   if(authLanding){pgAuthLanding();return}
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
   const demo=S.inspecoes.some(x=>x.demo);
-  ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto}[route.p]||pgPainel)();
+  ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO servem apenas para treinamento e apresentação. Remova-os em “Dados e configuração” antes do uso real.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
@@ -857,44 +877,63 @@ function pgAuthLanding(){
 /* =========================================================================
    6. PÁGINA: PAINEL
    ========================================================================= */
+let pf={dias:"",prod:""};
 function pgPainel(){
   head("Visão geral","Painel da qualidade",`<button class="btn primary" data-go2="nova">${ICON.new.replace('<svg','<svg width="15" height="15"')} Nova inspeção</button>`);
-  const I=S.inspecoes,tot=I.length,orig=I.filter(x=>!x.reap),acc=orig.filter(x=>x.result!=="R").length,rej=orig.filter(x=>x.result==="R").length;
-  const open=S.investigacoes.filter(v=>(v.conclusao?.status||"aberta")!=="concluida").length;
+  const lim=pf.dias?new Date(Date.now()-(+pf.dias)*864e5).toISOString().slice(0,10):"";
+  const I=S.inspecoes.filter(x=>(!lim||x.data>=lim)&&(!pf.prod||x.productId===pf.prod)),tot=I.length,orig=I.filter(x=>!x.reap),acc=orig.filter(x=>x.result!=="R").length,rej=orig.filter(x=>x.result==="R").length;
+  const ids=new Set(I.map(x=>x.id)),V=S.investigacoes.filter(v=>ids.has(v.inspecaoId));
+  const open=V.filter(v=>(v.conclusao?.status||"aberta")!=="concluida").length;
   const sumN=I.reduce((a,x)=>a+(x.n||0),0),sumD=I.reduce((a,x)=>a+(x.d||0),0);
   let h="";
   if(pendentes.length&&colab?.papel==="admin")h+=`<div class="banner info"><span><b>${pendentes.length} pedido(s) de acesso aguardando aprovação.</b> ${pendentes.slice(0,3).map(p=>esc(p.email)).join(", ")}${pendentes.length>3?"…":""}</span><button class="btn sm primary" id="verPed">Ver pedidos</button></div>`;
-  if(!tot)h+=`<div class="banner info"><span><b>Nenhuma inspeção registrada ainda.</b> Comece em “Nova inspeção”: informe o lote, o tamanho do lote e o NQA, e o sistema calcula o plano de amostragem pela NBR 5426. Para conhecer o sistema sem dados reais, carregue a demonstração em “Dados e configuração”.</span></div>`;
-  h+=`<div class="grid g4" style="margin-bottom:14px">
+  const pend=pendingTrees();
+  if(pend.length)h+=`<div class="banner warn"><span><b>${pend.length} árvore(s) de falha ainda não preenchida(s).</b> Preencha logo após a inspeção, enquanto as evidências estão no posto.</span><button class="btn sm primary" id="goPend">Preencher agora</button></div>`;
+  if(!S.inspecoes.length){
+    const semLote=S.produtos.some(p=>Object.keys(POINTS).some(k=>presetOf(p,k).N==null));
+    h+=`<div class="card start"><h2>Como começar</h2><p class="muted" style="margin:4px 0 14px">Três passos para a primeira inspeção. O sistema calcula a amostra e a decisão do lote pela NBR 5426.</p>
+     <div class="steps"><div class="step"><span class="stepn">1</span><div><b>Confira os cadastros</b><p>Produtos (com FTP e tamanho de lote), máquinas e usuários.${semLote?" Há produto sem tamanho de lote padrão.":""}</p><button class="btn sm" data-go2="cadastros">Abrir Cadastros</button></div></div>
+     <div class="step"><span class="stepn">2</span><div><b>Registre a inspeção</b><p>Escolha produto e ponto, informe o lote e marque as peças não conformes da amostra.</p><button class="btn sm primary" data-go2="nova">Nova inspeção</button></div></div>
+     <div class="step"><span class="stepn">3</span><div><b>Preencha a árvore de falha</b><p>Ela abre sozinha quando há falha: localize a origem, verifique as causas e registre a ação.</p><button class="btn sm" data-go2="ajuda">Ver o passo a passo</button></div></div></div></div>`;
+  }else{
+    h+=`<div class="pfilt"><label>Período<select id="pfD"><option value="">Todo o histórico</option>${[["7","Últimos 7 dias"],["30","Últimos 30 dias"],["90","Últimos 90 dias"]].map(([v,l])=>`<option value="${v}" ${pf.dias===v?"selected":""}>${l}</option>`).join("")}</select></label><label>Produto<select id="pfP"><option value="">Todos os produtos</option>${S.produtos.map(p=>`<option value="${esc(p.id)}" ${pf.prod===p.id?"selected":""}>${esc(p.id+" · "+p.nome)}</option>`).join("")}</select></label>${pf.dias||pf.prod?`<button class="lnk" id="pfX" type="button">Limpar filtros</button>`:""}</div>`;
+  }
+  h+=`<div class="grid g4 kpis" style="margin-bottom:14px">
    <div class="kpi"><div class="l">Lotes inspecionados</div><div class="v">${orig.length}</div><div class="s">${tot-orig.length} reapresentação(ões)</div></div>
    <div class="kpi"><div class="l">Taxa de aceitação</div><div class="v">${orig.length?Math.round(acc/orig.length*100)+"%":"—"}</div><div class="s">${acc} aceitos · ${rej} rejeitados</div></div>
    <div class="kpi"><div class="l">Peças não conformes nas amostras</div><div class="v">${sumN?(sumD/sumN*100).toFixed(2).replace(".",",")+"%":"—"}</div><div class="s">${sumD} de ${sumN} peças inspecionadas</div></div>
-   <div class="kpi"><div class="l">Árvores de falha em aberto</div><div class="v">${open}</div><div class="s">${S.investigacoes.length} registradas</div></div></div>`;
+   <div class="kpi"><div class="l">Árvores de falha em aberto</div><div class="v">${open}</div><div class="s">${V.length} registradas</div></div></div>`;
   // Pareto
   const cnt={};I.forEach(x=>Object.entries(x.defeitos||{}).forEach(([k,v])=>{if(v>0)cnt[k]=(cnt[k]||0)+v}));
   const par=Object.entries(cnt).sort((a,b)=>b[1]-a[1]),max=par.length?par[0][1]:1,totD=par.reduce((a,b)=>a+b[1],0);let cum=0;
   h+=`<div class="grid g2"><div class="card"><h2>Pareto de falhas nas peças não conformes</h2>${par.length?par.slice(0,10).map(([k,v])=>{cum+=v;return `<div class="barrow"><span title="${esc(DEF[k]?.nome||k)}">${esc(DEF[k]?.nome||k)}</span><div class="track"><div class="bar" style="width:${v/max*100}%"></div></div><b>${v}</b></div>`}).join("")+`<p class="hint">Os ${Math.min(3,par.length)} primeiros somam ${Math.round(par.slice(0,3).reduce((a,b)=>a+b[1],0)/totD*100)}% das peças defeituosas registradas.</p>`:'<p class="empty">Sem defeitos registrados.</p>'}</div>`;
   // por ponto
   h+=`<div class="card"><h2>Resultado por ponto de inspeção</h2>${Object.entries(POINTS).map(([k,p])=>{const L=orig.filter(x=>x.ponto===k),a=L.filter(x=>x.result!=="R").length;return `<div class="barrow"><span>${p.nome}</span><div class="track"><div class="bar" style="width:${L.length?a/L.length*100:0}%;background:var(--ok)"></div></div><b>${L.length?Math.round(a/L.length*100)+"%":"—"}</b></div>`}).join("")}<p class="hint">Percentual de lotes aceitos na inspeção original.</p>
+   ${(()=>{const M={};orig.forEach(x=>{const k=x.maquina||"Sem máquina";(M[k]=M[k]||[]).push(x)});const L=Object.entries(M).sort((a,b)=>b[1].length-a[1].length).slice(0,6);return L.length>1||(L.length===1&&L[0][0]!=="Sem máquina")?`<h3 style="margin:16px 0 8px">Por máquina</h3>${L.map(([k,a])=>{const ok=a.filter(x=>x.result!=="R").length;return `<div class="barrow"><span title="${esc(k)}">${esc(k)} <span class="muted">(${a.length})</span></span><div class="track"><div class="bar" style="width:${ok/a.length*100}%;background:var(--ok)"></div></div><b>${Math.round(ok/a.length*100)}%</b></div>`}).join("")}`:""})()}
    <h3 style="margin:16px 0 8px">Últimos lotes</h3><div class="dots">${orig.slice().sort(byTime).slice(-40).map(x=>`<i title="${esc(fmtD(x.data)+" · lote "+(x.lote||"")+" · "+(x.result==="R"?"rejeitado":"aceito"))}" style="background:${x.result==="R"?"var(--nc)":x.result==="AR"?"var(--warn)":"var(--ok)"}"></i>`).join("")||'<span class="muted small">—</span>'}</div></div></div>`;
   // regimes por série
-  const keys=[...new Set(I.map(seriesKey))];
+  const keys=[...new Set(S.inspecoes.filter(x=>!pf.prod||x.productId===pf.prod).map(seriesKey))];
   h+=`<div class="card"><h2>Regime de inspeção por série (produto · ponto · NQA)</h2>${keys.length?`<div class="tw"><table class="t"><thead><tr><th>Produto</th><th>Ponto</th><th>NQA</th><th>Lotes</th><th>Próximo regime</th><th>Situação</th></tr></thead><tbody>${keys.map(k=>{const [pid,pt,nq]=k.split("|"),r=regimeState(pid,pt,nq);return `<tr><td>${esc(prod(pid)?.nome||pid)}</td><td>${POINTS[pt]?.nome||pt}</td><td>${NQA[nq]}</td><td>${r.lots}</td><td>${regPill(r.reg)}</td><td class="small">${esc(r.reason)}${r.interrupt?' <span class="pill nc">10 lotes em severa: interromper e tratar a qualidade (5.4)</span>':""}${r.eligibleR?.ok?' <span class="pill ok">Elegível para atenuada</span>':""}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">Aparece após as primeiras inspeções.</p>'}</div>`;
   // investigações abertas
-  const inv=S.investigacoes.filter(v=>(v.conclusao?.status||"aberta")!=="concluida").sort((a,b)=>b.createdAt-a.createdAt).slice(0,8);
+  const inv=V.filter(v=>(v.conclusao?.status||"aberta")!=="concluida").sort((a,b)=>b.createdAt-a.createdAt).slice(0,8);
   h+=`<div class="card"><h2>Árvores de falha em aberto</h2>${inv.length?`<div class="tw"><table class="t"><thead><tr><th>Defeito</th><th>Detectado em</th><th>Lote</th><th>Causa provável</th><th>Status</th></tr></thead><tbody>${inv.map(v=>{const x=S.inspecoes.find(i=>i.id===v.inspecaoId);return `<tr class="click" data-inv="${v.id}"><td>${esc(DEF[v.defeito]?.nome)}</td><td>${POINTS[v.ponto]?.nome}</td><td>${esc(x?.lote||"—")}</td><td class="small">${esc(probable(v).map(c=>c.nome).join("; ")||"—")}</td><td>${invPill(v.conclusao?.status)}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">Nenhuma.</p>'}</div>`;
   setPage(h);
+  if($("#goPend"))$("#goPend").onclick=()=>go("arvore",pend[0].id);
+  if($("#pfD"))$("#pfD").onchange=e=>{pf.dias=e.target.value;pgPainel()};if($("#pfP"))$("#pfP").onchange=e=>{pf.prod=e.target.value;pgPainel()};if($("#pfX"))$("#pfX").onclick=()=>{pf={dias:"",prod:""};pgPainel()};
   if($("#verPed"))$("#verPed").onclick=()=>{cadTab="usuarios";go("cadastros")};$$("[data-go2]").forEach(b=>b.onclick=()=>go(b.dataset.go2));$$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
 }
 
 /* =========================================================================
    7. PÁGINA: NOVA INSPEÇÃO (lote → plano → amostra → decisão)
    ========================================================================= */
-let draft=null;
+let draft=null,draftRestored=false;
+const draftHasContent=d=>!!d&&(["productId","ponto","data","turno","maquina","molde","op","lote","inspetor","N","obs"].some(k=>String(d[k]||"").trim())||(d.pecas||[]).length>0);
+function saveDraftSoon(){clearTimeout(window._dt);window._dt=setTimeout(()=>{const v=draftHasContent(draft)?JSON.parse(JSON.stringify(draft)):null;if(v||S.meta.rascunho)setMeta("rascunho",v)},500)}
 function newDraft(base){const d={id:uid(),productId:"",ponto:"",data:"",turno:"",maquina:"",molde:"",op:"",lote:"",inspetor:"",N:"",nivel:"",nqa:"",regime:null,applyR:false,defeitos:{},dOverride:null,obs:"",reap:false,refId:null,irregular:false};return Object.assign(d,base||{})}
 function pgNova(){
   if(!S.produtos.length){head("Operação","Nova inspeção por amostragem");setPage(`<div class="card"><h2>Nenhum produto cadastrado</h2><p class="muted" style="margin:6px 0 12px">Cadastre pelo menos um produto para registrar inspeções.</p><button class="btn primary" id="toCad">Ir para Cadastros</button></div>`);$("#toCad").onclick=()=>{cadTab="produtos";go("cadastros")};return}
   if(!draft||(draft.productId&&!prod(draft.productId)))draft=newDraft();
+  saveDraftSoon();
   head("Operação","Nova inspeção por amostragem",`<button class="btn" id="clr">Limpar formulário</button>`);
   const d=draft,p=prod(d.productId);d._rN=d.N;
   const nqaVal=d.nqa===""||d.nqa==null?"":+d.nqa;
@@ -914,6 +953,7 @@ function pgNova(){
   const prevReap=d.reap?S.inspecoes.find(x=>x.id===d.refId):null;
   let h=`<div class="split"><div>`;
   if(pend.length)h+=`<div class="banner nc"><span><b>${pend.length} árvore(s) de falha ainda não preenchida(s)</b> de inspeções anteriores: ${pend.slice(0,4).map(v=>`<a href="#arvore/${v.id}">${esc(DEF[v.defeito]?.nome)} · lote ${esc(S.inspecoes.find(i=>i.id===v.inspecaoId)?.lote||"")}</a>`).join(", ")}${pend.length>4?"…":""}. Preencha antes de seguir, enquanto a informação ainda está fresca.</span></div>`;
+  if(draftRestored&&!d.editOf)h+=`<div class="banner info" id="rascB"><span><b>Rascunho recuperado.</b> Esta inspeção não tinha sido registrada; os dados preenchidos foram guardados neste aparelho. Confira e continue, ou use “Limpar formulário” para começar de novo.</span><button class="btn sm" id="rascX">Entendi</button></div>`;
   if(d.editOf)h+=`<div class="banner info"><span><b>Corrigindo a inspeção do lote ${esc(d.lote)} (${fmtD(d.data)}).</b> Ajuste o que estiver errado e salve: o registro original é substituído e a correção fica registrada com seu usuário e o motivo. As árvores de falha já preenchidas são mantidas.</span><button class="btn sm" id="cancEdit">Cancelar correção</button></div>`;
   if(d.reap)h+=`<div class="banner warn"><span><b>Reapresentação do lote ${esc(prevReap?.lote||"")}.</b> Só reapresente depois de reexaminar todas as unidades e retirar ou reparar as defeituosas (4.12.4). Reapresentações não contam para as regras de comutação.</span></div>`;
   h+=`<div class="card"><p class="sec-title">1 · Identificação do lote</p><div class="grid g3">
@@ -966,14 +1006,14 @@ function pgNova(){
   const falta=faltaTxt();
   setBar(`<div class="bar-info">${plan?`<span class="bar-plan">n <b>${plan.n}</b> · Ac <b>${plan.ac}</b> · Re <b>${plan.re}</b> · d <b>${dd}</b></span> <span class="pill ${result==="R"?"nc":result==="AR"?"warn":"ok"}">${result==="R"?"Rejeitar lote":"Aceitar lote"}</span>`:""}<span class="bar-hint" id="saveHint">${falta||(dd?"A seguir: árvore de falha de cada falha encontrada":"")}</span></div>
     ${plan?`<button class="btn" id="barAdd" ${dd<plan.n?"":"disabled"}>+ Peça NC</button>`:""}<button class="btn primary" id="save" ${ready?"":"disabled"}>${d.editOf?"Salvar correção →":dd?"Registrar e ir para as árvores →":"Registrar inspeção →"}</button>`);
-  const canSave=()=>{const b=$("#save");if(!b)return;const ok=!!(plan&&!falta1().length&&!semFalha);b.disabled=!ok;const hn=$("#saveHint");if(hn)hn.textContent=faltaTxt()||(dd?"A seguir: árvore de falha de cada falha encontrada":"")};
+  const canSave=()=>{const b=$("#save");if(!b)return;const ok=!!(plan&&!falta1().length&&!semFalha);b.disabled=!ok;const hn=$("#saveHint");if(hn)hn.textContent=faltaTxt()||(dd?"A seguir: árvore de falha de cada falha encontrada":"");saveDraftSoon()};
   ["data","op","lote","maquina","molde","inspetor"].forEach(k=>{const el=$("#f_"+k);el.oninput=el.onchange=e=>{d[k]=e.target.value;canSave()}});
   ["productId","ponto","nqa","nivel","turno"].forEach(k=>{const el=$("#f_"+k);if(el)el.onchange=e=>{d[k]=e.target.value;if(k==="productId"||k==="ponto")applyPreset(d);if(k!=="turno")pgNova();else canSave()}});
   if($("#setDefault"))$("#setDefault").onclick=async()=>{p.preset=p.preset||{};p.preset[d.ponto]={N:d.N===""?null:+d.N,nivel:d.nivel,nqa:d.nqa===""?null:+d.nqa,proposta:false};await persist("produtos",p);toast("Pré-definição salva para "+POINTS[d.ponto].nome+".");pgNova()};
   if($("#useDefault"))$("#useDefault").onclick=()=>{const keep={...d};applyPreset(d);if(d.N==="")d.N=keep.N;pgNova()};
   if($("#f_N"))$("#f_N").oninput=e=>{d.N=e.target.value;clearTimeout(window._nt);window._nt=setTimeout(()=>{pgNova();const n=$("#f_N");n.focus();try{n.setSelectionRange(99,99)}catch(_){}},500)};
   if($("#f_N"))$("#f_N").onchange=e=>{d.N=e.target.value;clearTimeout(window._nt);if(d.N!==d._rN)pgNova()};
-  $("#f_obs").oninput=e=>d.obs=e.target.value;
+  $("#f_obs").oninput=e=>{d.obs=e.target.value;saveDraftSoon()};
 
   if($("#f_applyR"))$("#f_applyR").onchange=e=>{d.applyR=e.target.checked;pgNova()};
   const keepY=fn=>{const y=window.scrollY;fn();pgNova();window.scrollTo(0,y)};
@@ -982,7 +1022,8 @@ function pgNova(){
   $$("[data-edpc]").forEach(b=>b.onclick=()=>{const pc=d.pecas.find(x=>x.id===b.dataset.edpc);pickFailures(pc,defs,d.pecas.indexOf(pc)+1,()=>keepY(()=>{}))});
   $$("[data-rmpc]").forEach(b=>b.onclick=()=>{if(confirm("Remover esta peça não conforme?"))keepY(()=>{d.pecas=d.pecas.filter(x=>x.id!==b.dataset.rmpc)})});
   $$("[data-cav]").forEach(i=>i.oninput=()=>{d.pecas.find(x=>x.id===i.dataset.cav).cav=i.value});
-  $("#clr").onclick=()=>{draft=newDraft();pgNova()};
+  $("#clr").onclick=()=>{if(draftHasContent(draft)&&!confirm("Limpar tudo o que foi preenchido nesta inspeção?"))return;draft=newDraft();draftRestored=false;pgNova();window.scrollTo(0,0)};
+  if($("#rascX"))$("#rascX").onclick=()=>{draftRestored=false;$("#rascB").remove()};
   if($("#save"))$("#save").onclick=async()=>{
     if(d.editOf&&!d._motivo){askReason({titulo:"Motivo da correção",texto:"Explique o que foi corrigido nesta inspeção.",botao:"Salvar correção"},m=>{d._motivo=m;$("#save").click()});return}
     const old=d.editOf?S.inspecoes.find(i=>i.id===d.editOf):null;
@@ -990,7 +1031,7 @@ function pgNova(){
       pecas:d.pecas.map((pc,ix)=>({n:ix+1,def:pc.def.filter(k=>defs.some(x=>x.id===k)),cav:pc.cav||"",med:Object.fromEntries(Object.entries(pc.med||{}).filter(([k,v])=>String(v).trim()&&pc.def.includes(k)))})),defeitos:{},d:dd,result,obs:d.obs,reap:d.reap,refId:d.refId,reacao:{},demo:false};
     rec.pecas.forEach(pc=>pc.def.forEach(k=>rec.defeitos[k]=(rec.defeitos[k]||0)+1));
     if(old){rec.reacao=old.reacao||{};rec.correcoes=[...(old.correcoes||[]),{em:new Date().toISOString(),por:user?.email||d.inspetor,motivo:d._motivo,antes:{N:old.N,nqa:old.nqa,d:old.d,result:old.result,lote:old.lote,defeitos:old.defeitos}}]}
-    await persist("inspecoes",rec);await setMeta("lastInspector",d.inspetor);await setMeta("lastN|"+d.productId+"|"+d.ponto,+d.N);draft=null;
+    await persist("inspecoes",rec);await setMeta("lastInspector",d.inspetor);await setMeta("lastN|"+d.productId+"|"+d.ponto,+d.N);draft=null;draftRestored=false;clearTimeout(window._dt);await setMeta("rascunho",null);
     const tipos=Object.keys(rec.defeitos).sort((a,b)=>rec.defeitos[b]-rec.defeitos[a]);
     if(old){for(const k of tipos){const v=await createInvestigation(rec,k);if(v.pecas!==rec.defeitos[k]){v.pecas=rec.defeitos[k];await persist("investigacoes",v)}}for(const v of S.investigacoes.filter(v=>v.inspecaoId===rec.id&&!rec.defeitos[v.defeito]&&!treeFilled(v)))await remove("investigacoes",v.id,{excluidoMotivo:"Falha removida na correção da inspeção"});const pend=S.investigacoes.filter(v=>v.inspecaoId===rec.id&&!treeFilled(v));toast("Correção salva.");if(pend.length)go("arvore",pend[0].id);else go("inspecao",rec.id);return}
     if(tipos.length){const ids=[];for(const k of tipos)ids.push((await createInvestigation(rec,k)).id);toast("Inspeção registrada. Preencha agora a árvore de falha.");go("arvore",ids[0])}
@@ -1004,8 +1045,9 @@ let filt={q:"",ponto:"",res:"",de:"",ate:""};
 function pgInspecoes(){
   head("Operação","Inspeções registradas",`<button class="btn" id="exI">Exportar CSV</button><button class="btn primary" id="newI">Nova inspeção</button>`);
   const L=S.inspecoes.filter(x=>(!filt.ponto||x.ponto===filt.ponto)&&(!filt.res||(filt.res==="R"?x.result==="R":x.result!=="R"))&&(!filt.de||x.data>=filt.de)&&(!filt.ate||x.data<=filt.ate)&&(!filt.q||[x.lote,x.op,x.maquina,x.inspetor,x.produto].join(" ").toLowerCase().includes(filt.q.toLowerCase()))).sort((a,b)=>byTime(b,a));
-  let h=`<div class="card" style="margin-bottom:14px"><div class="grid g4" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr"><label class="f">Buscar<input id="q" value="${esc(filt.q)}" placeholder="Lote, OP, máquina, inspetor…"></label><label class="f">Ponto<select id="fp"><option value="">Todos</option>${Object.entries(POINTS).map(([k,v])=>`<option value="${k}" ${filt.ponto===k?"selected":""}>${v.nome}</option>`).join("")}</select></label><label class="f">Resultado<select id="fr"><option value="">Todos</option><option value="A" ${filt.res==="A"?"selected":""}>Aceitos</option><option value="R" ${filt.res==="R"?"selected":""}>Rejeitados</option></select></label><label class="f">De<input type="date" id="fde" value="${filt.de}"></label><label class="f">Até<input type="date" id="fate" value="${filt.ate}"></label></div></div>`;
-  h+=L.length?`<div class="tw"><table class="t"><thead><tr><th>Data</th><th>Lote</th><th>OP</th><th>Ponto</th><th>Máquina</th><th>N</th><th>NQA</th><th>Regime</th><th>n / Ac / Re</th><th>d</th><th>Resultado</th><th>Árvores</th></tr></thead><tbody>${L.map(x=>{const nv=S.investigacoes.filter(v=>v.inspecaoId===x.id).length;return `<tr class="click" data-id="${x.id}"><td>${fmtD(x.data)}${x.demo?'<span class="demo-tag">DEMO</span>':""}</td><td><b>${esc(x.lote)}</b>${x.reap?' <span class="pill warn">reapres.</span>':""}</td><td>${esc(x.op||"—")}</td><td>${POINTS[x.ponto]?.nome}</td><td>${esc(x.maquina||"—")}</td><td>${x.N}</td><td>${NQA[x.nqa]}</td><td>${regPill(x.regime)}</td><td>${x.n} / ${x.ac} / ${x.re}</td><td><b>${x.d}</b></td><td>${resPill(x.result)}</td><td>${nv||"—"}</td></tr>`}).join("")}</tbody></table></div>`:`<div class="card empty">Nenhuma inspeção encontrada.</div>`;
+  let h=`<div class="card" style="margin-bottom:14px"><div class="grid filtgrid"><label class="f">Buscar<input id="q" value="${esc(filt.q)}" placeholder="Lote, OP, máquina, inspetor…"></label><label class="f">Ponto<select id="fp"><option value="">Todos</option>${Object.entries(POINTS).map(([k,v])=>`<option value="${k}" ${filt.ponto===k?"selected":""}>${v.nome}</option>`).join("")}</select></label><label class="f">Resultado<select id="fr"><option value="">Todos</option><option value="A" ${filt.res==="A"?"selected":""}>Aceitos</option><option value="R" ${filt.res==="R"?"selected":""}>Rejeitados</option></select></label><label class="f">De<input type="date" id="fde" value="${filt.de}"></label><label class="f">Até<input type="date" id="fate" value="${filt.ate}"></label></div></div>`;
+  h+=L.length?`<div class="tw hidem"><table class="t"><thead><tr><th>Data</th><th>Lote</th><th>OP</th><th>Ponto</th><th>Máquina</th><th>N</th><th>NQA</th><th>Regime</th><th>n / Ac / Re</th><th>d</th><th>Resultado</th><th>Árvores</th></tr></thead><tbody>${L.map(x=>{const nv=S.investigacoes.filter(v=>v.inspecaoId===x.id).length;return `<tr class="click" data-id="${x.id}"><td>${fmtD(x.data)}${x.demo?'<span class="demo-tag">DEMO</span>':""}</td><td><b>${esc(x.lote)}</b>${x.reap?' <span class="pill warn">reapres.</span>':""}</td><td>${esc(x.op||"—")}</td><td>${POINTS[x.ponto]?.nome}</td><td>${esc(x.maquina||"—")}</td><td>${x.N}</td><td>${NQA[x.nqa]}</td><td>${regPill(x.regime)}</td><td>${x.n} / ${x.ac} / ${x.re}</td><td><b>${x.d}</b></td><td>${resPill(x.result)}</td><td>${nv||"—"}</td></tr>`}).join("")}</tbody></table></div>`:`<div class="card empty">${S.inspecoes.length?"Nenhuma inspeção encontrada com esses filtros.":"Nenhuma inspeção registrada ainda."}</div>`;
+  if(L.length)h+=`<div class="mcards">${L.map(x=>{const nv=S.investigacoes.filter(v=>v.inspecaoId===x.id),pd=nv.filter(v=>!treeFilled(v)&&(v.conclusao?.status||"aberta")!=="concluida").length;return `<button class="mcard ${x.result==="R"?"rej":""}" data-id="${x.id}"><div class="mc1"><b>Lote ${esc(x.lote)}</b>${resPill(x.result)}</div><div class="mc2">${fmtD(x.data)}${x.turno?" · "+esc(x.turno)+" turno":""} · ${POINTS[x.ponto]?.nome}${x.maquina?" · "+esc(x.maquina):""}${x.demo?' <span class="demo-tag">DEMO</span>':""}</div><div class="mc2">N ${x.N} · NQA ${NQA[x.nqa]} · n ${x.n} · Ac ${x.ac} / Re ${x.re} · <b>d ${x.d}</b>${nv.length?` · ${nv.length} árvore(s)${pd?` <span class="pill warn">${pd} a preencher</span>`:""}`:""}</div></button>`}).join("")}</div>`;
   setPage(h);
   const f=(id,k)=>$("#"+id).oninput=$("#"+id).onchange=e=>{filt[k]=e.target.value;clearTimeout(window._ft);window._ft=setTimeout(()=>{pgInspecoes();const el=$("#"+id);el.focus();if(el.setSelectionRange&&el.type!=="date")el.setSelectionRange(99,99)},id==="q"?350:0)};
   f("q","q");f("fp","ponto");f("fr","res");f("fde","de");f("fate","ate");
@@ -1080,9 +1122,9 @@ const causesFor=(v,s)=>CAUSES.filter(c=>c.st===s&&c.defs.includes(v.defeito));
 const probable=v=>Object.entries(v.respostas||{}).filter(([,r])=>r.a==="S").map(([k])=>CA[k]).filter(Boolean);
 function treeSVG(v){
   const stages=stagesFor(v),rows=[];stages.forEach(s=>causesFor(v,s).forEach(c=>rows.push({s,c})));
-  const RH=44,top=24,H=Math.max(160,top*2+rows.length*RH),W=1080,midY=H/2;
+  const RH=44,top=24,H=Math.max(160,top*2+rows.length*RH),W=1100,midY=H/2;
   const css=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
-  let svg=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Árvore de falha reversa">`;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:820px;height:auto" role="img" aria-label="Árvore de falha reversa">`;
   const d=DEF[v.defeito];
   svg+=`<rect x="10" y="${midY-34}" width="200" height="68" rx="10" fill="${css("--nc-soft")}" stroke="${css("--nc")}" stroke-width="1.5"/><text x="22" y="${midY-14}" font-size="10" font-weight="700" fill="${css("--nc")}">EFEITO · ${esc(POINTS[v.ponto].nome.toUpperCase())}</text>`;
   wrapT(d.nome,26).slice(0,3).forEach((l,i)=>svg+=`<text x="22" y="${midY+3+i*14}" font-size="12.5" font-weight="600" fill="${css("--ink")}">${esc(l)}</text>`);
@@ -1106,8 +1148,8 @@ function pgArvore(){
   const irmas=S.investigacoes.filter(i=>i.inspecaoId===v.inspecaoId).sort((a,b)=>(x?.defeitos?.[b.defeito]||0)-(x?.defeitos?.[a.defeito]||0)||a.createdAt-b.createdAt),pos=irmas.findIndex(i=>i.id===v.id),prox=irmas.slice(pos+1).concat(irmas.slice(0,pos)).find(i=>!treeFilled(i)),filled=treeFilled(v);
   let h=`<div class="flowbar noprint"><div><p class="sec-title" style="margin:0 0 6px">Árvores de falha do lote ${esc(x?.lote||"")} · ${irmas.filter(treeFilled).length} de ${irmas.length} preenchida(s)</p><div class="row">${irmas.map((i,ix)=>`<a class="fstep ${i.id===v.id?"cur":""} ${treeFilled(i)?"ok":""}" href="#arvore/${i.id}">${treeFilled(i)?"✓":ix+1} · ${esc(DEF[i.defeito]?.nome)} <small>(${x?.defeitos?.[i.defeito]||i.pecas||0} pç)</small></a>`).join("")}</div></div>
     </div>`;
-  h+=`<div class="grid g4" style="margin-bottom:14px"><div class="kpi"><div class="l">Detectado em</div><div class="v" style="font-size:18px">${POINTS[v.ponto].nome}</div><div class="s">${x?`<a href="#inspecao/${x.id}">Lote ${esc(x.lote)} · ${fmtD(x.data)}</a>`:""}</div></div><div class="kpi"><div class="l">Especificação</div><div class="s" style="font-size:13px;color:var(--ink)">${esc(defSpec(v.defeito,prod(x?.productId)))}</div><div class="s">${esc(d.src)}</div></div><div class="kpi"><div class="l">Origem localizada</div><div class="v" style="font-size:18px">${esc(originLabel(v))}</div></div><div class="kpi"><div class="l">Status</div><div class="v" style="font-size:18px">${invPill(c.status)}</div><div class="s">${probable(v).length} desvio(s) observado(s)</div></div></div>`;
-  h+=`<div class="card"><h2>Árvore de falha reversa</h2><p class="muted" style="margin-bottom:10px">Do efeito (à esquerda) de volta às etapas do processo e às causas possíveis. Clique numa causa para ir até ela. Vermelho = desvio observado; verde = descartada; tracejado = fora da etapa de origem.</p><div class="treebox">${treeSVG(v)}</div></div>`;
+  h+=`<div class="grid g4 kpis" style="margin-bottom:14px"><div class="kpi"><div class="l">Detectado em</div><div class="v" style="font-size:18px">${POINTS[v.ponto].nome}</div><div class="s">${x?`<a href="#inspecao/${x.id}">Lote ${esc(x.lote)} · ${fmtD(x.data)}</a>`:""}</div></div><div class="kpi"><div class="l">Especificação</div><div class="s" style="font-size:13px;color:var(--ink)">${esc(defSpec(v.defeito,prod(x?.productId)))}</div><div class="s">${esc(d.src)}</div></div><div class="kpi"><div class="l">Origem localizada</div><div class="v" style="font-size:18px">${esc(originLabel(v))}</div></div><div class="kpi"><div class="l">Status</div><div class="v" style="font-size:18px">${invPill(c.status)}</div><div class="s">${probable(v).length} desvio(s) observado(s)</div></div></div>`;
+  h+=`<div class="card"><h2>Árvore de falha reversa</h2><p class="muted" style="margin-bottom:10px">Do efeito (à esquerda) de volta às etapas do processo e às causas possíveis. Clique numa causa para ir até ela. Vermelho = desvio observado; verde = descartada; tracejado = fora da etapa de origem.</p><p class="hint onlym" style="margin:-4px 0 8px">Arraste o desenho para o lado para ver as causas.</p><div class="treebox">${treeSVG(v)}</div></div>`;
   const qs=presenceQs(v);
   h+=`<div class="card"><p class="sec-title">Passo 1 · Localizar a origem (voltar no processo)</p>${qs.length?qs.map(q=>{const a=(v.presenca||{})[q.id]||"";return `<div class="cause"><div class="top2"><div><h3>${esc(q.t)}</h3><p class="hint">Evidência: ${esc(q.ev)}</p></div><div class="seg" role="group">${[["S","Sim"],["N","Não"],["X","Sem registro"]].map(([k,l])=>`<button data-pres="${q.id}" data-v="${k}" aria-pressed="${a===k}">${l}</button>`).join("")}</div></div>${a==="S"?`<p class="small" style="margin-top:6px;color:var(--brand)">→ ${esc(q.yes)}</p>`:a==="N"?`<p class="small" style="margin-top:6px;color:var(--brand)">→ ${esc(q.no)}</p>`:""}</div>`}).join(""):`<p class="muted">Defeito detectado na própria moldagem: a origem está nos parâmetros da máquina, no molde/setup ou na matéria-prima.</p>`}</div>`;
   h+=`<div class="card"><p class="sec-title">Passo 2 · Verificar as causas possíveis com evidência</p><p class="muted small">Para cada causa: houve desvio dessa condição no período do lote? Responda com base em registro, não em suposição. Uma condição observada no mesmo período não comprova sozinha a causa.</p>`;
@@ -1158,7 +1200,7 @@ function pgBiblioteca(){
   let h=`<div class="pagehead"><p>Relaciona cada defeito da FS 070 (incluindo rebarba) às causas possíveis por etapa e parâmetro — enchimento, refrigeração, vaporização, molde/setup, estufa, final de linha e matéria-prima — com a evidência para confirmar, a reação imediata, a ação corretiva e o critério de eficácia. É a mesma base usada nas árvores de falha.</p></div>
    <div class="card" style="margin-bottom:14px"><div class="grid g3"><label class="f">Defeito<select id="bdef"><option value="">Todos (${DEFECTS.length})</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa / parâmetro<select id="bst"><option value="">Todas</option>${STAGES.map(s=>`<option value="${s.id}" ${bf.st===s.id?"selected":""}>${esc(s.nome)}</option>`).join("")}</select></label><label class="f">Status da relação<select id="bnat"><option value="">Todos</option>${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${bf.nat===k?"selected":""}>${l}</option>`).join("")}</select></label></div><p class="hint" style="margin-top:8px">${L.length} relações. “Relatado/documentado” = informado pela JSP ou nos documentos; “hipótese” = levantada pelo grupo, a validar; “em estudo” = mecanismo ainda indefinido.</p></div>`;
   const noCause=DEFECTS.filter(d=>!CAUSES.some(c=>c.defs.includes(d.id)));
-  h+=`<div class="tw"><table class="t"><thead><tr><th>Efeito (defeito)</th><th>Etapa / parâmetro</th><th>Causa possível</th><th>Mecanismo</th><th>Evidência para confirmar</th><th>Reação (contenção)</th><th>Ação (correção)</th><th>Responsável</th><th>Eficácia</th><th>Status</th></tr></thead><tbody>${L.map(({c,df})=>`<tr><td><b>${esc(DEF[df].nome)}</b><div class="hint">${esc(DEF[df].spec)}</div></td><td>${esc(ST[c.st].nome)}</td><td>${esc(c.nome)}</td><td class="small">${esc(c.mech)}</td><td class="small">${c.evid.map(([e,d])=>esc(e)+" <span class='muted'>("+esc(d)+")</span>").join("<br>")}</td><td class="small">${esc(REACT[c.st]||REACT.MOLD)}</td><td class="small">${esc(c.acao)}</td><td class="small">${esc(c.resp)}</td><td class="small">${esc(c.efic)}</td><td><span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info":"warn"}">${NAT[c.nat]}</span><div class="hint">${esc(c.fonte)}</div></td></tr>`).join("")}</tbody></table></div>
+  h+=`<div class="tw"><table class="t wide"><thead><tr><th>Efeito (defeito)</th><th>Etapa / parâmetro</th><th>Causa possível</th><th>Mecanismo</th><th>Evidência para confirmar</th><th>Reação (contenção)</th><th>Ação (correção)</th><th>Responsável</th><th>Eficácia</th><th>Status</th></tr></thead><tbody>${L.map(({c,df})=>`<tr><td><b>${esc(DEF[df].nome)}</b><div class="hint">${esc(DEF[df].spec)}</div></td><td>${esc(ST[c.st].nome)}</td><td>${esc(c.nome)}</td><td class="small">${esc(c.mech)}</td><td class="small">${c.evid.map(([e,d])=>esc(e)+" <span class='muted'>("+esc(d)+")</span>").join("<br>")}</td><td class="small">${esc(REACT[c.st]||REACT.MOLD)}</td><td class="small">${esc(c.acao)}</td><td class="small">${esc(c.resp)}</td><td class="small">${esc(c.efic)}</td><td><span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info":"warn"}">${NAT[c.nat]}</span><div class="hint">${esc(c.fonte)}</div></td></tr>`).join("")}</tbody></table></div>
    ${noCause.length?`<div class="banner warn" style="margin-top:14px"><span><b>Defeitos ainda sem causa mapeada:</b> ${noCause.map(d=>esc(d.nome)).join(", ")}. Dependem de informação da JSP.</span></div>`:""}`;
   setPage(h);
   $("#bdef").onchange=e=>{bf.def=e.target.value;pgBiblioteca()};$("#bst").onchange=e=>{bf.st=e.target.value;pgBiblioteca()};$("#bnat").onchange=e=>{bf.nat=e.target.value;pgBiblioteca()};
@@ -1340,6 +1382,42 @@ function pgProduto(){
     await persist("produtos",rec);pdraft=null;toast(isNew?"Produto cadastrado.":"Produto salvo.");cadTab="produtos";go("cadastros")};
 }
 
+function pgAjuda(){
+  head("Referência","Como usar o sistema",`<button class="btn" onclick="window.print()">Imprimir</button>`);
+  const st=(n,t,x)=>`<div class="step"><span class="stepn">${n}</span><div><b>${t}</b><p>${x}</p></div></div>`;
+  const g=(t,x)=>`<div class="gl"><dt>${t}</dt><dd>${x}</dd></div>`;
+  const q=(t,x)=>`<details class="faq"><summary>${t}</summary><p>${x}</p></details>`;
+  setPage(`<div class="card"><h2>Inspeção de um lote, passo a passo</h2><p class="muted" style="margin:4px 0 14px">Para o inspetor, no posto. Leva de 2 a 5 minutos por lote.</p><div class="steps col">
+    ${st(1,"Abra “Nova inspeção” e identifique o lote","Escolha o produto e o ponto (Moldagem, Estufa ou Final de linha). Preencha data, lote ou rack, turno, máquina e seu nome. Tudo começa em branco de propósito, para ninguém registrar com dados de outro lote.")}
+    ${st(2,"Informe o tamanho do lote","O nível e o NQA vêm do cadastro do produto. Com o tamanho do lote, o sistema mostra quantas peças retirar (n) e os limites para aceitar (Ac) e rejeitar (Re).")}
+    ${st(3,"Retire a amostra ao acaso e inspecione","Compare cada peça com a FS 070 e o Plano de Controle. Peça boa não precisa de registro.")}
+    ${st(4,"Registre cada peça não conforme","Toque em “+ Peça NC” e marque as falhas daquela peça. Para peso úmido ou peso seco, digite o peso medido: o sistema compara com a faixa da FTP.")}
+    ${st(5,"Registre a inspeção","A barra de baixo mostra a decisão: aceitar ou rejeitar o lote. Lote rejeitado segue o plano de reação (segregar, inspeção 100%, reapresentar).")}
+    ${st(6,"Preencha a árvore de falha na hora","Havendo falha, a árvore abre sozinha, uma por tipo de falha: responda onde o defeito apareceu, verifique as causas com evidência e registre a ação.")}</div></div>
+   <div class="grid g2"><div class="card"><h2>O que significa cada termo</h2><dl class="gloss">
+    ${g("Lote (N)","Conjunto de peças do mesmo produto, feitas nas mesmas condições, que será aceito ou rejeitado como um todo.")}
+    ${g("Amostra (n)","Quantas peças retirar do lote para inspecionar. Vem da tabela da norma.")}
+    ${g("NQA","Nível de qualidade aceitável: a porcentagem de peças não conformes que a empresa aceita como média do processo. É escolhido pela Qualidade ou pelo cliente, não é calculado.")}
+    ${g("d","Número de peças não conformes encontradas na amostra. Uma peça com duas falhas conta uma vez.")}
+    ${g("Ac e Re","Se d for menor ou igual a Ac, o lote é aceito. Se d for maior ou igual a Re, o lote é rejeitado.")}
+    ${g("Nível de inspeção","Define o tamanho da amostra para o mesmo lote. O nível II é o padrão da norma.")}
+    ${g("Regime","Normal, severo ou atenuado. O sistema muda sozinho: 2 lotes rejeitados em 5 levam ao severo; 5 aceitos seguidos voltam ao normal.")}
+    ${g("FTP","Ficha Técnica de Processo: os valores nominais e as faixas de cada parâmetro do produto.")}
+    ${g("Árvore de falha reversa","Investigação que parte do defeito encontrado e volta pelo processo, etapa por etapa, até a causa.")}</dl></div>
+   <div class="card"><h2>Dúvidas comuns</h2>
+    ${q("Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica guardado no aparelho e é enviado sozinho quando a conexão voltar. O ponto colorido no menu mostra a situação do banco.")}
+    ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
+    ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
+    ${q("O tamanho do lote ou o NQA não vieram preenchidos.","Eles vêm do cadastro do produto. Um administrador define em Cadastros › Produtos › Pré-definições de amostragem.")}
+    ${q("A máquina ou o produto não aparece na lista.","Cadastre em Cadastros. Depois de salvo, aparece para todos os aparelhos.")}
+    ${q("Como libero o acesso de um colega?","Ele cria a conta na tela de entrada e confirma o e-mail. O administrador aceita o pedido em Cadastros › Usuários.")}
+    ${q("Uma causa da árvore está marcada como “hipótese”. Posso usar?","Pode verificar, mas trate como suspeita: ela foi levantada pelo grupo e ainda não foi confirmada pela Engenharia de Processos.")}
+    ${q("Posso treinar sem sujar o banco?","Sim. Na tela de entrada, abra “Sem acesso ao banco?” e use o modo local; em Dados e configuração, carregue a demonstração.")}</div></div>
+   <div class="card"><h2>Para o administrador</h2><div class="steps col">
+    ${st("A","Mantenha os cadastros","Produtos com FTP e pré-definições, máquinas e usuários ficam em Cadastros. Excluir um item não apaga as inspeções já feitas.")}
+    ${st("B","Acompanhe o painel","Pareto de falhas, resultado por ponto e por máquina, regime de cada série e árvores em aberto. Use os filtros de período e produto.")}
+    ${st("C","Faça backup","Em Dados e configuração, baixe o backup em JSON uma vez por mês e exporte os CSV quando precisar analisar no Excel.")}</div></div>`);
+}
 async function loadDemo(){
   if(S.inspecoes.some(x=>x.demo)&&!confirm("Já existem dados DEMO. Gerar mais?"))return;
   const p=S.produtos.find(p=>p.ref)||S.produtos[0];const base=new Date();base.setDate(base.getDate()-20);
@@ -1351,6 +1429,11 @@ async function loadDemo(){
     const result=d<=pl.ac?"A":d>=pl.re?"R":"AR";
     await persist("inspecoes",{id:uid(),createdAt:Date.now()+Math.random(),productId:p.id,produto:p.nome,ponto:s.ponto,data:s.data,turno:s.turno,maquina:"K1014 (DEMO)",molde:"DEMO",op:"DEMO-"+(1000+Math.floor(Math.random()*9000)),lote:"DEMO-"+s.data.slice(5).replace("-",""),inspetor:"Demonstração",N:s.N,nivel:"II",nqa:s.nqa,regime:rs.reg,letra0:pl.letter0,letra:pl.letter,n:pl.n,ac:pl.ac,re:pl.re,inspecao100:pl.full,pecas,defeitos,d,result,obs:"Registro fictício para demonstração.",reap:false,reacao:{},demo:true});
   }
+  const rejs=S.inspecoes.filter(x=>x.demo&&x.result==="R").sort(byTime);let nfe=0;
+  for(const x of rejs)for(const k of Object.keys(x.defeitos||{}).slice(0,2)){const v=await createInvestigation(x,k);
+    if(nfe===0&&k==="rebarba"){v.presenca={fl:"S",est:"S"};v.respostas={setup_fech:{a:"S",obs:"Travessa desalinhada após troca de molde (dado fictício)."},ench_alto:{a:"N"},mp_dens:{a:"N"},setup_topo:{a:"X"}};
+      v.conclusao={status:"concluida",classif:"confirmada",resp:"Área de Moldes (DEMO)",prazo:x.data,contencao:"Lote segregado e inspecionado 100% (dado fictício).",acao:"Realinhar a travessa e padronizar o calço no setup (dado fictício).",eficacia:"5 lotes seguintes sem rebarba acima de 3 mm (dado fictício)."};await persist("investigacoes",v);nfe++}
+    else if(nfe===1){v.presenca={fl:"S",est:"S"};const cs=CAUSES.filter(c=>c.defs.includes(k)&&MOLD_STAGES.includes(c.st));if(cs[0])v.respostas={[cs[0].id]:{a:"S"}};v.conclusao={status:"andamento"};await persist("investigacoes",v);nfe++}}
   toast("Demonstração carregada.");go("painel");
 }
 
@@ -1360,7 +1443,7 @@ async function loadDemo(){
 $("#menuBtn").onclick=()=>{const o=document.body.classList.toggle("menuopen");$("#menuBtn").setAttribute("aria-expanded",o)};
 $("#logout").onclick=signOut;
 (async function init(){
-  await openDB();await loadAll();await initCloud();
+  await openDB();await loadAll();if(draftHasContent(S.meta.rascunho)){draft=S.meta.rascunho;draftRestored=true}await initCloud();
   if(cloudState!=="login"&&cloudState!=="negado")await ensureProducts();
   const [p,id]=location.hash.slice(1).split("/");if(p&&PAGES.concat([{id:"inspecao"},{id:"arvore"}]).some(x=>x.id===p))route={p,id:id||null};
   render();
