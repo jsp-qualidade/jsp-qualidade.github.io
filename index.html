@@ -683,9 +683,11 @@ function updateDbStatus(){
    ========================================================================= */
 const seriesKey=r=>[r.productId,r.ponto,r.nqa].join("|");
 const byTime=(a,b)=>(a.data||"").localeCompare(b.data||"")||(a.createdAt-b.createdAt);
-function regimeState(productId,ponto,nqa,excludeId){
+// comDemo: true = conta lotes DEMO; false = ignora; sem valor = conta só se a série não tiver lote real
+function regimeState(productId,ponto,nqa,excludeId,comDemo){
   const key=[productId,ponto,nqa].join("|");
-  const lots=S.inspecoes.filter(x=>seriesKey(x)===key&&!x.reap&&x.result&&x.id!==excludeId).sort(byTime);
+  let lots=S.inspecoes.filter(x=>seriesKey(x)===key&&!x.reap&&x.result&&x.id!==excludeId).sort(byTime);
+  if(comDemo===false||(comDemo==null&&lots.some(x=>!x.demo)))lots=lots.filter(x=>!x.demo);
   let reg="N",reason="Início da inspeção em regime normal (5.2.1).",win=[],nRun=[],tAcc=0,tCount=0;
   for(const x of lots){
     const used=x.regime||"N";reg=used;
@@ -797,7 +799,7 @@ function render(){
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
   const demo=S.inspecoes.some(x=>x.demo);
   ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda}[route.p]||pgPainel)();
-  if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO servem apenas para treinamento e apresentação. Remova-os em “Dados e configuração” antes do uso real.</div>`)}
+  if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO ficam só neste aparelho e servem para treinamento e apresentação. Remova-os em “Dados e configuração” quando terminar.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
 }
@@ -937,7 +939,7 @@ function pgNova(){
   head("Operação","Nova inspeção por amostragem",`<button class="btn" id="clr">Limpar formulário</button>`);
   const d=draft,p=prod(d.productId);d._rN=d.N;
   const nqaVal=d.nqa===""||d.nqa==null?"":+d.nqa;
-  const rs=d.productId&&d.ponto&&nqaVal!==""?regimeState(d.productId,d.ponto,nqaVal,d.editOf):null;
+  const rs=d.productId&&d.ponto&&nqaVal!==""?regimeState(d.productId,d.ponto,nqaVal,d.editOf,localMode()):null;
   let reg=rs?rs.reg:"N";if(rs&&reg==="N"&&rs.eligibleR?.ok&&d.applyR)reg="R";
   const plan=samplingPlan(d.N,d.nivel,nqaVal===""?null:nqaVal,reg);
   const defs=DEFECTS.filter(x=>x.pts.includes(d.ponto));
@@ -1260,7 +1262,7 @@ function pgDados(){
    <div class="row"><button class="btn primary" id="bk">Baixar backup (JSON)</button><button class="btn" id="imp">Importar backup</button><input type="file" id="impF" accept=".json,application/json" hidden></div>
    <div class="row" style="margin-top:10px"><button class="btn" data-x="I">CSV inspeções</button><button class="btn" data-x="V">CSV árvores de falha</button><button class="btn" data-x="B">CSV biblioteca</button></div></div></div>`;
   h+=`<div class="card"><h2>Produtos, máquinas e usuários</h2><p class="muted small" style="margin-bottom:10px">Cadastro de produtos (com a FTP e as pré-definições de amostragem), máquinas e, para administradores, usuários e pedidos de acesso.</p><button class="btn" id="toCad2">Abrir Cadastros</button></div>`;
-  h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes fictícios, marcados como DEMO, para treinar inspetores e apresentar o sistema (inclui uma sequência que aciona a inspeção severa). Não usar em produção.</p>${cloudState==="ok"||cloudState==="offline"?'<p class="small" style="margin-bottom:10px"><span class="pill warn">Disponível só no modo local</span> para não misturar dados fictícios com o banco da empresa.</p>':""}<div class="row"><button class="btn" id="demoOn" ${cloudState==="ok"||cloudState==="offline"?"disabled":""}>Carregar demonstração</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
+  h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes e árvores fictícios, marcados como DEMO, para treinar inspetores e apresentar o sistema (inclui uma sequência que aciona a inspeção severa).</p><p class="small" style="margin-bottom:10px"><span class="pill ok">Só neste aparelho</span> Os dados DEMO não são enviados ao banco, não aparecem para os outros usuários e não entram na contagem de regime das inspeções reais.</p><div class="row"><button class="btn" id="demoOn">Carregar demonstração</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
    <div class="card"><h2>Zona de risco</h2><p class="muted small" style="margin-bottom:12px">${cloudState==="ok"?"Apaga apenas a cópia guardada neste aparelho; o banco compartilhado não é alterado e é baixado de novo.":"Apaga todas as inspeções e árvores deste aparelho. Baixe um backup antes."}</p><button class="btn danger" id="wipe">Limpar dados deste aparelho</button></div></div>
    <div class="card"><h2>Sobre o sistema</h2><p class="small muted">Desenvolvido pelo Grupo 2 (Gestão de Processos e Qualidade) para a JSP Brasil. Amostragem simples por atributos conforme NBR 5426 (Tabelas 1 a 4 e 17; regras de comutação 5.3). Defeitos conforme FS 070 rev. 06/07 e Plano de Controle 64993-BZ100; reação conforme FS 342 / PR 8.7. As relações de causa e efeito marcadas como hipótese devem ser validadas pela Engenharia de Processos antes do uso como padrão. Arquivo único; o banco compartilhado é o Supabase da JSP e cada aparelho mantém uma cópia para uso sem internet.</p></div>`;
   setPage(h);
@@ -1420,12 +1422,13 @@ function pgAjuda(){
 }
 async function loadDemo(){
   if(S.inspecoes.some(x=>x.demo)&&!confirm("Já existem dados DEMO. Gerar mais?"))return;
-  const p=S.produtos.find(p=>p.ref)||S.produtos[0];const base=new Date();base.setDate(base.getDate()-20);
+  const p=S.produtos.find(p=>p.ref)||S.produtos[0];if(!p){toast("Cadastre um produto antes de carregar a demonstração.");return}
+  const b=$("#demoOn");if(b){b.disabled=true;b.textContent="Gerando…"}const base=new Date();base.setDate(base.getDate()-20);
   const mk=(dayOff,ponto,N,nqa,defs,turno,extra={})=>{const dt=new Date(base);dt.setDate(dt.getDate()+dayOff);const data=dt.toISOString().slice(0,10);return {ponto,N,nqa,defs,turno,data,...extra}};
   const seq=[mk(0,"FL",500,10,{rebarba:1},"1º"),mk(1,"FL",480,10,{},"2º"),mk(2,"FL",520,10,{rebarba:3,corte:2,deformada:1},"1º"),mk(3,"FL",500,10,{rebarba:2},"3º"),mk(4,"FL",510,10,{rebarba:5,inchaco:2},"1º"),mk(5,"FL",500,10,{rebarba:1},"2º"),mk(6,"FL",500,10,{},"1º"),
     mk(1,"MOLD",300,13,{esfarelamento:1},"1º"),mk(3,"MOLD",320,13,{falha_injecao:1,murcha:1},"2º"),mk(5,"MOLD",300,13,{},"1º"),mk(2,"EST",150,13,{inchaco:1},"1º")];
   for(const s of seq){
-    const rs=regimeState(p.id,s.ponto,s.nqa);const pl=samplingPlan(s.N,"II",s.nqa,rs.reg);const pecas=[];Object.entries(s.defs).forEach(([k,v])=>{for(let q=0;q<v;q++)pecas.push({n:pecas.length+1,def:[k],cav:""})});if(s.defs.corte&&s.defs.rebarba){const ci=pecas.findIndex(pc=>pc.def[0]==="corte");pecas.splice(ci,1);pecas[0].def.push("corte");pecas.forEach((pc,ix)=>pc.n=ix+1)}const d=pecas.length;const defeitos={};pecas.forEach(pc=>pc.def.forEach(k=>defeitos[k]=(defeitos[k]||0)+1));
+    const rs=regimeState(p.id,s.ponto,s.nqa,null,true);const pl=samplingPlan(s.N,"II",s.nqa,rs.reg);const pecas=[];Object.entries(s.defs).forEach(([k,v])=>{for(let q=0;q<v;q++)pecas.push({n:pecas.length+1,def:[k],cav:""})});if(s.defs.corte&&s.defs.rebarba){const ci=pecas.findIndex(pc=>pc.def[0]==="corte");pecas.splice(ci,1);pecas[0].def.push("corte");pecas.forEach((pc,ix)=>pc.n=ix+1)}const d=pecas.length;const defeitos={};pecas.forEach(pc=>pc.def.forEach(k=>defeitos[k]=(defeitos[k]||0)+1));
     const result=d<=pl.ac?"A":d>=pl.re?"R":"AR";
     await persist("inspecoes",{id:uid(),createdAt:Date.now()+Math.random(),productId:p.id,produto:p.nome,ponto:s.ponto,data:s.data,turno:s.turno,maquina:"K1014 (DEMO)",molde:"DEMO",op:"DEMO-"+(1000+Math.floor(Math.random()*9000)),lote:"DEMO-"+s.data.slice(5).replace("-",""),inspetor:"Demonstração",N:s.N,nivel:"II",nqa:s.nqa,regime:rs.reg,letra0:pl.letter0,letra:pl.letter,n:pl.n,ac:pl.ac,re:pl.re,inspecao100:pl.full,pecas,defeitos,d,result,obs:"Registro fictício para demonstração.",reap:false,reacao:{},demo:true});
   }
