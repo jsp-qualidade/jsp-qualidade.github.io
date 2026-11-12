@@ -271,6 +271,11 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .backbtn{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 8px;margin:0 10px 6px 0;font:inherit;font-size:12.5px;font-weight:600;color:var(--brand);cursor:pointer}
 .backbtn:hover{background:var(--brand-soft)}
 @media (max-width:820px){.backbtn{display:flex;width:max-content;padding:8px 14px 8px 10px;font-size:13.5px;margin-bottom:8px}}
+.defgrp{margin-bottom:10px}.defgrp-h{display:block;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.defchips{display:flex;flex-wrap:wrap;gap:6px}.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;background:var(--surface);user-select:none}
+.chip input{width:auto;margin:0}.chip.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:600}
+.evrow{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr) auto;gap:8px;margin-bottom:6px}.evrow input{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);min-width:0}
+@media (max-width:820px){.evrow{grid-template-columns:1fr auto}.evrow input:nth-child(2){grid-column:1;grid-row:2}.evrow .iconbtn{grid-row:1/3;align-self:center}.evrow{padding-bottom:6px;border-bottom:1px dashed var(--line)}}
 </style>
 </head>
 <body>
@@ -454,7 +459,7 @@ const REACT={
  MP:"Bloquear o material suspeito e acionar a Qualidade (entrada de matéria-prima)."
 };
 const C=(id,st,nome,defs,mech,evid,nat,fonte,acao,resp,efic)=>({id,st,nome,defs,mech,evid,nat,fonte,acao,resp,efic});
-const CAUSES=[
+const BASE_CAUSES=[
  C("vap_alta","VAP","Vaporização acima do especificado (pressão ou tempo)",["queima","murcha","bico_esfarelando"],
    "Excesso de vapor pode queimar a peça, deixando aspecto queimado ou murcho. Válvula com falha pode entregar mais que o setado (ex.: setado 3,8, real 4,5).",
    [["Pressão e tempo de vapor na IHM × FTP","FTP / IHM"],["Item 21 do Formulário A (acima/abaixo)","Formulário A"],["Funcionamento da válvula de vapor","OS Engeman"]],
@@ -580,7 +585,16 @@ const CAUSES=[
    [["Condição da pesagem e balança","FS 100 / FS 072"],["Fixação das duas contrapeças no dispositivo","POP Final de Linha"]],
    "hip","POP Final de Linha","Repetir a medição conforme POP.","Inspetor(a)","Resultado confirmado na repetição")
 ];
-const CA=Object.fromEntries(CAUSES.map(c=>[c.id,c]));
+// A biblioteca em uso junta as causas originais com as inclusões, alterações e remoções feitas pela JSP (tabela "causas").
+const BASE_CA=Object.fromEntries(BASE_CAUSES.map(c=>[c.id,c]));
+let CAUSES=BASE_CAUSES.map(c=>({...c,_base:true})),CA=Object.fromEntries(CAUSES.map(c=>[c.id,c]));
+function rebuildCauses(){
+  const ov=Object.fromEntries((S.causas||[]).map(c=>[c.id,c]));
+  const all=[...BASE_CAUSES.map(c=>ov[c.id]?{...c,...ov[c.id],_base:true,_mod:true}:{...c,_base:true}),...(S.causas||[]).filter(c=>!BASE_CA[c.id]).map(c=>({...c,_custom:true}))]
+    .map(c=>({...c,defs:(c.defs||[]).filter(k=>DEF[k]),evid:(c.evid||[]).filter(e=>e&&e[0]),st:ST[c.st]?c.st:"SETUP"}));
+  CA=Object.fromEntries(all.map(c=>[c.id,c]));CAUSES=all.filter(c=>!c.removida);
+}
+const reactOf=c=>(c&&c.reacao&&c.reacao.trim())||REACT[c?.st]||REACT.MOLD;
 
 /* =========================================================================
    3. BANCO DE DADOS — Supabase (nuvem, compartilhado entre colaboradores)
@@ -588,13 +602,13 @@ const CA=Object.fromEntries(CAUSES.map(c=>[c.id,c]));
    ========================================================================= */
 // Endereço do banco da JSP. A TI pode alterar em "Dados e configuração" sem editar o arquivo.
 const CLOUD_CFG={url:"https://okcnwdoxxwslmpptlyhs.supabase.co",key:"sb_publishable_9UT4r3EM6HE2E-kkmxxz0w_RPtpKQAh"};
-const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","maquinas","meta"],TABLES=["inspecoes","investigacoes","produtos","maquinas"];
-const S={inspecoes:[],investigacoes:[],produtos:[],maquinas:[],meta:{}};
+const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","maquinas","causas","meta"],TABLES=["inspecoes","investigacoes","produtos","maquinas","causas"];
+const S={inspecoes:[],investigacoes:[],produtos:[],maquinas:[],causas:[],meta:{}};
 let idb=null,sb=null,user=null,colab=null,colabStatus="",pendentes=[],cloudState="off",cloudMsg="";
 const localMode=()=>{try{return sessionStorage.getItem("jsp-modo-local")==="1"}catch(e){return false}};
-function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,2);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
+function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,3);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
 function tx(store,mode,fn){return new Promise((res,rej)=>{if(!idb){res(null);return}const t=idb.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);t.onerror=()=>rej(t.error)})}
-function saveLS(){if(!idb){try{localStorage.setItem(DBNAME,JSON.stringify({inspecoes:S.inspecoes,investigacoes:S.investigacoes,produtos:S.produtos,maquinas:S.maquinas,meta:S.meta}))}catch(e){}}}
+function saveLS(){if(!idb){try{localStorage.setItem(DBNAME,JSON.stringify({inspecoes:S.inspecoes,investigacoes:S.investigacoes,produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,meta:S.meta}))}catch(e){}}}
 async function loadAll(){
   if(idb){for(const s of STORES){const all=await tx(s,"readonly",st=>st.getAll());if(s==="meta"){(all||[]).forEach(m=>S.meta[m.id]=m.v)}else S[s]=all||[]}}
   else{try{const j=JSON.parse(localStorage.getItem(DBNAME)||"null");if(j)Object.assign(S,j)}catch(e){}}
@@ -631,7 +645,7 @@ async function remove(store,id,info){
 }
 async function setMeta(k,v){S.meta[k]=v;if(idb)await tx("meta","readwrite",st=>st.put({id:k,v}));else saveLS()}
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
-function snapshot(){return {sistema:"JSP Inspeção por Amostragem",versao:2,exportadoEm:new Date().toISOString(),inspecoes:S.inspecoes.filter(x=>!x.demo),investigacoes:S.investigacoes.filter(x=>!x.demo),produtos:S.produtos,maquinas:S.maquinas}}
+function snapshot(){return {sistema:"JSP Inspeção por Amostragem",versao:2,exportadoEm:new Date().toISOString(),inspecoes:S.inspecoes.filter(x=>!x.demo),investigacoes:S.investigacoes.filter(x=>!x.demo),produtos:S.produtos,maquinas:S.maquinas,causas:S.causas}}
 async function mergeIn(data){let n=0;for(const st of TABLES){for(const r of (data[st]||[])){if(!r||!r.id)continue;const cur=S[st].find(x=>x.id===r.id);if(!cur||(r.updatedAt||0)>(cur.updatedAt||0)){const keep=r.updatedAt;await persist(st,r);n++}}}return n}
 // ---- nuvem ----
 function cfg(){return {url:(S.meta.cloudUrl||CLOUD_CFG.url||"").trim(),key:(S.meta.cloudKey||CLOUD_CFG.key||"").trim()}}
@@ -849,22 +863,22 @@ const PAGES=[
 ];
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
-const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1};
+const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1};
 const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
-    const ok=t.p!=="nova"&&t.p!=="produto"&&!(t.p===route.p&&t.id===route.id)&&!(t.p==="inspecao"&&!S.inspecoes.some(x=>x.id===t.id))&&!(t.p==="arvore"&&!S.investigacoes.some(v=>v.id===t.id));
+    const ok=t.p!=="nova"&&t.p!=="produto"&&t.p!=="causa"&&!(t.p===route.p&&t.id===route.id)&&!(t.p==="inspecao"&&!S.inspecoes.some(x=>x.id===t.id))&&!(t.p==="arvore"&&!S.investigacoes.some(v=>v.id===t.id));
     if(ok){if(!peek)navStack.length=i;return t}}
   if(!peek)navStack.length=0;
   if(route.p==="arvore"){const v=S.investigacoes.find(v=>v.id===route.id);if(v&&S.inspecoes.some(x=>x.id===v.inspecaoId))return {p:"inspecao",id:v.inspecaoId,y:0};return {p:"investigacoes",id:null,y:0}}
-  return {p:route.p==="produto"?"cadastros":"inspecoes",id:null,y:0};
+  return {p:route.p==="produto"?"cadastros":route.p==="causa"?"biblioteca":"inspecoes",id:null,y:0};
 }
 function goBack(){const t=backTarget(false);route={p:t.p,id:t.id||null};location.hash=t.p+(t.id?"/"+t.id:"");render();window.scrollTo(0,t.y||0)}
 window.addEventListener("hashchange",()=>{const [p,id0]=location.hash.slice(1).split("/"),id=id0||null;if(p&&(p!==route.p||id!==route.id)){const top=navStack[navStack.length-1];let y=0;if(top&&top.p===p&&(top.id||null)===id){y=top.y||0;navStack.pop()}else navStack.push({p:route.p,id:route.id,y:window.scrollY});route={p,id};render();window.scrollTo(0,y)}});
 function renderNav(){
   let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
-    const act=route.p===p.id||(route.p==="inspecao"&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros");
+    const act=route.p===p.id||(route.p==="inspecao"&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
     const badge=p.id==="investigacoes"?pendingTrees().length:p.id==="cadastros"?pendentes.length:0;
     h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
@@ -872,11 +886,11 @@ function renderNav(){
 function head(crumb,title,right=""){$("#crumb").textContent=crumb;
   if(DETAIL[route.p]){const t=backTarget(true);$("#crumb").insertAdjacentHTML("afterbegin",`<button class="backbtn noprint" id="backB" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Voltar para ${esc(PNAME[t.p]||"a lista")}</button>`);$("#backB").onclick=goBack}$("#title").textContent=title;$("#topright").innerHTML=right;document.title="JSP · "+title}
 function render(){
-  renderNav();updateDbStatus();setBar("");
+  rebuildCauses();renderNav();updateDbStatus();setBar("");
   if(authLanding){pgAuthLanding();return}
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
   const demo=S.inspecoes.some(x=>x.demo);
-  ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda}[route.p]||pgPainel)();
+  ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO ficam só neste aparelho e servem para treinamento e apresentação. Remova-os em “Dados e configuração” quando terminar.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
@@ -1248,14 +1262,14 @@ function pgArvore(){
   stagesFor(v).forEach(s=>{const on=stageActive(v,s);h+=`<div class="stagehead ${on?"":"off"}"><div><b>${esc(ST[s].nome)}</b> <span class="muted small">· ${esc(ST[s].sub)}</span></div>${on?"":'<span class="pill">Fora da etapa de origem</span>'}</div>`;
     causesFor(v,s).forEach(cs=>{const r=(v.respostas||{})[cs.id]||{};h+=`<div class="cause ${r.a||""} ${on?"":"off"}" id="c_${cs.id}"><div class="top2"><div style="flex:1;min-width:260px"><h3>${esc(cs.nome)}</h3><div class="row" style="margin-top:4px"><span class="pill ${cs.nat==="fato"?"ok":cs.nat==="estudo"?"info":"warn"}">${NAT[cs.nat]}</span><span class="pill">${esc(cs.fonte)}</span></div></div><div class="seg yn" role="group" aria-label="Desvio observado?">${[["S","Desvio observado"],["N","Sem desvio"],["X","Sem registro"]].map(([k,l])=>`<button data-ans="${cs.id}" data-v="${k}" aria-pressed="${r.a===k}">${l}</button>`).join("")}</div></div>
       <p class="mech">${esc(cs.mech)}</p><ul>${cs.evid.map(([e,doc])=>`<li>${esc(e)} <span class="muted">— ${esc(doc)}</span></li>`).join("")}</ul>
-      <details ${r.a==="S"||r.note?"open":""}><summary>Evidência registrada e ação/reação</summary><label class="f" style="margin-top:8px">Evidência (documento, valor, período)<textarea data-note="${cs.id}" placeholder="Ex.: IHM mostrou vapor 4,5 bar (FTP 3,8) das 14h às 16h, OP 12345">${esc(r.note||"")}</textarea></label><p class="small" style="margin-top:8px"><b>Reação (contenção):</b> ${esc(REACT[cs.st]||REACT.MOLD)}</p><p class="small"><b>Ação (correção):</b> ${esc(cs.acao)} · <b>Responsável:</b> ${esc(cs.resp)}</p><p class="small"><b>Critério de eficácia:</b> ${esc(cs.efic)}</p></details></div>`})});
+      <details ${r.a==="S"||r.note?"open":""}><summary>Evidência registrada e ação/reação</summary><label class="f" style="margin-top:8px">Evidência (documento, valor, período)<textarea data-note="${cs.id}" placeholder="Ex.: IHM mostrou vapor 4,5 bar (FTP 3,8) das 14h às 16h, OP 12345">${esc(r.note||"")}</textarea></label><p class="small" style="margin-top:8px"><b>Reação (contenção):</b> ${esc(reactOf(cs))}</p><p class="small"><b>Ação (correção):</b> ${esc(cs.acao)} · <b>Responsável:</b> ${esc(cs.resp)}</p><p class="small"><b>Critério de eficácia:</b> ${esc(cs.efic)}</p></details></div>`})});
   h+=`</div>`;
   const pr=probable(v);
   h+=`<div class="card"><p class="sec-title">Passo 3 · Conclusão, ação e eficácia</p>${pr.length?`<div class="banner nc"><span><b>Desvio(s) observado(s):</b> ${pr.map(c=>esc(c.nome)).join("; ")}.</span></div>`:'<div class="banner info"><span>Nenhum desvio marcado ainda. Se nenhuma causa for confirmada, registre a causa como não identificada e o que será coletado.</span></div>'}
    <div class="grid g3"><label class="f">Classificação da causa<select data-c="classif"><option value="">—</option>${[["confirmada","Confirmada com evidência"],["provavel","Provável (evidência parcial)"],["nao","Não identificada"]].map(([k,l])=>`<option value="${k}" ${c.classif===k?"selected":""}>${l}</option>`).join("")}</select></label>
    <label class="f">Responsável pela ação<input data-c="resp" value="${esc(c.resp||"")}" placeholder="${esc(pr[0]?.resp||"Nome / área")}"></label>
    <label class="f">Prazo<input type="date" data-c="prazo" value="${esc(c.prazo||"")}"></label></div>
-   <div class="grid g2" style="margin-top:10px"><label class="f">Contenção realizada (reação)<textarea data-c="contencao" placeholder="${esc(pr.length?REACT[pr[0].st]:REACT[v.ponto])}">${esc(c.contencao||"")}</textarea></label>
+   <div class="grid g2" style="margin-top:10px"><label class="f">Contenção realizada (reação)<textarea data-c="contencao" placeholder="${esc(pr.length?reactOf(pr[0]):REACT[v.ponto])}">${esc(c.contencao||"")}</textarea></label>
    <label class="f">Ação corretiva<textarea data-c="correcao" placeholder="${esc(pr.map(p=>p.acao).join(" ")||"Ação sobre a causa")}">${esc(c.correcao||"")}</textarea></label>
    <label class="f">Verificação de eficácia<textarea data-c="eficacia" placeholder="${esc(pr[0]?.efic||"Como saber que resolveu: ex. próximos 5 lotes aceitos sem o defeito")}">${esc(c.eficacia||"")}</textarea></label>
    <label class="f">Status<select data-c="status">${Object.entries(invStatus).map(([k,l])=>`<option value="${k}" ${c.status===k?"selected":""}>${l}</option>`).join("")}</select><span class="hint">Conclua apenas após verificar a eficácia.</span></label></div></div>`;
@@ -1284,19 +1298,82 @@ function pgInvestigacoes(){
 /* =========================================================================
    10. BIBLIOTECA CAUSA/EFEITO E AÇÃO/REAÇÃO
    ========================================================================= */
-let bf={def:"",st:"",nat:""};
+let bf={def:"",st:"",nat:"",q:""},cdraft=null;
+const causeMark=c=>c._custom?`<div class="hint">Incluída pela JSP${c.updatedBy?" · "+esc(c.updatedBy):""}</div>`:c._mod?`<div class="hint">Alterada pela JSP${c.updatedBy?" · "+esc(c.updatedBy):""}</div>`:"";
 function pgBiblioteca(){
-  head("Análise","Biblioteca causa/efeito e ação/reação",`<button class="btn" id="exB">Exportar CSV</button>`);
+  const ed=isAdmin();
+  head("Análise","Biblioteca causa/efeito e ação/reação",`<button class="btn" id="exB">Exportar CSV</button>${ed?'<button class="btn primary" id="newC">+ Nova causa</button>':""}`);
   const rows=[];CAUSES.forEach(c=>c.defs.forEach(df=>rows.push({c,df})));
-  const L=rows.filter(r=>(!bf.def||r.df===bf.def)&&(!bf.st||r.c.st===bf.st)&&(!bf.nat||r.c.nat===bf.nat)).sort((a,b)=>DEFECTS.findIndex(x=>x.id===a.df)-DEFECTS.findIndex(x=>x.id===b.df)||STAGES.findIndex(s=>s.id===a.c.st)-STAGES.findIndex(s=>s.id===b.c.st));
-  let h=`<div class="pagehead"><p>Relaciona cada defeito da FS 070 (incluindo rebarba) às causas possíveis por etapa e parâmetro — enchimento, refrigeração, vaporização, molde/setup, estufa, final de linha e matéria-prima — com a evidência para confirmar, a reação imediata, a ação corretiva e o critério de eficácia. É a mesma base usada nas árvores de falha.</p></div>
-   <div class="card" style="margin-bottom:14px"><div class="grid g3"><label class="f">Defeito<select id="bdef"><option value="">Todos (${DEFECTS.length})</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa / parâmetro<select id="bst"><option value="">Todas</option>${STAGES.map(s=>`<option value="${s.id}" ${bf.st===s.id?"selected":""}>${esc(s.nome)}</option>`).join("")}</select></label><label class="f">Status da relação<select id="bnat"><option value="">Todos</option>${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${bf.nat===k?"selected":""}>${l}</option>`).join("")}</select></label></div><p class="hint" style="margin-top:8px">${L.length} relações. “Relatado/documentado” = informado pela JSP ou nos documentos; “hipótese” = levantada pelo grupo, a validar; “em estudo” = mecanismo ainda indefinido.</p></div>`;
+  const qq=bf.q.trim().toLowerCase();
+  const L=rows.filter(r=>(!bf.def||r.df===bf.def)&&(!bf.st||r.c.st===bf.st)&&(!bf.nat||r.c.nat===bf.nat)&&(!qq||[r.c.nome,r.c.mech,r.c.acao,r.c.resp,DEF[r.df].nome].join(" ").toLowerCase().includes(qq))).sort((a,b)=>DEFECTS.findIndex(x=>x.id===a.df)-DEFECTS.findIndex(x=>x.id===b.df)||STAGES.findIndex(s=>s.id===a.c.st)-STAGES.findIndex(s=>s.id===b.c.st));
+  const rem=Object.values(CA).filter(c=>c.removida),nMod=CAUSES.filter(c=>c._mod||c._custom).length;
+  let h=`<div class="pagehead"><p>Relaciona cada defeito da FS 070 (incluindo rebarba) às causas possíveis por etapa e parâmetro, com a evidência para confirmar, a reação imediata, a ação corretiva e o critério de eficácia. É a mesma base usada nas árvores de falha.</p></div>
+   <div class="banner info"><span>${ed?"<b>A biblioteca é editável.</b> Corrija, inclua ou remova causas conforme a experiência da fábrica: use “Editar” em cada causa ou “+ Nova causa”. A mudança vale para todos e passa a aparecer nas árvores de falha.":"<b>A biblioteca é mantida pelos administradores.</b> Se encontrar um erro ou souber de uma causa que falta, avise o administrador do sistema para ele corrigir aqui."} ${nMod?`<b>${nMod}</b> causa(s) já incluída(s) ou alterada(s) pela JSP.`:""}</span></div>
+   <div class="card" style="margin-bottom:14px"><div class="grid g4"><label class="f">Buscar<input id="bq" value="${esc(bf.q)}" placeholder="Causa, mecanismo, ação…"></label><label class="f">Defeito<select id="bdef"><option value="">Todos (${DEFECTS.length})</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa / parâmetro<select id="bst"><option value="">Todas</option>${STAGES.map(s=>`<option value="${s.id}" ${bf.st===s.id?"selected":""}>${esc(s.nome)}</option>`).join("")}</select></label><label class="f">Status da relação<select id="bnat"><option value="">Todos</option>${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${bf.nat===k?"selected":""}>${l}</option>`).join("")}</select></label></div><p class="hint" style="margin-top:8px">${CAUSES.length} causas · ${L.length} relações mostradas. “Relatado/documentado” = informado pela JSP ou nos documentos; “hipótese” = a validar; “em estudo” = mecanismo ainda indefinido.</p></div>`;
   const noCause=DEFECTS.filter(d=>!CAUSES.some(c=>c.defs.includes(d.id)));
-  h+=`<div class="tw"><table class="t wide"><thead><tr><th>Efeito (defeito)</th><th>Etapa / parâmetro</th><th>Causa possível</th><th>Mecanismo</th><th>Evidência para confirmar</th><th>Reação (contenção)</th><th>Ação (correção)</th><th>Responsável</th><th>Eficácia</th><th>Status</th></tr></thead><tbody>${L.map(({c,df})=>`<tr><td><b>${esc(DEF[df].nome)}</b><div class="hint">${esc(DEF[df].spec)}</div></td><td>${esc(ST[c.st].nome)}</td><td>${esc(c.nome)}</td><td class="small">${esc(c.mech)}</td><td class="small">${c.evid.map(([e,d])=>esc(e)+" <span class='muted'>("+esc(d)+")</span>").join("<br>")}</td><td class="small">${esc(REACT[c.st]||REACT.MOLD)}</td><td class="small">${esc(c.acao)}</td><td class="small">${esc(c.resp)}</td><td class="small">${esc(c.efic)}</td><td><span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info":"warn"}">${NAT[c.nat]}</span><div class="hint">${esc(c.fonte)}</div></td></tr>`).join("")}</tbody></table></div>
-   ${noCause.length?`<div class="banner warn" style="margin-top:14px"><span><b>Defeitos ainda sem causa mapeada:</b> ${noCause.map(d=>esc(d.nome)).join(", ")}. Dependem de informação da JSP.</span></div>`:""}`;
+  h+=L.length?`<div class="tw"><table class="t wide"><thead><tr><th>Efeito (defeito)</th><th>Etapa / parâmetro</th><th>Causa possível</th><th>Mecanismo</th><th>Evidência para confirmar</th><th>Reação (contenção)</th><th>Ação (correção)</th><th>Responsável</th><th>Eficácia</th><th>Status</th></tr></thead><tbody>${L.map(({c,df})=>`<tr><td><b>${esc(DEF[df].nome)}</b><div class="hint">${esc(DEF[df].spec)}</div></td><td>${esc(ST[c.st].nome)}</td><td>${esc(c.nome)}${causeMark(c)}${ed?`<div style="margin-top:6px"><button class="btn sm" data-edc="${esc(c.id)}">Editar</button></div>`:""}</td><td class="small">${esc(c.mech)}</td><td class="small">${c.evid.map(([e,d])=>esc(e)+(d?" <span class='muted'>("+esc(d)+")</span>":"")).join("<br>")}</td><td class="small">${esc(reactOf(c))}</td><td class="small">${esc(c.acao)}</td><td class="small">${esc(c.resp)}</td><td class="small">${esc(c.efic)}</td><td><span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info":"warn"}">${NAT[c.nat]||NAT.hip}</span><div class="hint">${esc(c.fonte)}</div></td></tr>`).join("")}</tbody></table></div>`:`<div class="card empty">Nenhuma causa encontrada com esses filtros.</div>`;
+  if(noCause.length)h+=`<div class="banner warn" style="margin-top:14px"><span><b>Defeitos ainda sem causa mapeada:</b> ${noCause.map(d=>esc(d.nome)).join(", ")}.${ed?" Inclua em “+ Nova causa”.":""}</span></div>`;
+  if(ed&&rem.length)h+=`<div class="card" style="margin-top:14px"><h2>Causas removidas</h2><p class="muted small" style="margin-bottom:10px">Não aparecem mais nas árvores novas. As árvores antigas que as usaram continuam mostrando o nome.</p>${rem.map(c=>`<div class="filarow" style="margin-bottom:6px"><div class="filainfo"><b>${esc(c.nome)}</b><span class="small muted">${esc(ST[c.st]?.nome||"")}${c.updatedBy?" · removida por "+esc(c.updatedBy):""}</span></div><button class="btn sm" data-restc="${esc(c.id)}">Restaurar</button></div>`).join("")}</div>`;
   setPage(h);
   $("#bdef").onchange=e=>{bf.def=e.target.value;pgBiblioteca()};$("#bst").onchange=e=>{bf.st=e.target.value;pgBiblioteca()};$("#bnat").onchange=e=>{bf.nat=e.target.value;pgBiblioteca()};
-  $("#exB").onclick=()=>download("JSP_biblioteca_causa_efeito.csv",csv([["Efeito (defeito)","Especificação","Etapa / parâmetro","Causa possível","Mecanismo","Evidência para confirmar","Reação (contenção)","Ação (correção)","Responsável","Critério de eficácia","Status","Fonte"],...rows.map(({c,df})=>[DEF[df].nome,DEF[df].spec,ST[c.st].nome,c.nome,c.mech,c.evid.map(([e,d])=>`${e} (${d})`).join(" | "),REACT[c.st]||REACT.MOLD,c.acao,c.resp,c.efic,NAT[c.nat],c.fonte])]),"text/csv;charset=utf-8");
+  $("#bq").oninput=e=>{bf.q=e.target.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{pgBiblioteca();const el=$("#bq");el.focus();el.setSelectionRange(99,99)},350)};
+  if($("#newC"))$("#newC").onclick=()=>{cdraft=null;go("causa","nova")};
+  $$("[data-edc]").forEach(b=>b.onclick=()=>{cdraft=null;go("causa",b.dataset.edc)});
+  $$("[data-restc]").forEach(b=>b.onclick=async()=>{const c=CA[b.dataset.restc];await saveCause({...c,removida:false},"restaurada");toast("Causa restaurada.");render()});
+  $("#exB").onclick=()=>download("JSP_biblioteca_causa_efeito.csv",csv([["Efeito (defeito)","Especificação","Etapa / parâmetro","Causa possível","Mecanismo","Evidência para confirmar","Reação (contenção)","Ação (correção)","Responsável","Critério de eficácia","Status","Fonte","Origem do registro"],...rows.map(({c,df})=>[DEF[df].nome,DEF[df].spec,ST[c.st].nome,c.nome,c.mech,c.evid.map(([e,d])=>d?`${e} (${d})`:e).join(" | "),reactOf(c),c.acao,c.resp,c.efic,NAT[c.nat],c.fonte,c._custom?"Incluída pela JSP":c._mod?"Alterada pela JSP":"Original"])]),"text/csv;charset=utf-8");
+}
+// grava uma causa (nova, alterada, removida ou restaurada) com histórico de quem mexeu
+async function saveCause(c,acao){
+  const rec={};["id","st","nome","defs","mech","evid","nat","fonte","acao","resp","efic","reacao","removida"].forEach(k=>{if(c[k]!==undefined)rec[k]=c[k]});
+  rec.removida=!!c.removida;rec.hist=[...((S.causas.find(x=>x.id===c.id)||{}).hist||[]),{em:new Date().toISOString(),por:user?.email||"modo local",acao}].slice(-20);
+  await persist("causas",rec);rebuildCauses();
+}
+function pgCausa(){
+  if(!isAdmin()){go("biblioteca");return}
+  const isNew=route.id==="nova",orig=isNew?null:CA[route.id];if(!isNew&&!orig){go("biblioteca");return}
+  if(!cdraft||cdraft._for!==route.id)cdraft=isNew?{_for:"nova",id:"jsp_"+uid().replace(/-/g,"").slice(0,10),st:bf.st||"",nome:"",defs:bf.def?[bf.def]:[],mech:"",evid:[["",""]],nat:"fato",fonte:"Experiência da fábrica (JSP)",acao:"",resp:"",efic:"",reacao:""}
+    :{...JSON.parse(JSON.stringify(orig)),_for:route.id,reacao:orig.reacao||""};
+  const C=cdraft;if(!C.evid.length)C.evid=[["",""]];
+  const usos=isNew?0:S.investigacoes.filter(v=>(v.respostas||{})[C.id]).length,hist=isNew?[]:((S.causas.find(x=>x.id===C.id)||{}).hist||[]);
+  head("Biblioteca",isNew?"Nova causa":"Editar causa",isNew?"":`${orig._mod?'<button class="btn" id="cOrig">Voltar ao texto original</button>':""}<button class="btn danger" id="cDel">Remover causa</button>`);
+  let h=`<div class="card"><p class="sec-title">1 · Causa e efeito</p><div class="grid g2">
+    <label class="f">Causa possível <span class="req">*</span><input id="c_nome" value="${esc(C.nome)}" placeholder="Ex.: Aspersor de refrigeração entupido"></label>
+    <label class="f">Etapa / parâmetro do processo <span class="req">*</span><select id="c_st"><option value="">Selecione…</option>${STAGES.map(x=>`<option value="${x.id}" ${C.st===x.id?"selected":""}>${esc(x.nome)} · ${esc(x.sub)}</option>`).join("")}</select></label></div>
+    <label class="f" style="margin-top:12px">Como essa causa gera o defeito (mecanismo)<textarea id="c_mech" placeholder="Explique em uma ou duas frases, como você explicaria a um operador novo.">${esc(C.mech)}</textarea></label>
+    <p class="f" style="margin:14px 0 6px;font-weight:600">Defeitos (efeitos) que esta causa pode gerar <span class="req">*</span></p>
+    ${DEF_GROUPS.map(g=>`<div class="defgrp"><span class="defgrp-h">${esc(g.nome)}</span><div class="defchips">${g.ids.filter(k=>DEF[k]).map(k=>`<label class="chip ${C.defs.includes(k)?"on":""}"><input type="checkbox" data-cdef="${k}" ${C.defs.includes(k)?"checked":""}>${esc(DEF[k].nome)}</label>`).join("")}</div></div>`).join("")}
+    ${(()=>{const fora=DEFECTS.filter(d=>!DEF_GROUPS.some(g=>g.ids.includes(d.id)));return fora.length?`<div class="defgrp"><span class="defgrp-h">Outros</span><div class="defchips">${fora.map(d=>`<label class="chip ${C.defs.includes(d.id)?"on":""}"><input type="checkbox" data-cdef="${d.id}" ${C.defs.includes(d.id)?"checked":""}>${esc(d.nome)}</label>`).join("")}</div></div>`:""})()}</div>
+   <div class="card"><p class="sec-title">2 · Como confirmar (evidências)</p><p class="muted small" style="margin-bottom:10px">O que verificar para saber se foi esta a causa, e onde está o registro. Aparece na árvore de falha.</p>
+    ${C.evid.map((e,ix)=>`<div class="evrow"><input data-ev="${ix}" data-ek="0" value="${esc(e[0]||"")}" placeholder="O que verificar"><input data-ev="${ix}" data-ek="1" value="${esc(e[1]||"")}" placeholder="Onde (registro, setor, tela)"><button class="iconbtn" data-evdel="${ix}" aria-label="Remover evidência" title="Remover">✕</button></div>`).join("")}
+    <button class="btn sm" id="evAdd" style="margin-top:8px">+ Evidência</button></div>
+   <div class="card"><p class="sec-title">3 · Ação e reação</p><div class="grid g2">
+    <label class="f">Reação imediata (contenção)<textarea id="c_reacao" placeholder="${esc(REACT[C.st]||REACT.MOLD)}">${esc(C.reacao||"")}</textarea><span class="hint">Em branco, vale a reação padrão da etapa (FS 342 / PR 8.7), mostrada acima em cinza.</span></label>
+    <label class="f">Ação corretiva<textarea id="c_acao" placeholder="O que fazer para eliminar a causa">${esc(C.acao)}</textarea></label>
+    <label class="f">Responsável<input id="c_resp" value="${esc(C.resp)}" placeholder="Ex.: Ferramentaria · Ajustador"></label>
+    <label class="f">Critério de eficácia<input id="c_efic" value="${esc(C.efic)}" placeholder="Como saber que resolveu"></label></div></div>
+   <div class="card"><p class="sec-title">4 · Confiança na informação</p><div class="grid g2">
+    <label class="f">Status da relação<select id="c_nat">${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${C.nat===k?"selected":""}>${l}</option>`).join("")}</select><span class="hint">Use “hipótese” enquanto a causa não foi confirmada na prática.</span></label>
+    <label class="f">Fonte<input id="c_fonte" value="${esc(C.fonte)}" placeholder="Quem informou ou qual documento"></label></div>
+    ${usos?`<p class="hint" style="margin-top:10px">Esta causa já foi usada em ${usos} árvore(s) de falha. As respostas dadas continuam guardadas.</p>`:""}
+    ${hist.length?`<details style="margin-top:12px"><summary class="muted small">Histórico de alterações (${hist.length})</summary><ul class="small muted" style="margin:8px 0 0 18px">${hist.slice().reverse().map(x=>`<li>${new Date(x.em).toLocaleString("pt-BR")} · ${esc(x.por)} · ${esc(x.acao)}</li>`).join("")}</ul></details>`:""}</div>`;
+  setPage(h);
+  setBar(`<div class="bar-info">${isNew?"Nova causa na biblioteca":"A alteração vale para todos os usuários"}</div><button class="btn" id="cC">Cancelar</button><button class="btn primary" id="cS">${isNew?"Incluir causa":"Salvar causa"}</button>`);
+  const rr=()=>{const y=window.scrollY;pgCausa();window.scrollTo(0,y)};
+  ["nome","mech","reacao","acao","resp","efic","fonte"].forEach(k=>{$("#c_"+k).oninput=e=>C[k]=e.target.value});
+  $("#c_nat").onchange=e=>C.nat=e.target.value;$("#c_st").onchange=e=>{C.st=e.target.value;rr()};
+  $$("[data-cdef]").forEach(el=>el.onchange=()=>{const k=el.dataset.cdef;C.defs=el.checked?[...new Set([...C.defs,k])]:C.defs.filter(x=>x!==k);el.parentElement.classList.toggle("on",el.checked)});
+  $$("[data-ev]").forEach(el=>el.oninput=()=>{C.evid[+el.dataset.ev][+el.dataset.ek]=el.value});
+  $$("[data-evdel]").forEach(b=>b.onclick=()=>{C.evid.splice(+b.dataset.evdel,1);rr()});
+  $("#evAdd").onclick=()=>{C.evid.push(["",""]);rr()};
+  const sair=()=>{cdraft=null;go("biblioteca")};
+  $("#cC").onclick=sair;
+  $("#cS").onclick=async()=>{
+    if(!C.nome.trim()){toast("Informe a causa.");$("#c_nome").focus();return}if(!C.st){toast("Escolha a etapa do processo.");$("#c_st").focus();return}if(!C.defs.length){toast("Marque pelo menos um defeito.");return}
+    if(Object.values(CA).some(x=>x.id!==C.id&&!x.removida&&x.nome.trim().toLowerCase()===C.nome.trim().toLowerCase()&&x.st===C.st)&&!confirm("Já existe uma causa com esse nome nessa etapa. Salvar mesmo assim?"))return;
+    await saveCause({...C,nome:C.nome.trim(),evid:C.evid.map(e=>[(e[0]||"").trim(),(e[1]||"").trim()]).filter(e=>e[0]),removida:false},isNew?"incluída":"alterada");
+    toast(isNew?"Causa incluída na biblioteca.":"Causa salva.");sair()};
+  if($("#cDel"))$("#cDel").onclick=async()=>{if(!confirm(`Remover a causa “${orig.nome}” da biblioteca?\n\nEla deixa de aparecer nas árvores novas. Pode ser restaurada depois, em “Causas removidas”.`))return;await saveCause({...orig,removida:true},"removida");toast("Causa removida.");sair()};
+  if($("#cOrig"))$("#cOrig").onclick=async()=>{if(!confirm("Descartar as alterações da JSP e voltar ao texto original desta causa?"))return;await remove("causas",C.id);rebuildCauses();toast("Texto original restaurado.");sair()};
 }
 
 /* =========================================================================
@@ -1597,10 +1674,10 @@ $("#logout").onclick=signOut;
   setInterval(async()=>{if(document.visibilityState!=="visible")return;if(cloudState==="ok"||cloudState==="offline"){
     await pullCloud(false);
     if(cloudState==="ok"){await flushQueue();const np=pendentes.length;await loadPendentes();if(np!==pendentes.length)pullCloud.mudou=true;if(++_tick%15===0)await recheckAccess()}
-    if(pullCloud.mudou&&!["nova","arvore","produto"].includes(route.p)&&!digitando()){pullCloud.mudou=false;const y=window.scrollY;render();window.scrollTo(0,y)}else{renderNav();updateDbStatus()}}},20000);
+    if(pullCloud.mudou&&!["nova","arvore","produto","causa"].includes(route.p)&&!digitando()){pullCloud.mudou=false;const y=window.scrollY;render();window.scrollTo(0,y)}else{renderNav();updateDbStatus()}}},20000);
   window.addEventListener("online",()=>{if(cloudState==="offline")pullCloud(false).then(()=>updateDbStatus())});
   try{navigator.storage?.persist?.()}catch(e){}
-  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&(cloudState==="ok"||cloudState==="offline"))pullCloud(false).then(()=>{if(pullCloud.mudou&&!["nova","arvore","produto"].includes(route.p)&&!digitando()){pullCloud.mudou=false;render()}else updateDbStatus()})});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&(cloudState==="ok"||cloudState==="offline"))pullCloud(false).then(()=>{if(pullCloud.mudou&&!["nova","arvore","produto","causa"].includes(route.p)&&!digitando()){pullCloud.mudou=false;render()}else updateDbStatus()})});
 })();
 </script>
 </body>
