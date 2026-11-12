@@ -7,7 +7,8 @@
 --  2) Só administradores incluem ou alteram PRODUTOS e MÁQUINAS.
 --     Inspetores continuam lendo os cadastros e registrando inspeções e árvores.
 --
--- Como aplicar (Owner do projeto, uma única vez):
+-- Já aplicado no projeto JSP Qualidade Amostragem em 12/11/2026.
+-- Como reaplicar em outro projeto (Owner):
 --   Supabase > SQL Editor > New query > colar tudo > Run.
 -- É seguro rodar mais de uma vez. Não apaga nem altera dados.
 -- O site já funciona antes e depois deste script.
@@ -39,6 +40,11 @@ begin
     $f$, t);
   end loop;
 end $$;
+
+-- 3) Lista de colaboradores: a regra de leitura avalia o usuário uma vez só por consulta ---
+drop policy if exists "ve o proprio cadastro ou admin ve todos" on public.colaboradores;
+create policy "ve o proprio cadastro ou admin ve todos" on public.colaboradores for select to authenticated
+  using (email = lower(((select auth.jwt()) ->> 'email')) or (select private.e_admin()));
 
 -- Conferência: deve listar "admin inclui" e "admin altera" em produtos e maquinas
 select tablename, policyname, cmd from pg_policies
