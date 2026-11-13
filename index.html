@@ -1411,6 +1411,7 @@ function pgCausa(){
     if(!confirm(`Remover a causa “${orig.nome}”?\n\nEla deixa de aparecer nas árvores novas. Pode ser restaurada depois, em “Causas removidas”.`))return;await saveCause({...orig,removida:true},"removida");toast("Causa removida.");sair()};
   if($("#cOrig"))$("#cOrig").onclick=async()=>{if(!confirm("Descartar as alterações da JSP e voltar ao texto original desta causa?"))return;await remove("causas",C.id);rebuildCauses();toast("Texto original restaurado.");sair()};
 }
+let sim={N:"500",nivel:"II",nqa:"10",reg:"N"},ptab="sim";
 function regimeDiagram(){
   const box=(x,y,w,h,lines,o={})=>{const lh=o.lh||21,ty=y+(h-(lines.length-1)*lh)/2+5;
     return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${o.fill||"var(--surface)"}" stroke="${o.stroke||"var(--line)"}" stroke-width="1.5"/>`+
