@@ -279,6 +279,9 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .sym{text-transform:none!important;font-style:italic;font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:0;font-size:1.25em;line-height:1}
 .rgbox{overflow-x:auto;-webkit-overflow-scrolling:touch}.rgsvg{display:block;width:100%;max-width:980px;min-width:720px;height:auto;margin:0 auto;font-family:inherit}
 .rglegend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px;font-size:13px;color:var(--muted)}.rglegend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+table.t.mtx td{vertical-align:top;line-height:1.45}table.t.mtx td.mtx-def{background:var(--sunk);border-right:1px solid var(--line)}
+.mtxcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.mtxcard-h{display:flex;justify-content:space-between;gap:8px;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.mtxc{padding:10px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.mtxc:last-child{border-bottom:0;padding-bottom:2px}.mtxc-n{font-weight:700;margin-bottom:4px}.mtxc-l{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:6px}
 </style>
 </head>
 <body>
@@ -858,7 +861,7 @@ const PAGES=[
  {id:"nova",t:"Nova inspeção",ic:"new",grp:"Operação"},
  {id:"inspecoes",t:"Inspeções",ic:"list",grp:"Operação"},
  {id:"investigacoes",t:"Árvores de falha",ic:"tree",grp:"Análise"},
- {id:"biblioteca",t:"Biblioteca causa/efeito",ic:"book",grp:"Análise"},
+ {id:"biblioteca",t:"Matriz de referência",ic:"book",grp:"Análise"},
  {id:"cadastros",t:"Cadastros",ic:"cad",grp:"Referência"},
  {id:"planos",t:"Planos NBR 5426",ic:"table",grp:"Referência"},
  {id:"dados",t:"Dados e configuração",ic:"db",grp:"Referência"},
@@ -867,7 +870,7 @@ const PAGES=[
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
 const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1};
-const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Matriz de referência",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
@@ -1306,29 +1309,38 @@ function pgInvestigacoes(){
 /* =========================================================================
    10. BIBLIOTECA CAUSA/EFEITO E AÇÃO/REAÇÃO
    ========================================================================= */
-let bf={def:"",st:"",nat:"",q:""},cdraft=null;
-const causeMark=c=>c._custom?`<div class="hint">Incluída pela JSP${c.updatedBy?" · "+esc(c.updatedBy):""}</div>`:c._mod?`<div class="hint">Alterada pela JSP${c.updatedBy?" · "+esc(c.updatedBy):""}</div>`:"";
+let bf={def:"",st:"",nat:"",q:""},cdraft=null,bDet=false,cDef="";
+// Fontes de dados de uma causa, no formato da matriz ("Relatório de OS / Parâmetros de máquina")
+const fontesOf=c=>[...new Set((c.evid||[]).map(e=>(e[1]||e[0]||"").trim()).filter(Boolean))].join(" / ");
+const natPill=c=>`<span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info":"warn"}">${NAT[c.nat]||NAT.hip}</span>`;
+const causeMark=c=>c._custom||c._mod?`<span class="hint" style="display:block">${c._custom?"Incluída":"Alterada"} pela JSP</span>`:"";
 function pgBiblioteca(){
   const ed=isAdmin();
-  head("Análise","Biblioteca causa/efeito e ação/reação",`<button class="btn" id="exB">Exportar CSV</button>${ed?'<button class="btn primary" id="newC">+ Nova causa</button>':""}`);
-  const rows=[];CAUSES.forEach(c=>c.defs.forEach(df=>rows.push({c,df})));
+  head("Análise","Matriz de referência técnica",`<button class="btn" id="exB">Exportar CSV</button>`);
   const qq=bf.q.trim().toLowerCase();
-  const L=rows.filter(r=>(!bf.def||r.df===bf.def)&&(!bf.st||r.c.st===bf.st)&&(!bf.nat||r.c.nat===bf.nat)&&(!qq||[r.c.nome,r.c.mech,r.c.acao,r.c.resp,DEF[r.df].nome].join(" ").toLowerCase().includes(qq))).sort((a,b)=>DEFECTS.findIndex(x=>x.id===a.df)-DEFECTS.findIndex(x=>x.id===b.df)||STAGES.findIndex(s=>s.id===a.c.st)-STAGES.findIndex(s=>s.id===b.c.st));
-  const rem=Object.values(CA).filter(c=>c.removida),nMod=CAUSES.filter(c=>c._mod||c._custom).length;
-  let h=`<div class="pagehead"><p>Relaciona cada defeito da FS 070 (incluindo rebarba) às causas possíveis por etapa e parâmetro, com a evidência para confirmar, a reação imediata, a ação corretiva e o critério de eficácia. É a mesma base usada nas árvores de falha.</p></div>
-   <div class="banner info"><span>${ed?"<b>A biblioteca é editável.</b> Corrija, inclua ou remova causas conforme a experiência da fábrica: use “Editar” em cada causa ou “+ Nova causa”. A mudança vale para todos e passa a aparecer nas árvores de falha.":"<b>A biblioteca é mantida pelos administradores.</b> Se encontrar um erro ou souber de uma causa que falta, avise o administrador do sistema para ele corrigir aqui."} ${nMod?`<b>${nMod}</b> causa(s) já incluída(s) ou alterada(s) pela JSP.`:""}</span></div>
-   <div class="card" style="margin-bottom:14px"><div class="grid g4"><label class="f">Buscar<input id="bq" value="${esc(bf.q)}" placeholder="Causa, mecanismo, ação…"></label><label class="f">Defeito<select id="bdef"><option value="">Todos (${DEFECTS.length})</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa / parâmetro<select id="bst"><option value="">Todas</option>${STAGES.map(s=>`<option value="${s.id}" ${bf.st===s.id?"selected":""}>${esc(s.nome)}</option>`).join("")}</select></label><label class="f">Status da relação<select id="bnat"><option value="">Todos</option>${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${bf.nat===k?"selected":""}>${l}</option>`).join("")}</select></label></div><p class="hint" style="margin-top:8px">${CAUSES.length} causas · ${L.length} relações mostradas. “Relatado/documentado” = informado pela JSP ou nos documentos; “hipótese” = a validar; “em estudo” = mecanismo ainda indefinido.</p></div>`;
-  const noCause=DEFECTS.filter(d=>!CAUSES.some(c=>c.defs.includes(d.id)));
-  h+=L.length?`<div class="tw"><table class="t wide"><thead><tr><th>Efeito (defeito)</th><th>Etapa / parâmetro</th><th>Causa possível</th><th>Mecanismo</th><th>Evidência para confirmar</th><th>Reação (contenção)</th><th>Ação (correção)</th><th>Responsável</th><th>Eficácia</th><th>Status</th></tr></thead><tbody>${L.map(({c,df})=>`<tr><td><b>${esc(DEF[df].nome)}</b><div class="hint">${esc(DEF[df].spec)}</div></td><td>${esc(ST[c.st].nome)}</td><td>${esc(c.nome)}${causeMark(c)}${ed?`<div style="margin-top:6px"><button class="btn sm" data-edc="${esc(c.id)}">Editar</button></div>`:""}</td><td class="small">${esc(c.mech)}</td><td class="small">${c.evid.map(([e,d])=>esc(e)+(d?" <span class='muted'>("+esc(d)+")</span>":"")).join("<br>")}</td><td class="small">${esc(reactOf(c))}</td><td class="small">${esc(c.acao)}</td><td class="small">${esc(c.resp)}</td><td class="small">${esc(c.efic)}</td><td><span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info":"warn"}">${NAT[c.nat]||NAT.hip}</span><div class="hint">${esc(c.fonte)}</div></td></tr>`).join("")}</tbody></table></div>`:`<div class="card empty">Nenhuma causa encontrada com esses filtros.</div>`;
-  if(noCause.length)h+=`<div class="banner warn" style="margin-top:14px"><span><b>Defeitos ainda sem causa mapeada:</b> ${noCause.map(d=>esc(d.nome)).join(", ")}.${ed?" Inclua em “+ Nova causa”.":""}</span></div>`;
-  if(ed&&rem.length)h+=`<div class="card" style="margin-top:14px"><h2>Causas removidas</h2><p class="muted small" style="margin-bottom:10px">Não aparecem mais nas árvores novas. As árvores antigas que as usaram continuam mostrando o nome.</p>${rem.map(c=>`<div class="filarow" style="margin-bottom:6px"><div class="filainfo"><b>${esc(c.nome)}</b><span class="small muted">${esc(ST[c.st]?.nome||"")}${c.updatedBy?" · removida por "+esc(c.updatedBy):""}</span></div><button class="btn sm" data-restc="${esc(c.id)}">Restaurar</button></div>`).join("")}</div>`;
+  const match=c=>(!bf.st||c.st===bf.st)&&(!bf.nat||c.nat===bf.nat)&&(!qq||[c.nome,c.mech,c.acao,c.resp,fontesOf(c),(c.evid||[]).map(e=>e[0]).join(" ")].join(" ").toLowerCase().includes(qq));
+  const grupos=DEFECTS.filter(d=>!bf.def||d.id===bf.def).map(d=>({d,cs:CAUSES.filter(c=>c.defs.includes(d.id)&&match(c)).sort((a,b)=>STAGES.findIndex(x=>x.id===a.st)-STAGES.findIndex(x=>x.id===b.st))}))
+    .filter(g=>g.cs.length||(!qq&&!bf.st&&!bf.nat));
+  const nRel=grupos.reduce((a,g)=>a+g.cs.length,0),rem=Object.values(CA).filter(c=>c.removida),nMod=CAUSES.filter(c=>c._mod||c._custom).length;
+  let h=`<div class="pagehead"><p>Para cada falha da FS 070, a causa raiz provável, a ação de reação (corretiva) e a fonte de dados ou evidência para confirmar. Cada causa cadastrada aqui aparece na árvore de falha daquela falha.</p></div>
+   ${ed?`<div class="banner info"><span><b>Para incluir uma causa,</b> use “+ Incluir causa” na linha da falha. Para corrigir, use “Editar” na causa. ${nMod?`<b>${nMod}</b> causa(s) já incluída(s) ou alterada(s) pela JSP.`:""}</span></div>`:`<div class="banner info"><span>A matriz é mantida pelos administradores. Se encontrar um erro ou souber de uma causa que falta, avise o administrador do sistema.</span></div>`}
+   <div class="card" style="margin-bottom:14px"><div class="grid g4"><label class="f">Buscar<input id="bq" value="${esc(bf.q)}" placeholder="Causa, ação, fonte…"></label><label class="f">Falha<select id="bdef"><option value="">Todas (${DEFECTS.length})</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa do processo<select id="bst"><option value="">Todas</option>${STAGES.map(x=>`<option value="${x.id}" ${bf.st===x.id?"selected":""}>${esc(x.nome)}</option>`).join("")}</select></label><label class="f">Status da relação<select id="bnat"><option value="">Todos</option>${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${bf.nat===k?"selected":""}>${l}</option>`).join("")}</select></label></div>
+   <div class="row" style="justify-content:space-between;margin-top:10px"><span class="hint" style="margin:0">${nRel} relação(ões) falha × causa · “hipótese” = levantada pelo grupo, a validar</span><label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" id="bdet" ${bDet?"checked":""} style="width:auto;margin:0"> Mostrar detalhes (etapa, mecanismo, responsável, eficácia)</label></div></div>`;
+  const addBtn=d=>ed?`<button class="btn sm" data-addc="${d.id}">+ Incluir causa</button>`:"";
+  const det=bDet;
+  h+=grupos.length?`<div class="tw hidem"><table class="t mtx ${det?"wide":""}"><thead><tr><th style="width:${det?14:18}%">Falha</th><th style="width:${det?18:26}%">Causa raiz provável</th>${det?"<th>Etapa</th><th>Mecanismo</th>":""}<th style="width:${det?18:28}%">Ação de reação (corretiva)</th><th>Fonte de dados / evidência</th>${det?"<th>Responsável</th><th>Eficácia</th>":""}${ed?"<th></th>":""}</tr></thead><tbody>${grupos.map(({d,cs})=>cs.length?cs.map((c,ix)=>`<tr>${ix===0?`<td rowspan="${cs.length}" class="mtx-def"><b>${esc(d.nome)}</b><div class="hint">${esc(POINTS[d.pts[0]]?.nome||"")}${d.pts.length>1?" e outros":""}</div><div style="margin-top:8px">${addBtn(d)}</div></td>`:""}<td>${esc(c.nome)}<div style="margin-top:4px">${natPill(c)}</div>${causeMark(c)}</td>${det?`<td class="small">${esc(ST[c.st].nome)}</td><td class="small">${esc(c.mech)}</td>`:""}<td>${esc(c.acao)}${c.reacao?`<div class="hint"><b>Contenção:</b> ${esc(c.reacao)}</div>`:""}</td><td>${esc(fontesOf(c))}${det?`<div class="hint">${(c.evid||[]).map(e=>esc(e[0])).join("<br>")}</div>`:""}</td>${det?`<td class="small">${esc(c.resp)}</td><td class="small">${esc(c.efic)}</td>`:""}${ed?`<td><button class="btn sm" data-edc="${esc(c.id)}" data-edd="${d.id}">Editar</button></td>`:""}</tr>`).join(""):`<tr><td class="mtx-def"><b>${esc(d.nome)}</b><div style="margin-top:8px">${addBtn(d)}</div></td><td colspan="${(det?7:3)+(ed?1:0)}" class="muted">Nenhuma causa cadastrada para esta falha.</td></tr>`).join("")}</tbody></table></div>
+   <div class="mcards">${grupos.map(({d,cs})=>`<div class="mtxcard"><div class="mtxcard-h"><b>${esc(d.nome)}</b>${addBtn(d)}</div>${cs.length?cs.map(c=>`<div class="mtxc"><div class="mtxc-n">${esc(c.nome)} ${natPill(c)}${causeMark(c)}</div><div class="mtxc-l">Ação de reação (corretiva)</div><div>${esc(c.acao)}</div><div class="mtxc-l">Fonte de dados / evidência</div><div>${esc(fontesOf(c))}</div>${det?`<div class="mtxc-l">Etapa · responsável</div><div>${esc(ST[c.st].nome)}${c.resp?" · "+esc(c.resp):""}</div><div class="mtxc-l">Mecanismo</div><div>${esc(c.mech)}</div>`:""}${ed?`<button class="btn sm" data-edc="${esc(c.id)}" data-edd="${d.id}" style="margin-top:8px">Editar</button>`:""}</div>`).join(""):'<p class="muted small" style="margin:6px 0 0">Nenhuma causa cadastrada para esta falha.</p>'}</div>`).join("")}</div>`
+   :`<div class="card empty">Nenhuma causa encontrada com esses filtros.</div>`;
+  if(ed&&rem.length)h+=`<div class="card" style="margin-top:14px"><h2>Causas removidas</h2><p class="muted small" style="margin-bottom:10px">Não aparecem mais nas árvores novas. As árvores antigas guardam as respostas já dadas.</p>${rem.map(c=>`<div class="filarow" style="margin-bottom:6px"><div class="filainfo"><b>${esc(c.nome)}</b><span class="small muted">${esc(c.defs.map(k=>DEF[k]?.nome).filter(Boolean).join(", "))}</span></div><button class="btn sm" data-restc="${esc(c.id)}">Restaurar</button></div>`).join("")}</div>`;
   setPage(h);
   $("#bdef").onchange=e=>{bf.def=e.target.value;pgBiblioteca()};$("#bst").onchange=e=>{bf.st=e.target.value;pgBiblioteca()};$("#bnat").onchange=e=>{bf.nat=e.target.value;pgBiblioteca()};
-  $("#bq").oninput=e=>{bf.q=e.target.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{pgBiblioteca();const el=$("#bq");el.focus();el.setSelectionRange(99,99)},350)};
-  if($("#newC"))$("#newC").onclick=()=>{cdraft=null;go("causa","nova")};
-  $$("[data-edc]").forEach(b=>b.onclick=()=>{cdraft=null;go("causa",b.dataset.edc)});
+  $("#bdet").onchange=e=>{bDet=e.target.checked;const y=window.scrollY;pgBiblioteca();window.scrollTo(0,y)};
+  $("#bq").oninput=e=>{bf.q=e.target.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{pgBiblioteca();const el=$("#bq");el.focus();const v=el.value;el.value="";el.value=v},400)};
+  $$("[data-addc]").forEach(b=>b.onclick=()=>{cdraft=null;cDef=b.dataset.addc;go("causa","nova")});
+  $$("[data-edc]").forEach(b=>b.onclick=()=>{cdraft=null;cDef=b.dataset.edd;go("causa",b.dataset.edc)});
   $$("[data-restc]").forEach(b=>b.onclick=async()=>{const c=CA[b.dataset.restc];await saveCause({...c,removida:false},"restaurada");toast("Causa restaurada.");render()});
-  $("#exB").onclick=()=>download("JSP_biblioteca_causa_efeito.csv",csv([["Efeito (defeito)","Especificação","Etapa / parâmetro","Causa possível","Mecanismo","Evidência para confirmar","Reação (contenção)","Ação (correção)","Responsável","Critério de eficácia","Status","Fonte","Origem do registro"],...rows.map(({c,df})=>[DEF[df].nome,DEF[df].spec,ST[c.st].nome,c.nome,c.mech,c.evid.map(([e,d])=>d?`${e} (${d})`:e).join(" | "),reactOf(c),c.acao,c.resp,c.efic,NAT[c.nat],c.fonte,c._custom?"Incluída pela JSP":c._mod?"Alterada pela JSP":"Original"])]),"text/csv;charset=utf-8");
+  const rows=[];CAUSES.forEach(c=>c.defs.forEach(df=>rows.push({c,df})));rows.sort((a,b)=>DEFECTS.findIndex(x=>x.id===a.df)-DEFECTS.findIndex(x=>x.id===b.df));
+  $("#exB").onclick=()=>download("JSP_matriz_referencia_tecnica.csv",csv([["Falha","Causa raiz provável","Ação de reação (corretiva)","Fonte de dados / evidência","O que verificar","Etapa do processo","Mecanismo","Contenção imediata","Responsável","Critério de eficácia","Status","Fonte da informação","Origem do registro"],...rows.map(({c,df})=>[DEF[df].nome,c.nome,c.acao,fontesOf(c),(c.evid||[]).map(e=>e[0]).join(" | "),ST[c.st].nome,c.mech,reactOf(c),c.resp,c.efic,NAT[c.nat],c.fonte,c._custom?"Incluída pela JSP":c._mod?"Alterada pela JSP":"Original"])]),"text/csv;charset=utf-8");
 }
 // grava uma causa (nova, alterada, removida ou restaurada) com histórico de quem mexeu
 async function saveCause(c,acao){
@@ -1336,59 +1348,69 @@ async function saveCause(c,acao){
   rec.removida=!!c.removida;rec.hist=[...((S.causas.find(x=>x.id===c.id)||{}).hist||[]),{em:new Date().toISOString(),por:user?.email||"modo local",acao}].slice(-20);
   await persist("causas",rec);rebuildCauses();
 }
+// Edição por falha: se a causa vale para várias falhas, a alteração feita a partir de uma delas cria uma cópia só para ela
+async function splitCause(orig,df,novo,acao){
+  const nid=orig.id+"__"+df;
+  await saveCause({...orig,defs:orig.defs.filter(x=>x!==df)},"separada a falha "+(DEF[df]?.nome||df));
+  await saveCause({...novo,id:nid,defs:[df],removida:false},acao);
+  for(const v of S.investigacoes.filter(v=>v.defeito===df&&(v.respostas||{})[orig.id])){v.respostas[nid]=v.respostas[orig.id];await persist("investigacoes",v)}
+  return nid;
+}
 function pgCausa(){
   if(!isAdmin()){go("biblioteca");return}
   const isNew=route.id==="nova",orig=isNew?null:CA[route.id];if(!isNew&&!orig){go("biblioteca");return}
-  if(!cdraft||cdraft._for!==route.id)cdraft=isNew?{_for:"nova",id:"jsp_"+uid().replace(/-/g,"").slice(0,10),st:bf.st||"",nome:"",defs:bf.def?[bf.def]:[],mech:"",evid:[["",""]],nat:"fato",fonte:"Experiência da fábrica (JSP)",acao:"",resp:"",efic:"",reacao:""}
-    :{...JSON.parse(JSON.stringify(orig)),_for:route.id,reacao:orig.reacao||""};
+  const df0=cDef&&(isNew||orig.defs.includes(cDef))?cDef:(orig?.defs[0]||"");
+  if(!cdraft||cdraft._for!==route.id+"|"+df0)cdraft=isNew?{_for:"nova|"+df0,id:"jsp_"+uid().replace(/-/g,"").slice(0,10),df:df0,st:"",nome:"",mech:"",evid:[["",""]],nat:"fato",fonte:"Experiência da fábrica (JSP)",acao:"",resp:"",efic:"",reacao:""}
+    :{...JSON.parse(JSON.stringify(orig)),_for:route.id+"|"+df0,df:df0,reacao:orig.reacao||""};
   const C=cdraft;if(!C.evid.length)C.evid=[["",""]];
-  const usos=isNew?0:S.investigacoes.filter(v=>(v.respostas||{})[C.id]).length,hist=isNew?[]:((S.causas.find(x=>x.id===C.id)||{}).hist||[]);
-  head("Biblioteca",isNew?"Nova causa":"Editar causa",isNew?"":`${orig._mod?'<button class="btn" id="cOrig">Voltar ao texto original</button>':""}<button class="btn danger" id="cDel">Remover causa</button>`);
-  let h=`<div class="card"><p class="sec-title">1 · Causa e efeito</p><div class="grid g2">
-    <label class="f">Causa possível <span class="req">*</span><input id="c_nome" value="${esc(C.nome)}" placeholder="Ex.: Aspersor de refrigeração entupido"></label>
-    <label class="f">Etapa / parâmetro do processo <span class="req">*</span><select id="c_st"><option value="">Selecione…</option>${STAGES.map(x=>`<option value="${x.id}" ${C.st===x.id?"selected":""}>${esc(x.nome)} · ${esc(x.sub)}</option>`).join("")}</select></label></div>
-    <label class="f" style="margin-top:12px">Como essa causa gera o defeito (mecanismo)<textarea id="c_mech" placeholder="Explique em uma ou duas frases, como você explicaria a um operador novo.">${esc(C.mech)}</textarea></label>
-    <p class="f" style="margin:14px 0 6px;font-weight:600">Defeitos (efeitos) que esta causa pode gerar <span class="req">*</span></p>
-    ${DEF_GROUPS.map(g=>`<div class="defgrp"><span class="defgrp-h">${esc(g.nome)}</span><div class="defchips">${g.ids.filter(k=>DEF[k]).map(k=>`<label class="chip ${C.defs.includes(k)?"on":""}"><input type="checkbox" data-cdef="${k}" ${C.defs.includes(k)?"checked":""}>${esc(DEF[k].nome)}</label>`).join("")}</div></div>`).join("")}
-    ${(()=>{const fora=DEFECTS.filter(d=>!DEF_GROUPS.some(g=>g.ids.includes(d.id)));return fora.length?`<div class="defgrp"><span class="defgrp-h">Outros</span><div class="defchips">${fora.map(d=>`<label class="chip ${C.defs.includes(d.id)?"on":""}"><input type="checkbox" data-cdef="${d.id}" ${C.defs.includes(d.id)?"checked":""}>${esc(d.nome)}</label>`).join("")}</div></div>`:""})()}</div>
-   <div class="card"><p class="sec-title">2 · Como confirmar (evidências)</p><p class="muted small" style="margin-bottom:10px">O que verificar para saber se foi esta a causa, e onde está o registro. Aparece na árvore de falha.</p>
-    ${C.evid.map((e,ix)=>`<div class="evrow"><input data-ev="${ix}" data-ek="0" value="${esc(e[0]||"")}" placeholder="O que verificar"><input data-ev="${ix}" data-ek="1" value="${esc(e[1]||"")}" placeholder="Onde (registro, setor, tela)"><button class="iconbtn" data-evdel="${ix}" aria-label="Remover evidência" title="Remover">✕</button></div>`).join("")}
-    <button class="btn sm" id="evAdd" style="margin-top:8px">+ Evidência</button></div>
-   <div class="card"><p class="sec-title">3 · Ação e reação</p><div class="grid g2">
-    <label class="f">Reação imediata (contenção)<textarea id="c_reacao" placeholder="${esc(REACT[C.st]||REACT.MOLD)}">${esc(C.reacao||"")}</textarea><span class="hint">Em branco, vale a reação padrão da etapa (FS 342 / PR 8.7), mostrada acima em cinza.</span></label>
-    <label class="f">Ação corretiva<textarea id="c_acao" placeholder="O que fazer para eliminar a causa">${esc(C.acao)}</textarea></label>
-    <label class="f">Responsável<input id="c_resp" value="${esc(C.resp)}" placeholder="Ex.: Ferramentaria · Ajustador"></label>
-    <label class="f">Critério de eficácia<input id="c_efic" value="${esc(C.efic)}" placeholder="Como saber que resolveu"></label></div></div>
+  const outras=isNew?[]:orig.defs.filter(k=>k!==df0),hist=isNew?[]:((S.causas.find(x=>x.id===C.id)||{}).hist||[]);
+  const usos=isNew?0:S.investigacoes.filter(v=>v.defeito===df0&&(v.respostas||{})[C.id]).length;
+  head("Matriz de referência técnica",isNew?"Incluir causa":"Editar causa",isNew?"":`${orig._mod&&!outras.length&&!Object.keys(CA).some(k=>k.startsWith(orig.id+"__"))?'<button class="btn" id="cOrig">Voltar ao texto original</button>':""}<button class="btn danger" id="cDel">${outras.length?"Remover desta falha":"Remover causa"}</button>`);
+  const stOpts=STAGES.map(x=>`<option value="${x.id}" ${C.st===x.id?"selected":""}>${esc(x.nome)} · ${esc(x.sub)}</option>`).join("");
+  let h=(C.df&&C.st?`<div class="banner ok"><span>Esta causa aparece na <b>árvore de falha de “${esc(DEF[C.df]?.nome)}”</b>, no ramo <b>${esc(ST[C.st].nome)}</b>.</span></div>`:"")
+   +(outras.length?`<div class="banner warn"><span>Esta causa também está cadastrada para: <b>${outras.map(k=>esc(DEF[k]?.nome)).join(", ")}</b>. As alterações valem <b>só para “${esc(DEF[df0]?.nome)}”</b>; nas outras falhas ela continua como está.</span></div>`:"")
+   +`<div class="card"><p class="sec-title">1 · Falha e causa</p><div class="grid g2">
+    <label class="f">Falha (efeito) <span class="req">*</span><select id="c_df" ${outras.length?"disabled":""}><option value="">Selecione a falha…</option>${DEFECTS.map(d=>`<option value="${d.id}" ${C.df===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label>
+    <label class="f">Etapa do processo onde está a causa <span class="req">*</span><select id="c_st"><option value="">Selecione…</option>${stOpts}</select><span class="hint">Define em que ramo da árvore de falha a causa aparece.</span></label></div>
+    <label class="f" style="margin-top:12px">Causa raiz provável <span class="req">*</span><input id="c_nome" value="${esc(C.nome)}" placeholder="Ex.: Falha de vedação ou fechamento do molde"></label>
+    <label class="f" style="margin-top:12px">Como essa causa gera a falha (mecanismo)<textarea id="c_mech" placeholder="Uma ou duas frases, como você explicaria a um operador novo.">${esc(C.mech)}</textarea></label></div>
+   <div class="card"><p class="sec-title">2 · Ação de reação (corretiva)</p>
+    <label class="f">Ação de reação (corretiva) <span class="req">*</span><textarea id="c_acao" placeholder="Ex.: Ajuste de parâmetros de pressão ou intervenção de manutenção no molde">${esc(C.acao)}</textarea></label>
+    <div class="grid g2" style="margin-top:12px"><label class="f">Responsável<input id="c_resp" value="${esc(C.resp)}" placeholder="Ex.: Ferramentaria · Ajustador"></label>
+    <label class="f">Critério de eficácia<input id="c_efic" value="${esc(C.efic)}" placeholder="Ex.: 5 lotes seguintes sem a falha"></label></div>
+    <label class="f" style="margin-top:12px">Contenção imediata do lote (opcional)<textarea id="c_reacao" placeholder="${esc(REACT[C.st]||REACT.MOLD)}">${esc(C.reacao||"")}</textarea><span class="hint">Em branco, vale a reação padrão da etapa (FS 342 / PR 8.7), mostrada em cinza.</span></label></div>
+   <div class="card"><p class="sec-title">3 · Fonte de dados / evidência</p><p class="muted small" style="margin-bottom:10px">Onde buscar a informação para confirmar a causa. Ex.: Relatório de OS (Engeman), Parâmetros de máquina, Registro de processo.</p>
+    ${C.evid.map((e,ix)=>`<div class="evrow"><input data-ev="${ix}" data-ek="1" value="${esc(e[1]||"")}" placeholder="Fonte de dados (registro, sistema, setor)"><input data-ev="${ix}" data-ek="0" value="${esc(e[0]||"")}" placeholder="O que verificar nela"><button class="iconbtn" data-evdel="${ix}" aria-label="Remover fonte" title="Remover">✕</button></div>`).join("")}
+    <button class="btn sm" id="evAdd" style="margin-top:8px">+ Fonte de dados</button></div>
    <div class="card"><p class="sec-title">4 · Confiança na informação</p><div class="grid g2">
     <label class="f">Status da relação<select id="c_nat">${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${C.nat===k?"selected":""}>${l}</option>`).join("")}</select><span class="hint">Use “hipótese” enquanto a causa não foi confirmada na prática.</span></label>
-    <label class="f">Fonte<input id="c_fonte" value="${esc(C.fonte)}" placeholder="Quem informou ou qual documento"></label></div>
-    ${usos?`<p class="hint" style="margin-top:10px">Esta causa já foi usada em ${usos} árvore(s) de falha. As respostas dadas continuam guardadas.</p>`:""}
+    <label class="f">Quem informou / documento<input id="c_fonte" value="${esc(C.fonte)}" placeholder="Ex.: Ferramentaria, FS 070, experiência do turno"></label></div>
+    ${usos?`<p class="hint" style="margin-top:10px">Já usada em ${usos} árvore(s) de “${esc(DEF[df0]?.nome)}”. As respostas dadas continuam guardadas.</p>`:""}
     ${hist.length?`<details style="margin-top:12px"><summary class="muted small">Histórico de alterações (${hist.length})</summary><ul class="small muted" style="margin:8px 0 0 18px">${hist.slice().reverse().map(x=>`<li>${new Date(x.em).toLocaleString("pt-BR")} · ${esc(x.por)} · ${esc(x.acao)}</li>`).join("")}</ul></details>`:""}</div>`;
   setPage(h);
-  setBar(`<div class="bar-info">${isNew?"Nova causa na biblioteca":"A alteração vale para todos os usuários"}</div><button class="btn" id="cC">Cancelar</button><button class="btn primary" id="cS">${isNew?"Incluir causa":"Salvar causa"}</button>`);
+  setBar(`<div class="bar-info">${isNew?"A causa vai direto para a árvore da falha escolhida":"A alteração vale para todos os usuários"}</div><button class="btn" id="cC">Cancelar</button><button class="btn primary" id="cS">${isNew?"Incluir causa":"Salvar causa"}</button>`);
   const rr=()=>{const y=window.scrollY;pgCausa();window.scrollTo(0,y)};
   ["nome","mech","reacao","acao","resp","efic","fonte"].forEach(k=>{$("#c_"+k).oninput=e=>C[k]=e.target.value});
-  $("#c_nat").onchange=e=>C.nat=e.target.value;$("#c_st").onchange=e=>{C.st=e.target.value;rr()};
-  $$("[data-cdef]").forEach(el=>el.onchange=()=>{const k=el.dataset.cdef;C.defs=el.checked?[...new Set([...C.defs,k])]:C.defs.filter(x=>x!==k);el.parentElement.classList.toggle("on",el.checked)});
+  $("#c_nat").onchange=e=>C.nat=e.target.value;$("#c_st").onchange=e=>{C.st=e.target.value;rr()};$("#c_df").onchange=e=>{C.df=e.target.value;rr()};
   $$("[data-ev]").forEach(el=>el.oninput=()=>{C.evid[+el.dataset.ev][+el.dataset.ek]=el.value});
   $$("[data-evdel]").forEach(b=>b.onclick=()=>{C.evid.splice(+b.dataset.evdel,1);rr()});
   $("#evAdd").onclick=()=>{C.evid.push(["",""]);rr()};
-  const sair=()=>{cdraft=null;go("biblioteca")};
-  $("#cC").onclick=sair;
+  const sair=()=>{cdraft=null;bf.def=bf.def&&C.df?C.df:bf.def;go("biblioteca")};
+  $("#cC").onclick=()=>{cdraft=null;go("biblioteca")};
   $("#cS").onclick=async()=>{
-    if(!C.nome.trim()){toast("Informe a causa.");$("#c_nome").focus();return}if(!C.st){toast("Escolha a etapa do processo.");$("#c_st").focus();return}if(!C.defs.length){toast("Marque pelo menos um defeito.");return}
-    if(Object.values(CA).some(x=>x.id!==C.id&&!x.removida&&x.nome.trim().toLowerCase()===C.nome.trim().toLowerCase()&&x.st===C.st)&&!confirm("Já existe uma causa com esse nome nessa etapa. Salvar mesmo assim?"))return;
-    await saveCause({...C,nome:C.nome.trim(),evid:C.evid.map(e=>[(e[0]||"").trim(),(e[1]||"").trim()]).filter(e=>e[0]),removida:false},isNew?"incluída":"alterada");
-    toast(isNew?"Causa incluída na biblioteca.":"Causa salva.");sair()};
-  if($("#cDel"))$("#cDel").onclick=async()=>{if(!confirm(`Remover a causa “${orig.nome}” da biblioteca?\n\nEla deixa de aparecer nas árvores novas. Pode ser restaurada depois, em “Causas removidas”.`))return;await saveCause({...orig,removida:true},"removida");toast("Causa removida.");sair()};
+    if(!C.df){toast("Escolha a falha.");$("#c_df").focus();return}if(!C.st){toast("Escolha a etapa do processo.");$("#c_st").focus();return}
+    if(!C.nome.trim()){toast("Descreva a causa.");$("#c_nome").focus();return}if(!C.acao.trim()){toast("Descreva a ação de reação.");$("#c_acao").focus();return}
+    if(CAUSES.some(x=>x.id!==C.id&&x.defs.includes(C.df)&&x.nome.trim().toLowerCase()===C.nome.trim().toLowerCase())&&!confirm("Essa falha já tem uma causa com esse nome. Salvar mesmo assim?"))return;
+    const rec={...C,nome:C.nome.trim(),acao:C.acao.trim(),evid:C.evid.map(e=>[(e[0]||"").trim(),(e[1]||"").trim()]).filter(e=>e[0]||e[1]).map(e=>[e[0]||e[1],e[1]]),removida:false};delete rec.df;delete rec._for;
+    if(isNew)await saveCause({...rec,defs:[C.df]},"incluída");
+    else if(outras.length)await splitCause(orig,df0,rec,"alterada para "+(DEF[df0]?.nome||df0));
+    else await saveCause({...rec,defs:[C.df]},"alterada");
+    toast(isNew?"Causa incluída na árvore de “"+DEF[C.df].nome+"”.":"Causa salva.");sair()};
+  if($("#cDel"))$("#cDel").onclick=async()=>{
+    if(outras.length){if(!confirm(`Tirar a causa “${orig.nome}” da falha “${DEF[df0].nome}”?\n\nEla continua valendo para: ${outras.map(k=>DEF[k]?.nome).join(", ")}.`))return;await saveCause({...orig,defs:outras},"removida da falha "+DEF[df0].nome);toast("Causa removida desta falha.");sair();return}
+    if(!confirm(`Remover a causa “${orig.nome}”?\n\nEla deixa de aparecer nas árvores novas. Pode ser restaurada depois, em “Causas removidas”.`))return;await saveCause({...orig,removida:true},"removida");toast("Causa removida.");sair()};
   if($("#cOrig"))$("#cOrig").onclick=async()=>{if(!confirm("Descartar as alterações da JSP e voltar ao texto original desta causa?"))return;await remove("causas",C.id);rebuildCauses();toast("Texto original restaurado.");sair()};
 }
-
-/* =========================================================================
-   11. PLANOS NBR 5426 — simulador e tabelas
-   ========================================================================= */
-let sim={N:"500",nivel:"II",nqa:"10",reg:"N"},ptab="sim";
-// Diagrama do sistema de comutação (NBR 5426, 5.3), no formato usado em aula
 function regimeDiagram(){
   const box=(x,y,w,h,lines,o={})=>{const lh=o.lh||21,ty=y+(h-(lines.length-1)*lh)/2+5;
     return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${o.fill||"var(--surface)"}" stroke="${o.stroke||"var(--line)"}" stroke-width="1.5"/>`+
@@ -1462,7 +1484,7 @@ function pgDados(){
    <div class="row" style="margin-top:8px"><button class="btn sm" id="cfSave">Salvar e reconectar</button></div><p class="hint">Use apenas a chave publicável. Nunca coloque a chave secreta (service_role) neste arquivo.</p></details></div>
    <div class="card"><h2>Backup e exportação</h2><p class="muted small" style="margin-bottom:12px">O backup em JSON guarda todo o banco e pode ser importado em outro computador (os registros são mesclados, sem duplicar). Os CSV abrem no Excel.</p>
    <div class="row"><button class="btn primary" id="bk">Baixar backup (JSON)</button><button class="btn" id="imp">Importar backup</button><input type="file" id="impF" accept=".json,application/json" hidden></div>
-   <div class="row" style="margin-top:10px"><button class="btn" data-x="I">CSV inspeções</button><button class="btn" data-x="V">CSV árvores de falha</button><button class="btn" data-x="B">CSV biblioteca</button></div></div></div>`;
+   <div class="row" style="margin-top:10px"><button class="btn" data-x="I">CSV inspeções</button><button class="btn" data-x="V">CSV árvores de falha</button><button class="btn" data-x="B">CSV matriz de referência</button></div></div></div>`;
   if(adm&&cloudState==="ok")h+=`<div class="card"><h2>Inspeções excluídas</h2><p class="muted small" style="margin-bottom:10px">Toda exclusão fica guardada no banco com o motivo e o usuário. Se uma inspeção foi excluída por engano, restaure aqui: ela volta para todos, junto com as árvores de falha.</p><div id="lixo"><button class="btn sm" id="lixoLoad">Ver inspeções excluídas</button></div></div>`;
   h+=`<div class="card"><h2>Produtos, máquinas e usuários</h2><p class="muted small" style="margin-bottom:10px">Cadastro de produtos (com a FTP e as pré-definições de amostragem), máquinas e, para administradores, usuários e pedidos de acesso.</p><button class="btn" id="toCad2">Abrir Cadastros</button></div>`;
   h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes e árvores de falha fictícios, sorteados a partir dos produtos, das pré-definições e das máquinas cadastradas. Cada clique acrescenta cerca de um mês de histórico, anterior ao que já existe, como se o sistema estivesse em uso há mais tempo.</p><p class="small" style="margin-bottom:10px"><span class="pill ok">Só neste aparelho</span> Os dados DEMO não são enviados ao banco e não entram na contagem de regime das inspeções reais. Ao remover, somem por completo.${S.inspecoes.some(x=>x.demo)?` <b>${S.inspecoes.filter(x=>x.demo).length} lotes e ${S.investigacoes.filter(x=>x.demo).length} árvores DEMO carregados.</b>`:""}</p><div class="row"><button class="btn" id="demoOn">${S.inspecoes.some(x=>x.demo)?"Gerar mais um mês de demonstração":"Carregar demonstração"}</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
