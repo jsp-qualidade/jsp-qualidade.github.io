@@ -1111,7 +1111,7 @@ function pgNova(){
   ["productId","ponto","nqa","nivel","turno"].forEach(k=>{const el=$("#f_"+k);if(el)el.onchange=e=>{d[k]=e.target.value;if(k==="productId"||k==="ponto")applyPreset(d);if(k!=="turno")pgNova();else canSave()}});
   if($("#setDefault"))$("#setDefault").onclick=async()=>{p.preset=p.preset||{};p.preset[d.ponto]={N:d.N===""?null:+d.N,nivel:d.nivel,nqa:d.nqa===""?null:+d.nqa,proposta:false};await persist("produtos",p);toast("Pré-definição salva para "+POINTS[d.ponto].nome+".");pgNova()};
   if($("#useDefault"))$("#useDefault").onclick=()=>{const keep={...d};applyPreset(d);if(d.N==="")d.N=keep.N;pgNova()};
-  if($("#f_N"))$("#f_N").oninput=e=>{d.N=e.target.value;clearTimeout(window._nt);window._nt=setTimeout(()=>{pgNova();const n=$("#f_N");n.focus();try{n.setSelectionRange(99,99)}catch(_){}},500)};
+  if($("#f_N"))$("#f_N").oninput=e=>{d.N=e.target.value;clearTimeout(window._nt);window._nt=setTimeout(()=>{if(document.activeElement?.id!=="f_N")return;const y=window.scrollY;pgNova();window.scrollTo(0,y);const n=$("#f_N");if(!n)return;n.focus();const v=n.value;n.value="";n.value=v},800)};
   if($("#f_N"))$("#f_N").onchange=e=>{d.N=e.target.value;clearTimeout(window._nt);if(d.N!==d._rN)pgNova()};
   $("#f_obs").oninput=e=>{d.obs=e.target.value;saveDraftSoon()};
 
@@ -1408,7 +1408,7 @@ function pgPlanos(){
   setPage(h);
   $$("[data-pt]").forEach(b=>b.onclick=()=>{ptab=b.dataset.pt;pgPlanos()});
   $$("[data-sreg]").forEach(b=>b.onclick=()=>{sim.reg=b.dataset.sreg;pgPlanos()});
-  const s=(id,k)=>{const el=$("#"+id);if(el)el.onchange=el.oninput=e=>{sim[k]=e.target.value;if(e.type==="change"||id!=="sN")pgPlanos();else{clearTimeout(el._t);el._t=setTimeout(()=>{pgPlanos();const n=$("#sN");n.focus()},450)}}};
+  const s=(id,k)=>{const el=$("#"+id);if(el)el.onchange=el.oninput=e=>{sim[k]=e.target.value;if(e.type==="change"||id!=="sN")pgPlanos();else{clearTimeout(el._t);el._t=setTimeout(()=>{if(document.activeElement?.id!=="sN")return;pgPlanos();const n=$("#sN");if(!n)return;n.focus();const v=n.value;n.value="";n.value=v},800)}}};
   s("sN","N");s("sNiv","nivel");s("sNqa","nqa");s("sReg","reg");
 }
 
