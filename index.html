@@ -279,6 +279,24 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .sym{text-transform:none!important;font-style:italic;font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:0;font-size:1.25em;line-height:1}
 .rgbox{overflow-x:auto;-webkit-overflow-scrolling:touch}.rgsvg{display:block;width:100%;max-width:980px;min-width:720px;height:auto;margin:0 auto;font-family:inherit}
 .rglegend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px;font-size:13px;color:var(--muted)}.rglegend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.verdict.info{background:var(--info-soft);color:var(--info)}
+.lotflow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px}.lotflow .lfarr{color:var(--muted)}.lotflow a.fstep:not([href]){cursor:default}
+.dsum>*{min-width:0}.dsum .verdict{flex-wrap:wrap}
+.dopts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dopt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;border:2px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface);cursor:pointer;font:inherit;color:var(--ink)}
+.dopt b{font-size:15.5px}.dopt ul{margin:0 0 0 16px;padding:0;font-size:12.5px;color:var(--ink2);line-height:1.5}.dopt-q{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.dopt-ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:16px}
+.dopt.ok .dopt-ic{background:var(--ok-soft);color:var(--ok)}.dopt.info .dopt-ic{background:var(--info-soft);color:var(--info)}.dopt.nc .dopt-ic{background:var(--nc-soft);color:var(--nc)}
+.dopt.ok.on{border-color:var(--ok);background:var(--ok-soft)}.dopt.info.on{border-color:var(--info);background:var(--info-soft)}.dopt.nc.on{border-color:var(--nc);background:var(--nc-soft)}
+.dopt:disabled{opacity:.5;cursor:not-allowed}.dopt:not(:disabled):hover{border-color:var(--ink2)}
+.dform{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.c100prog{height:10px;border-radius:6px;background:var(--sunk);overflow:hidden;margin:-4px 0 14px}.c100prog i{display:block;height:100%;background:var(--brand)}
+.c100btns{display:flex;flex-wrap:wrap;gap:10px}.c100btns button{font:inherit;font-weight:700;font-size:15px;border-radius:10px;padding:14px 18px;cursor:pointer;border:2px solid}
+.c100ok{background:var(--ok);border-color:var(--ok)!important;color:#fff;min-width:220px}.c100nc{background:var(--nc-soft);border-color:var(--nc)!important;color:var(--nc)}
+.destino.ok{border-left:4px solid var(--ok)}.destino.nc{border-left:4px solid var(--nc)}.destino.info{border-left:4px solid var(--info)}
+.banner.ok{background:var(--ok-soft);border-color:#B7DEC8;color:var(--ok)}.banner.nc{background:var(--nc-soft);border-color:#F1C3BC;color:var(--nc)}
+ol.tl{list-style:none;margin:0;padding:0}ol.tl li{display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--line2);font-size:13px}ol.tl .tl-t{color:var(--muted);white-space:nowrap;min-width:92px}
+@media(max-width:820px){.dopts{grid-template-columns:1fr}.c100btns button{flex:1 1 100%}}
 .acrec{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;background:var(--sunk)}.acrec-h{margin-bottom:8px}.acrec .list-kv{margin-bottom:6px}@media(max-width:600px){.acrec .list-kv{grid-template-columns:1fr;gap:2px 0}.acrec .list-kv dd{margin-bottom:8px}}
 table.t.mtx td{vertical-align:top;line-height:1.45}table.t.mtx td.mtx-def{background:var(--sunk);border-right:1px solid var(--line)}
 .mtxcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.mtxcard-h{display:flex;justify-content:space-between;gap:8px;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)}
@@ -870,14 +888,15 @@ const PAGES=[
 ];
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
-const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1};
-const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1,disposicao:1,cem:1};
+const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",disposicao:"Decisão do lote",cem:"Inspeção 100%",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
     const ok=t.p!=="nova"&&t.p!=="produto"&&t.p!=="causa"&&!(t.p===route.p&&t.id===route.id)&&!(t.p==="inspecao"&&!S.inspecoes.some(x=>x.id===t.id))&&!(t.p==="arvore"&&!S.investigacoes.some(v=>v.id===t.id));
     if(ok){if(!peek)navStack.length=i;return t}}
   if(!peek)navStack.length=0;
+  if(route.p==="disposicao"||route.p==="cem")return {p:"inspecao",id:route.id,y:0};
   if(route.p==="arvore"){const v=S.investigacoes.find(v=>v.id===route.id);if(v&&S.inspecoes.some(x=>x.id===v.inspecaoId))return {p:"inspecao",id:v.inspecaoId,y:0};return {p:"investigacoes",id:null,y:0}}
   return {p:route.p==="produto"?"cadastros":route.p==="causa"?"biblioteca":"inspecoes",id:null,y:0};
 }
@@ -885,19 +904,19 @@ function goBack(){const t=backTarget(false);route={p:t.p,id:t.id||null};location
 window.addEventListener("hashchange",()=>{const [p,id0]=location.hash.slice(1).split("/"),id=id0||null;if(p&&(p!==route.p||id!==route.id)){const top=navStack[navStack.length-1];let y=0;if(top&&top.p===p&&(top.id||null)===id){y=top.y||0;navStack.pop()}else navStack.push({p:route.p,id:route.id,y:window.scrollY});route={p,id};render();window.scrollTo(0,y)}});
 function renderNav(){
   let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
-    const act=route.p===p.id||(route.p==="inspecao"&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
-    const badge=p.id==="investigacoes"?pendingTrees().length:p.id==="cadastros"?pendentes.length:0;
-    h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
+    const act=route.p===p.id||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
+    const badge=p.id==="investigacoes"?pendingTrees().length:p.id==="inspecoes"?pendingLots().length:p.id==="cadastros"?pendentes.length:0;
+    h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
 }
 function head(crumb,title,right=""){$("#crumb").textContent=crumb;
   if(DETAIL[route.p]){const t=backTarget(true);$("#crumb").insertAdjacentHTML("afterbegin",`<button class="backbtn noprint" id="backB" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Voltar para ${esc(PNAME[t.p]||"a lista")}</button>`);$("#backB").onclick=goBack}$("#title").textContent=title;$("#topright").innerHTML=right;document.title="JSP · "+title}
 function render(){
-  rebuildCauses();renderNav();updateDbStatus();setBar("");
+  c100Flush();rebuildCauses();renderNav();updateDbStatus();setBar("");
   if(authLanding){pgAuthLanding();return}
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
   const demo=S.inspecoes.some(x=>x.demo);
-  ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
+  ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO ficam só neste aparelho e servem para treinamento e apresentação. Remova-os em “Dados e configuração” quando terminar.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
@@ -988,7 +1007,8 @@ function pgPainel(){
   const sumN=I.reduce((a,x)=>a+(x.n||0),0),sumD=I.reduce((a,x)=>a+(x.d||0),0);
   let h="";
   if(pendentes.length&&colab?.papel==="admin")h+=`<div class="banner info"><span><b>${pendentes.length} pedido(s) de acesso aguardando aprovação.</b> ${pendentes.slice(0,3).map(p=>esc(p.email)).join(", ")}${pendentes.length>3?"…":""}</span><button class="btn sm primary" id="verPed">Ver pedidos</button></div>`;
-  const pend=pendingTrees();
+  const pend=pendingTrees(),pl=pendingLots();
+  if(pl.length)h+=`<div class="banner warn"><span><b>${pl.length} lote(s) aguardando decisão ou em inspeção 100%.</b> ${pl.slice(0,3).map(x=>"Lote "+esc(x.lote||"")+" ("+lotStage(x).label.toLowerCase()+")").join(", ")}${pl.length>3?"…":""}</span><button class="btn sm primary" id="goLots">Ver lotes</button></div>`;
   if(pend.length)h+=`<div class="banner warn"><span><b>${pend.length} árvore(s) de falha ainda não preenchida(s).</b> Preencha logo após a inspeção, enquanto as evidências estão no posto.</span><button class="btn sm primary" id="goPend">Preencher agora</button></div>`;
   if(!S.inspecoes.length){
     const semLote=S.produtos.some(p=>Object.keys(POINTS).some(k=>presetOf(p,k).N==null));
@@ -1020,6 +1040,7 @@ function pgPainel(){
   h+=`<div class="card"><h2>Árvores de falha em aberto</h2>${inv.length?`<div class="tw"><table class="t"><thead><tr><th>Defeito</th><th>Detectado em</th><th>Lote</th><th>Causa provável</th><th>Status</th></tr></thead><tbody>${inv.map(v=>{const x=S.inspecoes.find(i=>i.id===v.inspecaoId);return `<tr class="click" data-inv="${v.id}"><td>${esc(DEF[v.defeito]?.nome)}</td><td>${POINTS[v.ponto]?.nome}</td><td>${esc(x?.lote||"—")}</td><td class="small">${esc(probable(v).map(c=>c.nome).join("; ")||"—")}</td><td>${invPill(v.conclusao?.status)}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">Nenhuma.</p>'}</div>`;
   setPage(h);
   if($("#goPend"))$("#goPend").onclick=()=>go("arvore",pend[0].id);
+  if($("#goLots"))$("#goLots").onclick=()=>{const k=lotStage(pl[0]).k;if(pl.length===1)go(k==="cem"?"cem":"disposicao",pl[0].id);else{filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""};filt.res=pl.every(x=>lotStage(x).k==="cem")?"C":pl.every(x=>lotStage(x).k!=="cem")?"P":"";go("inspecoes")}};
   if($("#verRegras"))$("#verRegras").onclick=()=>{ptab="com";go("planos")};
   if($("#pfD"))$("#pfD").onchange=e=>{pf.dias=e.target.value;pgPainel()};if($("#pfP"))$("#pfP").onchange=e=>{pf.prod=e.target.value;pgPainel()};if($("#pfX"))$("#pfX").onclick=()=>{pf={dias:"",prod:""};pgPainel()};
   if($("#verPed"))$("#verPed").onclick=()=>{cadTab="usuarios";go("cadastros")};$$("[data-go2]").forEach(b=>b.onclick=()=>go(b.dataset.go2));$$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
@@ -1137,7 +1158,7 @@ function pgNova(){
     const rec={id:d.id,createdAt:old?old.createdAt:Date.now(),productId:d.productId,produto:p?.nome,ponto:d.ponto,data:d.data,turno:d.turno,maquina:d.maquina,molde:d.molde,op:d.op,lote:d.lote,inspetor:d.inspetor,N:+d.N,nivel:d.nivel,nqa:nqaVal,regime:reg,letra0:plan.letter0,letra:plan.letter,n:plan.n,ac:plan.ac,re:plan.re,inspecao100:plan.full,
       pecas:d.pecas.map((pc,ix)=>({n:ix+1,def:pc.def.filter(k=>defs.some(x=>x.id===k)),cav:pc.cav||"",med:Object.fromEntries(Object.entries(pc.med||{}).filter(([k,v])=>String(v).trim()&&pc.def.includes(k)))})),defeitos:{},d:dd,result,obs:d.obs,reap:d.reap,refId:d.refId,reacao:{},demo:false};
     rec.pecas.forEach(pc=>pc.def.forEach(k=>rec.defeitos[k]=(rec.defeitos[k]||0)+1));
-    if(old){rec.reacao=old.reacao||{};rec.correcoes=[...(old.correcoes||[]),{em:new Date().toISOString(),por:user?.email||d.inspetor,motivo:d._motivo,antes:{N:old.N,nqa:old.nqa,d:old.d,result:old.result,lote:old.lote,defeitos:old.defeitos}}]}
+    if(old){rec.reacao=old.reacao||{};["disp","dispHist","c100","c100Hist"].forEach(k=>{if(old[k]!==undefined)rec[k]=old[k]});rec.correcoes=[...(old.correcoes||[]),{em:new Date().toISOString(),por:user?.email||d.inspetor,motivo:d._motivo,antes:{N:old.N,nqa:old.nqa,d:old.d,result:old.result,lote:old.lote,defeitos:old.defeitos}}]}
     await persist("inspecoes",rec);await setMeta("lastInspector",d.inspetor);await setMeta("lastN|"+d.productId+"|"+d.ponto,+d.N);draft=null;draftRestored=false;clearTimeout(window._dt);await setMeta("rascunho",null);
     const tipos=Object.keys(rec.defeitos).sort((a,b)=>rec.defeitos[b]-rec.defeitos[a]);
     if(old){for(const k of tipos){const v=await createInvestigation(rec,k);if(v.pecas!==rec.defeitos[k]){v.pecas=rec.defeitos[k];await persist("investigacoes",v)}}for(const v of S.investigacoes.filter(v=>v.inspecaoId===rec.id&&!rec.defeitos[v.defeito]&&!treeFilled(v)))await remove("investigacoes",v.id,{excluidoMotivo:"Falha removida na correção da inspeção"});const pend=S.investigacoes.filter(v=>v.inspecaoId===rec.id&&!treeFilled(v));toast("Correção salva.");if(pend.length)go("arvore",pend[0].id);else go("inspecao",rec.id);return}
@@ -1151,14 +1172,14 @@ function pgNova(){
 let filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""},listLim=100;
 function pgInspecoes(){
   head("Operação","Inspeções registradas",`<button class="btn" id="exI">Exportar CSV</button><button class="btn primary" id="newI">Nova inspeção</button>`);
-  const L=S.inspecoes.filter(x=>(!filt.prod||x.productId===filt.prod)&&(!filt.maq||x.maquina===filt.maq)&&(!filt.ponto||x.ponto===filt.ponto)&&(!filt.res||(filt.res==="R"?x.result==="R":x.result!=="R"))&&(!filt.de||x.data>=filt.de)&&(!filt.ate||x.data<=filt.ate)&&(!filt.q||[x.lote,x.op,x.maquina,x.inspetor,x.produto].join(" ").toLowerCase().includes(filt.q.toLowerCase()))).sort((a,b)=>byTime(b,a));
+  const L=S.inspecoes.filter(x=>(!filt.prod||x.productId===filt.prod)&&(!filt.maq||x.maquina===filt.maq)&&(!filt.ponto||x.ponto===filt.ponto)&&(!filt.res||lotSit(x)===filt.res)&&(!filt.de||x.data>=filt.de)&&(!filt.ate||x.data<=filt.ate)&&(!filt.q||[x.lote,x.op,x.maquina,x.inspetor,x.produto].join(" ").toLowerCase().includes(filt.q.toLowerCase()))).sort((a,b)=>byTime(b,a));
   const V=L.slice(0,listLim),nvBy={};S.investigacoes.forEach(v=>(nvBy[v.inspecaoId]=nvBy[v.inspecaoId]||[]).push(v));
-  let h=`<div class="card" style="margin-bottom:14px"><div class="grid filtgrid"><label class="f">Buscar<input id="q" value="${esc(filt.q)}" placeholder="Lote, OP, máquina, inspetor…"></label><label class="f">Ponto<select id="fp"><option value="">Todos</option>${Object.entries(POINTS).map(([k,v])=>`<option value="${k}" ${filt.ponto===k?"selected":""}>${v.nome}</option>`).join("")}</select></label><label class="f">Resultado<select id="fr"><option value="">Todos</option><option value="A" ${filt.res==="A"?"selected":""}>Aceitos</option><option value="R" ${filt.res==="R"?"selected":""}>Rejeitados</option></select></label><label class="f">De<input type="date" id="fde" value="${filt.de}"></label><label class="f">Até<input type="date" id="fate" value="${filt.ate}"></label>
+  let h=`<div class="card" style="margin-bottom:14px"><div class="grid filtgrid"><label class="f">Buscar<input id="q" value="${esc(filt.q)}" placeholder="Lote, OP, máquina, inspetor…"></label><label class="f">Ponto<select id="fp"><option value="">Todos</option>${Object.entries(POINTS).map(([k,v])=>`<option value="${k}" ${filt.ponto===k?"selected":""}>${v.nome}</option>`).join("")}</select></label><label class="f">Situação<select id="fr"><option value="">Todas</option>${[["A","Aceitos"],["R","Rejeitados"],["P","Aguardando árvore ou decisão"],["C","Em inspeção 100%"]].map(([k,l])=>`<option value="${k}" ${filt.res===k?"selected":""}>${l}</option>`).join("")}</select></label><label class="f">De<input type="date" id="fde" value="${filt.de}"></label><label class="f">Até<input type="date" id="fate" value="${filt.ate}"></label>
     <label class="f">Produto<select id="fprod"><option value="">Todos</option>${[...new Map(S.inspecoes.map(x=>[x.productId,x.produto||x.productId])).entries()].map(([k,n])=>`<option value="${esc(k)}" ${filt.prod===k?"selected":""}>${esc(k+" · "+n)}</option>`).join("")}</select></label>
     <label class="f">Máquina<select id="fmaq"><option value="">Todas</option>${[...new Set(S.inspecoes.map(x=>x.maquina).filter(Boolean))].sort().map(k=>`<option ${filt.maq===k?"selected":""}>${esc(k)}</option>`).join("")}</select></label></div>
-    <div class="filtsum"><span><b>${L.length}</b> inspeção(ões) · <b>${L.filter(x=>x.result==="R").length}</b> rejeitada(s) · <b>${L.reduce((a,x)=>a+(x.d||0),0)}</b> peça(s) não conforme(s) em <b>${L.reduce((a,x)=>a+(x.n||0),0)}</b> inspecionadas</span>${Object.values(filt).some(Boolean)?'<button class="lnk" id="fclr" type="button">Limpar filtros</button>':""}</div></div>`;
-  h+=L.length?`<div class="tw hidem"><table class="t"><thead><tr><th>Data</th><th>Lote</th><th>OP</th><th>Ponto</th><th>Máquina</th><th title="Tamanho do lote"><span class="sym">N</span> (lote)</th><th>NQA</th><th>Regime</th><th title="Tamanho da amostra / aceitação / rejeição"><span class="sym">n</span> (amostra) / Ac / Re</th><th title="Peças não conformes na amostra"><span class="sym">d</span></th><th>Resultado</th><th>Árvores</th></tr></thead><tbody>${V.map(x=>{const nv=(nvBy[x.id]||[]).length;return `<tr class="click" data-id="${x.id}"><td>${fmtD(x.data)}${x.demo?'<span class="demo-tag">DEMO</span>':""}</td><td><b>${esc(x.lote)}</b>${x.reap?' <span class="pill warn">reapres.</span>':""}</td><td>${esc(x.op||"—")}</td><td>${POINTS[x.ponto]?.nome}</td><td>${esc(x.maquina||"—")}</td><td>${x.N}</td><td>${NQA[x.nqa]}</td><td>${regPill(x.regime)}</td><td>${x.n} / ${x.ac} / ${x.re}</td><td><b>${x.d}</b></td><td>${resPill(x.result)}</td><td>${nv||"—"}</td></tr>`}).join("")}</tbody></table></div>`:`<div class="card empty">${S.inspecoes.length?"Nenhuma inspeção encontrada com esses filtros.":"Nenhuma inspeção registrada ainda."}</div>`;
-  if(L.length)h+=`<div class="mcards">${V.map(x=>{const nv=nvBy[x.id]||[],pd=nv.filter(v=>!treeFilled(v)&&(v.conclusao?.status||"aberta")!=="concluida").length;return `<button class="mcard ${x.result==="R"?"rej":""}" data-id="${x.id}"><div class="mc1"><b>Lote ${esc(x.lote)}</b>${resPill(x.result)}</div><div class="mc2">${fmtD(x.data)}${x.turno?" · "+esc(x.turno)+" turno":""} · ${POINTS[x.ponto]?.nome}${x.maquina?" · "+esc(x.maquina):""}${x.demo?' <span class="demo-tag">DEMO</span>':""}</div><div class="mc2">Lote N ${x.N} · amostra n ${x.n} · NQA ${NQA[x.nqa]} · Ac ${x.ac} / Re ${x.re} · <b>d ${x.d}</b>${nv.length?` · ${nv.length} árvore(s)${pd?` <span class="pill warn">${pd} a preencher</span>`:""}`:""}</div></button>`}).join("")}</div>`;
+    <div class="filtsum"><span><b>${L.length}</b> inspeção(ões) · <b>${L.filter(x=>lotSit(x)==="R").length}</b> rejeitada(s) · <b>${L.filter(x=>["P","C"].includes(lotSit(x))).length}</b> em andamento · <b>${L.reduce((a,x)=>a+(x.d||0),0)}</b> peça(s) não conforme(s) em <b>${L.reduce((a,x)=>a+(x.n||0),0)}</b> inspecionadas</span>${Object.values(filt).some(Boolean)?'<button class="lnk" id="fclr" type="button">Limpar filtros</button>':""}</div></div>`;
+  h+=L.length?`<div class="tw hidem"><table class="t"><thead><tr><th>Data</th><th>Lote</th><th>OP</th><th>Ponto</th><th>Máquina</th><th title="Tamanho do lote"><span class="sym">N</span> (lote)</th><th>NQA</th><th>Regime</th><th title="Tamanho da amostra / aceitação / rejeição"><span class="sym">n</span> (amostra) / Ac / Re</th><th title="Peças não conformes na amostra"><span class="sym">d</span></th><th>Amostragem</th><th>Situação do lote</th><th>Árvores</th></tr></thead><tbody>${V.map(x=>{const nv=(nvBy[x.id]||[]).length;return `<tr class="click" data-id="${x.id}"><td>${fmtD(x.data)}${x.demo?'<span class="demo-tag">DEMO</span>':""}</td><td><b>${esc(x.lote)}</b>${x.reap?' <span class="pill warn">reapres.</span>':""}</td><td>${esc(x.op||"—")}</td><td>${POINTS[x.ponto]?.nome}</td><td>${esc(x.maquina||"—")}</td><td>${x.N}</td><td>${NQA[x.nqa]}</td><td>${regPill(x.regime)}</td><td>${x.n} / ${x.ac} / ${x.re}</td><td><b>${x.d}</b></td><td>${resPill(x.result)}</td><td>${statusPill(x)}</td><td>${nv||"—"}</td></tr>`}).join("")}</tbody></table></div>`:`<div class="card empty">${S.inspecoes.length?"Nenhuma inspeção encontrada com esses filtros.":"Nenhuma inspeção registrada ainda."}</div>`;
+  if(L.length)h+=`<div class="mcards">${V.map(x=>{const nv=nvBy[x.id]||[],pd=nv.filter(v=>!treeFilled(v)&&(v.conclusao?.status||"aberta")!=="concluida").length;return `<button class="mcard ${lotSit(x)==="R"?"rej":""}" data-id="${x.id}"><div class="mc1"><b>Lote ${esc(x.lote)}</b>${statusPill(x)}</div><div class="mc2">${fmtD(x.data)}${x.turno?" · "+esc(x.turno)+" turno":""} · ${POINTS[x.ponto]?.nome}${x.maquina?" · "+esc(x.maquina):""}${x.demo?' <span class="demo-tag">DEMO</span>':""}</div><div class="mc2">Lote N ${x.N} · amostra n ${x.n} · NQA ${NQA[x.nqa]} · Ac ${x.ac} / Re ${x.re} · <b>d ${x.d}</b>${nv.length?` · ${nv.length} árvore(s)${pd?` <span class="pill warn">${pd} a preencher</span>`:""}`:""}</div></button>`}).join("")}</div>`;
   if(L.length>V.length)h+=`<div style="text-align:center;margin-top:12px"><button class="btn" id="maisL">Mostrar mais ${Math.min(100,L.length-V.length)} (${V.length} de ${L.length})</button></div>`;
   setPage(h);
   if($("#maisL"))$("#maisL").onclick=()=>{const y=window.scrollY;listLim+=100;pgInspecoes();window.scrollTo(0,y)};
@@ -1167,42 +1188,202 @@ function pgInspecoes(){
   if($("#fclr"))$("#fclr").onclick=()=>{filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""};pgInspecoes()};
   $$("[data-id]").forEach(r=>r.onclick=()=>go("inspecao",r.dataset.id));
   $("#newI").onclick=()=>{draft=null;go("nova")};
-  $("#exI").onclick=()=>download("JSP_inspecoes.csv",csv([["ID","Data","Produto","Código","Ponto","Turno","Máquina","Molde","OP","Lote","Inspetor","N","Nível","NQA","Regime","Letra","n","Ac","Re","d","Resultado","Reapresentação","Defeitos","Observações","Demo"],...S.inspecoes.sort(byTime).map(x=>[x.id,x.data,x.produto,x.productId,POINTS[x.ponto]?.nome,x.turno,x.maquina,x.molde,x.op,x.lote,x.inspetor,x.N,x.nivel,NQA[x.nqa],REG[x.regime],x.letra,x.n,x.ac,x.re,x.d,{A:"Aceito",AR:"Aceito (volta ao normal)",R:"Rejeitado"}[x.result],x.reap?"Sim":"Não",Object.entries(x.defeitos||{}).map(([k,v])=>`${DEF[k]?.nome||k}: ${v}`).join(" | "),x.obs,x.demo?"Sim":""])]),"text/csv;charset=utf-8");
+  $("#exI").onclick=()=>download("JSP_inspecoes.csv",csv([["ID","Data","Produto","Código","Ponto","Turno","Máquina","Molde","OP","Lote","Inspetor","N","Nível","NQA","Regime","Letra","n","Ac","Re","d","Resultado da amostragem","Situação do lote","Decisão de disposição","Motivo","Justificativa","Decidido por","Decidido em","100%: inspecionadas","100%: aprovadas","100%: reprovadas","100%: critério","Reapresentação","Defeitos","Observações","Demo"],...S.inspecoes.sort(byTime).map(x=>[x.id,x.data,x.produto,x.productId,POINTS[x.ponto]?.nome,x.turno,x.maquina,x.molde,x.op,x.lote,x.inspetor,x.N,x.nivel,NQA[x.nqa],REG[x.regime],x.letra,x.n,x.ac,x.re,x.d,{A:"Aceito",AR:"Aceito (volta ao normal)",R:"Rejeitado"}[x.result],lotStage(x).label,x.disp?DISP[x.disp.tipo]:"",x.disp?.motivo?motLabel(x.disp.motivo):"",x.disp?.just||"",x.disp?.por||"",x.disp?.em?new Date(x.disp.em).toLocaleString("pt-BR"):"",...(x.c100?(c=>{const k=c.status==="concluida"?{a:c.aprov,r:c.reprov,t:c.total}:c100Count(c);return [k.t,k.a,k.r,c.criterio||"em andamento"]})(x.c100):["","","",""]),x.reap?"Sim":"Não",Object.entries(x.defeitos||{}).map(([k,v])=>`${DEF[k]?.nome||k}: ${v}`).join(" | "),x.obs,x.demo?"Sim":""])]),"text/csv;charset=utf-8");
 }
 const REACTION_STEPS=[["segregar","Lote segregado e identificado (FS 342 – Fluxo de produto não conforme / PR 8.7)"],["lider","Líder / Qualidade comunicado(s)"],["cem","Inspeção 100% do lote: todas as unidades reexaminadas"],["retirar","Peças defeituosas retiradas ou reparadas (retrabalho conforme FS 046, quando aplicável)"],["arvore","Árvore de falha aberta para os defeitos encontrados"],["reap","Lote reapresentado para nova inspeção (4.12.4)"]];
+function destinoCard(x,ls){
+  const dp=x.disp;let h="";
+  if(dp){const c=x.c100;
+    h+=`<div class="card destino ${ls.cls}"><div class="row" style="justify-content:space-between;align-items:flex-start"><h2>Destino do lote</h2>${isAdmin()?'<button class="btn sm noprint" id="reabB">Reabrir decisão</button>':""}</div>
+     <dl class="list-kv"><dt>Decisão</dt><dd>${esc(dp.tipo==="aceitar"&&dp.amostragem==="R"?"Aceitar lote mesmo assim":DISP[dp.tipo])}</dd>${dp.motivo?`<dt>Motivo</dt><dd>${esc(motLabel(dp.motivo))}</dd>`:""}${dp.just?`<dt>${dp.tipo==="segregar"?"Observação":"Justificativa"}</dt><dd>${esc(dp.just)}</dd>`:""}<dt>Decidido por</dt><dd>${esc(dp.por||"—")} · ${new Date(dp.em).toLocaleString("pt-BR")}</dd><dt>Árvores consideradas</dt><dd>${(dp.arvores||[]).map(id=>{const v=S.investigacoes.find(i=>i.id===id);return v?`<a href="#arvore/${v.id}">${esc(DEF[v.defeito]?.nome||v.defeito)}</a>`:""}).filter(Boolean).join(", ")||"—"}</dd></dl>`;
+    if(c){const k=c.status==="concluida"?{a:c.aprov,r:c.reprov,t:c.total}:c100Count(c);
+      h+=`<h3 style="margin:14px 0 8px">Inspeção 100% ${c.status==="concluida"?"· concluída":"· em andamento"}</h3><div class="grid g4 kpis"><div class="kpi"><div class="l">Inspecionadas</div><div class="v">${k.t}</div><div class="s">lote N = ${x.N}</div></div><div class="kpi"><div class="l">Aprovadas</div><div class="v" style="color:var(--ok)">${k.a}</div><div class="s">${c.status==="concluida"&&c.resultado==="A"?"liberadas":"liberáveis"}</div></div><div class="kpi"><div class="l">Reprovadas</div><div class="v" style="color:var(--nc)">${k.r}</div><div class="s">segregadas (FS 342)</div></div><div class="kpi"><div class="l">% reprovada</div><div class="v">${k.t?pctFmt(k.r/k.t*100):"0"}%</div><div class="s">NQA ${NQA[x.nqa]}%</div></div></div>
+       ${c.status==="concluida"?`<div class="banner ${c.resultado==="A"?"ok":"nc"}" style="margin-top:10px"><span><b>Critério da decisão final:</b> ${esc(c.criterio)}. ${c.resultado==="A"?"Lote aceito: liberar só as peças aprovadas.":"Lote rejeitado: o lote não é liberado."}${c.parcial?" "+esc(c.parcial)+".":""}</span></div>`:`<p class="noprint" style="margin-top:10px"><button class="btn primary sm" id="cemB2">Continuar inspeção 100%</button></p>`}`}
+    h+=`</div>`}
+  const hs=lotHistory(x);
+  if(hs.length>1)h+=`<div class="card"><h2>Histórico do lote</h2><ol class="tl">${hs.map(([t,txt,por])=>`<li><span class="tl-t">${new Date(t).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span><span>${esc(txt)}${por?` <span class="muted small">· ${esc(por)}</span>`:""}</span></li>`).join("")}</ol></div>`;
+  return h;
+}
 function pgInspecao(){
   const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("inspecoes");return}
   head("Inspeções · "+fmtD(x.data),"Lote "+(x.lote||"—"),`<button class="btn" onclick="window.print()">Imprimir relatório</button><button class="btn" id="editI">Corrigir</button><button class="btn danger" id="delI">Excluir</button>`);
   const invs=S.investigacoes.filter(v=>v.inspecaoId===x.id),reaps=S.inspecoes.filter(i=>i.refId===x.id),ref=x.refId?S.inspecoes.find(i=>i.id===x.refId):null;
   const found=Object.entries(x.defeitos||{}).filter(([,v])=>v>0);
   let h=`<div class="printonly"><h1>JSP Brasil · Relatório de inspeção por amostragem</h1><p class="muted">NBR 5426 · amostragem simples por atributos</p><br></div>`;
-  h+=`<div class="verdict ${x.result==="R"?"nc":x.result==="AR"?"warn":"ok"}" style="margin:0 0 14px"><span class="big">${x.result==="R"?"LOTE REJEITADO":"LOTE ACEITO"}</span><span>d = ${x.d} · Ac = ${x.ac} · Re = ${x.re}${x.result==="AR"?" · próximos lotes voltam ao regime normal":""}</span>${x.demo?'<span class="demo-tag">DEMO</span>':""}</div>`;
+  const ls=lotStage(x);
+  h+=`<div class="verdict ${ls.cls}" style="margin:0 0 10px"><span class="big">${ls.k==="final"?"LOTE "+ls.label.toUpperCase():ls.label.toUpperCase()}</span><span>Amostragem: ${x.result==="R"?"rejeitado":"aceito"} · d = ${x.d} · Ac = ${x.ac} · Re = ${x.re}${x.result==="AR"?" · próximos lotes voltam ao regime normal":""}</span>${x.demo?'<span class="demo-tag">DEMO</span>':""}</div>`+lotFlow(x,stageKey[ls.k]);
+  h+=destinoCard(x,ls);
   h+=`<div class="grid g2"><div class="card"><h2>Lote</h2><dl class="list-kv"><dt>Produto</dt><dd>${esc(x.produto)} (${esc(x.productId)})</dd><dt>Ponto</dt><dd>${POINTS[x.ponto]?.nome} · ${POINTS[x.ponto]?.op}</dd><dt>Data / turno</dt><dd>${fmtD(x.data)} · ${esc(x.turno||"—")}</dd><dt>OP / lote</dt><dd>${esc(x.op||"—")} / ${esc(x.lote)}</dd><dt>Máquina / molde</dt><dd>${esc(x.maquina||"—")} / ${esc(x.molde||"—")}</dd><dt>Inspetor(a)</dt><dd>${esc(x.inspetor)}</dd>${ref?`<dt>Reapresentação de</dt><dd><a href="#inspecao/${ref.id}">lote ${esc(ref.lote)} (${fmtD(ref.data)})</a></dd>`:""}</dl>${x.obs?`<p style="margin-top:10px"><b>Observações:</b> ${esc(x.obs)}</p>`:""}</div>
    <div class="card"><h2>Plano aplicado</h2><dl class="list-kv"><dt>Tamanho do lote</dt><dd>N = ${x.N}</dd><dt>Nível / NQA</dt><dd>${x.nivel} / ${NQA[x.nqa]}</dd><dt>Regime</dt><dd>${REG[x.regime]} (${REG_T[x.regime]})</dd><dt>Letra-código</dt><dd>${x.letra0}${x.letra!==x.letra0?" → "+x.letra+" (seta)":""}</dd><dt>Tamanho da amostra</dt><dd>n = ${x.n}${x.inspecao100?" (100% do lote)":""}</dd><dt>Critério</dt><dd>Ac = ${x.ac} · Re = ${x.re}</dd><dt>Peças defeituosas</dt><dd>d = ${x.d}</dd></dl></div></div>`;
   if((x.correcoes||[]).length)h+=`<div class="card"><h2>Histórico de correções</h2><div class="tw"><table class="t"><thead><tr><th>Quando</th><th>Por</th><th>Motivo</th><th>Antes da correção</th></tr></thead><tbody>${x.correcoes.map(c=>`<tr><td>${new Date(c.em).toLocaleString("pt-BR")}</td><td>${esc(c.por||"")}</td><td>${esc(c.motivo||"")}</td><td class="small">Lote ${esc(c.antes?.lote||"")} · N ${c.antes?.N} · NQA ${NQA[c.antes?.nqa]??""} · d ${c.antes?.d} · ${c.antes?.result==="R"?"rejeitado":"aceito"}</td></tr>`).join("")}</tbody></table></div></div>`;
   h+=`<div class="card"><h2>Falhas encontradas na amostra</h2>${found.length?`<div class="tw"><table class="t"><thead><tr><th>Falha (FS 070 / Plano de Controle)</th><th>Peças com a falha</th><th>Especificação</th><th>Árvore de falha</th></tr></thead><tbody>${found.map(([k,v])=>{const iv=invs.find(i=>i.defeito===k);return `<tr><td>${esc(DEF[k]?.nome||k)}</td><td><b>${v}</b></td><td class="small">${esc(defSpec(k,prod(x.productId)))}${(()=>{const m=(x.pecas||[]).map(pc=>pc.med?.[k]).filter(Boolean);return m.length?`<div><b>Medido:</b> ${m.map(esc).join("; ")} kg</div>`:""})()}</td><td>${iv?`<a href="#arvore/${iv.id}">${invPill(iv.conclusao?.status)} abrir</a>`:`<button class="btn sm noprint" data-open="${k}">Abrir árvore</button>`}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">Nenhum defeito na amostra.</p>'}
    ${x.pecas?.length?`<h3 style="margin:14px 0 6px">Peças não conformes da amostra (d = ${x.d})</h3><div class="tw"><table class="t"><thead><tr><th>Peça</th><th>Cavidade / posição</th><th>Falhas</th></tr></thead><tbody>${x.pecas.map(pc=>`<tr><td>${pc.n}</td><td>${esc(pc.cav||"—")}</td><td>${pc.def.map(k=>esc(DEF[k]?.nome||k)).join("; ")}</td></tr>`).join("")}</tbody></table></div>`:""}
    <div class="row noprint" style="margin-top:12px"><select id="anyDef" style="width:auto;margin:0"><option value="">Abrir árvore para outro defeito…</option>${DEFECTS.filter(dd=>dd.pts.includes(x.ponto)).map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select></div></div>`;
-  if(x.result==="R"){const r=x.reacao||{};h+=`<div class="card"><h2>Plano de reação ao lote rejeitado</h2><p class="muted" style="margin-bottom:8px">${esc(REACT[x.ponto]||"")} Lotes rejeitados só podem ser reapresentados após o reexame de todas as unidades (NBR 5426, 4.12.4).</p>${REACTION_STEPS.map(([k,t])=>`<label class="chk"><input type="checkbox" data-rx="${k}" ${r[k]?"checked":""}> <span>${t}${r[k+"_em"]?` <span class="muted small">· ${new Date(r[k+"_em"]).toLocaleString("pt-BR")}</span>`:""}</span></label>`).join("")}
+  if(ls.k==="final"&&ls.st==="R"){const r=x.reacao||{};h+=`<div class="card"><h2>Plano de reação ao lote rejeitado</h2><p class="muted" style="margin-bottom:8px">${esc(REACT[x.ponto]||"")} ${x.disp?"":"Lotes rejeitados só podem ser reapresentados após o reexame de todas as unidades (NBR 5426, 4.12.4)."}</p>${REACTION_STEPS.filter(([k])=>!x.disp||!["cem","arvore","reap"].includes(k)).map(([k,t])=>`<label class="chk"><input type="checkbox" data-rx="${k}" ${r[k]?"checked":""}> <span>${t}${r[k+"_em"]?` <span class="muted small">· ${new Date(r[k+"_em"]).toLocaleString("pt-BR")}</span>`:""}</span></label>`).join("")}
     <div class="row noprint" style="margin-top:12px">${reaps.length?`<span class="muted small">Reapresentações: ${reaps.map(i=>`<a href="#inspecao/${i.id}">${fmtD(i.data)} ${i.result==="R"?"(rejeitado)":"(aceito)"}</a>`).join(", ")}</span>`:""}</div></div>`}
   if(invs.length)h+=`<div class="card"><h2>Árvores de falha deste lote</h2><div class="tw"><table class="t"><thead><tr><th>Defeito</th><th>Origem localizada</th><th>Causa provável</th><th>Responsável</th><th>Status</th></tr></thead><tbody>${invs.map(v=>`<tr class="click" data-inv="${v.id}"><td>${esc(DEF[v.defeito]?.nome)}</td><td>${esc(originLabel(v))}</td><td class="small">${esc(probable(v).map(c=>c.nome).join("; ")||"—")}</td><td>${esc(acaoRec(v).resp||"—")}</td><td>${invPill(v.conclusao?.status)}</td></tr>`).join("")}</tbody></table></div></div>`;
   setPage(h);
   const pendLot=invs.filter(v=>!treeFilled(v));
-  if(pendLot.length)setBar(`<div class="bar-info"><span class="bar-plan">${pendLot.length} árvore(s) de falha deste lote sem preencher</span></div><button class="btn primary" data-goinv="${pendLot[0].id}">Preencher árvores →</button>`);
-  else if(x.result==="R")setBar(`<div class="bar-info"><span class="bar-plan">Lote rejeitado</span><span class="bar-hint">Reapresente só após a inspeção 100% (4.12.4)</span></div><button class="btn" id="novaB">Nova inspeção</button><button class="btn primary" id="reapB">Reapresentar lote →</button>`);
-  else setBar(`<div class="bar-info"><span class="bar-plan">Inspeção registrada · lote aceito</span></div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
+  if(pendLot.length&&ls.k!=="final")setBar(`<div class="bar-info"><span class="bar-plan">${pendLot.length} árvore(s) de falha deste lote sem preencher</span><span class="bar-hint">${ls.k==="cem"?"Depois volte à inspeção 100%":"Depois delas vem a decisão do lote"}</span></div><button class="btn primary" data-goinv="${pendLot[0].id}">Preencher árvores →</button>`);
+  else if(ls.k==="disp")setBar(`<div class="bar-info"><span class="bar-plan">Árvores preenchidas · falta decidir o destino do lote</span><span class="bar-hint">Aceitar, inspecionar 100% ou rejeitar</span></div><button class="btn primary" id="dispB">Decidir destino do lote →</button>`);
+  else if(ls.k==="cem")setBar(`<div class="bar-info"><span class="bar-plan">Lote em inspeção 100%</span><span class="bar-hint">${(()=>{const k=c100Count(x.c100);return k.t+" de "+x.N+" peças inspecionadas"})()}</span></div><button class="btn primary" id="cemB">Continuar inspeção 100% →</button>`);
+  else if(ls.st==="R")setBar(`<div class="bar-info"><span class="bar-plan">Lote rejeitado · bloqueado</span><span class="bar-hint">Siga o plano de reação</span></div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
+  else setBar(`<div class="bar-info"><span class="bar-plan">${esc(ls.label)} · lote liberado</span>${x.c100?.status==="concluida"?`<span class="bar-hint">Liberar só as ${x.c100.aprov} peças aprovadas</span>`:""}</div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
+  if($("#dispB"))$("#dispB").onclick=()=>go("disposicao",x.id);if($("#cemB"))$("#cemB").onclick=()=>go("cem",x.id);
+  if($("#reabB"))$("#reabB").onclick=()=>askReason({titulo:"Reabrir a decisão do lote "+(x.lote||""),texto:"A decisão atual e a inspeção 100% (se houver) ficam guardadas no histórico. O lote volta para a decisão de disposição.",botao:"Reabrir decisão"},async m=>{x.dispHist=[...(x.dispHist||[]),{tipo:"reaberta",just:m,em:new Date().toISOString(),por:decidedBy()||""}];if(x.c100)x.c100Hist=[...(x.c100Hist||[]),x.c100];delete x.disp;delete x.c100;await persist("inspecoes",x);toast("Decisão reaberta.");go("disposicao",x.id)});
+  if($("#cemB2"))$("#cemB2").onclick=()=>go("cem",x.id);
   $$("[data-goinv]").forEach(b=>b.onclick=()=>go("arvore",b.dataset.goinv));if($("#novaB"))$("#novaB").onclick=()=>{draft=null;go("nova")};
   $$("[data-open]").forEach(b=>b.onclick=()=>openInvestigation(x,b.dataset.open));
   $("#anyDef").onchange=e=>{if(e.target.value)openInvestigation(x,e.target.value)};
   $$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
   $$("[data-rx]").forEach(c=>c.onchange=async()=>{x.reacao=x.reacao||{};x.reacao[c.dataset.rx]=c.checked;x.reacao[c.dataset.rx+"_em"]=c.checked?Date.now():null;await persist("inspecoes",x);pgInspecao()});
-  if($("#reapB"))$("#reapB").onclick=()=>{draft=newDraft({productId:x.productId,ponto:x.ponto,op:x.op,lote:x.lote,maquina:x.maquina,molde:x.molde,turno:x.turno,N:String(x.N),nivel:x.nivel,nqa:String(x.nqa),reap:true,refId:x.id});go("nova")};
   $("#delI").onclick=()=>askReason({titulo:"Excluir inspeção do lote "+(x.lote||""),texto:`A inspeção e ${invs.length?invs.length+" árvore(s) de falha ligada(s) a ela":"seus registros"} deixam de aparecer para todos. O registro fica guardado no banco com o motivo, para rastreabilidade.`,botao:"Excluir inspeção",perigo:true},async motivo=>{for(const v of invs)await remove("investigacoes",v.id,{excluidoMotivo:motivo});await remove("inspecoes",x.id,{excluidoMotivo:motivo});toast("Inspeção excluída.");go("inspecoes")});
   $("#editI").onclick=()=>{draft=newDraft({id:x.id,editOf:x.id,createdAt:x.createdAt,productId:x.productId,ponto:x.ponto,data:x.data,turno:x.turno||"",maquina:x.maquina||"",molde:x.molde||"",op:x.op||"",lote:x.lote||"",inspetor:x.inspetor||"",N:String(x.N),nivel:x.nivel,nqa:String(x.nqa),applyR:x.regime==="R",pecas:(x.pecas||[]).map(pc=>({id:uid(),def:[...pc.def],cav:pc.cav||"",med:{...(pc.med||{})}})),obs:x.obs||"",reap:!!x.reap,refId:x.refId||null});go("nova")};
 }
+/* =========================================================================
+   8b. DESTINO DO LOTE: decisão de disposição, inspeção 100% e resultado final
+   A decisão não altera x.result (resultado da amostragem), que continua
+   valendo para as regras de comutação da NBR 5426.
+   ========================================================================= */
+const nqaPct=x=>parseFloat(String(NQA[x.nqa]).replace(",","."));
+const pctFmt=v=>(Math.round(v*100)/100).toLocaleString("pt-BR",{maximumFractionDigits:2});
+const lotTrees=x=>S.investigacoes.filter(v=>v.inspecaoId===x.id);
+const c100Count=c=>{let a=0,r=0;(c?.log||[]).forEach(e=>{if(e.a==="A")a+=e.q||1;else r++});return {a,r,t:a+r}};
+const DISP={aceitar:"Aceitar lote",segregar:"Segregar e inspecionar 100%",rejeitar:"Rejeitar lote"};
+const ACEITE_MOT=[["amostragem","Lote aceito pela amostragem (d ≤ Ac)"],["funcao","O defeito não afeta função, segurança ou desempenho"],["estetico","Defeito apenas estético, sem relevância para a aplicação"],["oculto","Região oculta após a montagem ou sem relevância para o cliente"],["criterio","Dentro da condição aceitável definida pela JSP"]];
+const motLabel=k=>(ACEITE_MOT.find(m=>m[0]===k)||[,k||""])[1];
+// Em que etapa o lote está e qual a situação dele
+function lotStage(x){
+  const tr=lotTrees(x),pend=tr.filter(v=>!treeFilled(v)),dp=x.disp,c=x.c100;
+  if(dp?.tipo==="aceitar")return {k:"final",st:"A",label:x.result==="R"?"Aceito com justificativa":"Aceito",cls:"ok"};
+  if(dp?.tipo==="rejeitar")return {k:"final",st:"R",label:"Rejeitado",cls:"nc"};
+  if(dp?.tipo==="segregar"){if(c?.status==="concluida")return {k:"final",st:c.resultado,label:c.resultado==="A"?"Aceito após inspeção 100%":"Rejeitado após inspeção 100%",cls:c.resultado==="A"?"ok":"nc"};return {k:"cem",label:"Em inspeção 100%",cls:"info"}}
+  if(x.reap||(!(x.d>0)&&!tr.length))return {k:"final",st:x.result==="R"?"R":"A",label:x.result==="R"?"Rejeitado":"Aceito",cls:x.result==="R"?"nc":"ok",auto:true};
+  if(pend.length)return {k:"arvore",label:"Aguardando árvore de falha",cls:"warn",pend};
+  return {k:"disp",label:"Aguardando decisão",cls:"warn"};
+}
+const statusPill=x=>{const s=lotStage(x);return `<span class="pill ${s.cls}">${s.label}</span>`};
+const lotSit=x=>{const s=lotStage(x);return s.k==="final"?s.st:s.k==="cem"?"C":"P"};
+const pendingLots=()=>S.inspecoes.filter(x=>!x.demo&&["disp","cem"].includes(lotStage(x).k));
+// Trilha do lote: mostra em que etapa o lote está
+function lotFlow(x,cur){
+  const s=lotStage(x),tr=lotTrees(x),dp=x.disp,steps=[["insp","Inspeção por amostragem",true,"inspecao/"+x.id]];
+  if(tr.length||x.d>0)steps.push(["arv","Árvore(s) de falha",tr.length>0&&tr.every(treeFilled),tr.length?"arvore/"+(tr.find(v=>!treeFilled(v))||tr[0]).id:null]);
+  if(!s.auto){steps.push(["disp","Decisão do lote",!!dp,dp?null:"disposicao/"+x.id]);if(dp?.tipo==="segregar")steps.push(["cem","Inspeção 100%",x.c100?.status==="concluida",x.c100?.status==="concluida"?null:"cem/"+x.id])}
+  steps.push(["fim","Resultado final",s.k==="final","inspecao/"+x.id]);
+  return `<div class="lotflow noprint" aria-label="Andamento do lote">${steps.map(([k,t,ok,href],i)=>`<a class="fstep ${k===cur?"cur":""} ${ok?"ok":""}" ${href?`href="#${href}"`:""}>${ok?"✓":i+1} · ${t}</a>`).join('<span class="lfarr">›</span>')}</div>`;
+}
+const stageKey={arvore:"arv",disp:"disp",cem:"cem",final:"fim"};
+// Linha do tempo do lote (rastreabilidade)
+function lotHistory(x){
+  const E=[],t=v=>typeof v==="number"?v:Date.parse(v);
+  E.push([x.createdAt,`Inspeção por amostragem registrada: ${x.result==="R"?"rejeitado":"aceito"} (d = ${x.d}, Ac = ${x.ac}, Re = ${x.re})`,x.inspetor]);
+  (x.correcoes||[]).forEach(c=>E.push([t(c.em),"Inspeção corrigida: "+(c.motivo||""),c.por]));
+  lotTrees(x).forEach(v=>{E.push([v.createdAt,`Árvore de falha aberta: ${DEF[v.defeito]?.nome||v.defeito}${v.de100?" (defeito novo na inspeção 100%)":""}`,""]);const pr=probable(v);if(treeFilled(v))E.push([v.updatedAt||v.createdAt,`Árvore de ${DEF[v.defeito]?.nome||v.defeito} preenchida${pr.length?" · desvio: "+pr.map(c=>c.nome).join("; "):""}`,v.updatedBy||""])});
+  (x.dispHist||[]).forEach(d=>E.push([t(d.em),d.tipo==="reaberta"?"Decisão reaberta: "+(d.just||""):`Decisão: ${DISP[d.tipo]}${d.motivo?" · "+motLabel(d.motivo):""}${d.just?" · "+d.just:""}`,d.por]));
+  const c=x.c100;if(c){if(c.fim)E.push([t(c.fim),`Inspeção 100% concluída: ${c.aprov} aprovadas, ${c.reprov} reprovadas de ${c.total} · lote ${c.resultado==="A"?"aceito":"rejeitado"}`,c.porFim])}
+  (x.c100Hist||[]).forEach(c=>{if(c.fim)E.push([t(c.fim),`Inspeção 100% anterior (decisão reaberta): ${c.aprov} aprovadas, ${c.reprov} reprovadas`,c.porFim])});
+  return E.filter(e=>e[0]).sort((a,b)=>a[0]-b[0]);
+}
+const decidedBy=()=>user?.email||"";
+
+/* ---------- Tela: Decisão de disposição do lote ---------- */
+const dispDraft={};
+function pgDisposicao(){
+  const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("inspecoes");return}
+  const s=lotStage(x),tr=lotTrees(x);
+  if(x.disp){go(x.disp.tipo==="segregar"&&x.c100?.status!=="concluida"?"cem":"inspecao",x.id);return}
+  if(s.auto){go("inspecao",x.id);return}
+  const D=dispDraft[x.id]||(dispDraft[x.id]={tipo:"",motivo:x.result==="R"?"":"amostragem",just:"",por:""});
+  const rej=x.result==="R",bloq=s.k==="arvore";
+  head("Lote "+(x.lote||"—")+" · "+fmtD(x.data),"Decisão de disposição do lote");
+  let h=lotFlow(x,"disp");
+  if(bloq)h+=`<div class="banner warn"><span><b>Preencha antes a(s) árvore(s) de falha deste lote.</b> A decisão usa a causa identificada: ${s.pend.map(v=>esc(DEF[v.defeito]?.nome)).join(", ")}.</span><button class="btn sm primary" data-goinv="${s.pend[0].id}">Abrir árvore</button></div>`;
+  h+=`<div class="grid g2 dsum"><div class="card"><h2>Resultado da amostragem</h2><div class="verdict ${rej?"nc":x.result==="AR"?"warn":"ok"}" style="margin:0 0 10px"><span class="big">${rej?"REJEITADO":"ACEITO"}</span><span>d = ${x.d} · Ac = ${x.ac} · Re = ${x.re}</span></div><dl class="list-kv"><dt>Produto</dt><dd>${esc(x.produto||"")} (${esc(x.productId)})</dd><dt>Ponto</dt><dd>${POINTS[x.ponto]?.nome||""}</dd><dt>Lote</dt><dd>N = ${x.N} · amostra n = ${x.n} · NQA ${NQA[x.nqa]}</dd></dl></div>
+   <div class="card"><h2>O que as árvores de falha encontraram</h2>${tr.length?`<div class="tw"><table class="t"><thead><tr><th>Falha</th><th>Peças</th><th>Causa identificada</th></tr></thead><tbody>${tr.map(v=>`<tr class="click" data-inv="${v.id}"><td>${esc(DEF[v.defeito]?.nome)}</td><td>${(x.defeitos||{})[v.defeito]||0}</td><td class="small">${esc(probable(v).map(c=>c.nome).join("; ")||(treeFilled(v)?"Não identificada":"Árvore não preenchida"))}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Nenhuma árvore aberta para este lote.</p>'}</div></div>`;
+  const opt=(k,cls,ic,t,quando)=>`<button type="button" class="dopt ${cls} ${D.tipo===k?"on":""}" data-dopt="${k}" aria-pressed="${D.tipo===k}" ${bloq?"disabled":""}><span class="dopt-ic">${ic}</span><b>${t}</b><span class="dopt-q">Quando usar</span><ul>${quando.map(q=>`<li>${q}</li>`).join("")}</ul></button>`;
+  h+=`<div class="card"><h2>Qual o destino do lote?</h2><p class="muted" style="margin-bottom:12px">Escolha uma opção. A decisão fica registrada com seu usuário, a data e a justificativa.</p><div class="dopts">
+    ${opt("aceitar","ok","✓",rej?"Aceitar lote mesmo assim":"Aceitar lote",["O defeito não compromete função, segurança ou desempenho","O defeito é só estético, sem relevância para a aplicação","A região fica oculta após a montagem ou não importa ao cliente","Está dentro da condição aceita pela JSP"])}
+    ${opt("segregar","info","⇄","Segregar e inspecionar 100%",["É preciso separar uma a uma as peças com defeito","Parte do lote é boa e pode ser aproveitada","O sistema decide o resultado final pelo NQA do plano"])}
+    ${opt("rejeitar","nc","✕","Rejeitar lote",["O defeito inviabiliza o uso das peças","Não compensa separar as peças boas","O lote fica bloqueado e segue o plano de reação"])}</div>`;
+  if(D.tipo==="aceitar")h+=`<div class="dform"><p class="sec-title">Motivo da aceitação <span class="req">*</span></p>${ACEITE_MOT.filter(([k])=>k!=="amostragem"||!rej).map(([k,l])=>`<label class="chk"><input type="radio" name="dmot" value="${k}" ${D.motivo===k?"checked":""}> <span>${l}</span></label>`).join("")}
+    <label class="f" style="margin-top:10px">Justificativa ${rej?'<span class="req">*</span>':"(opcional)"}<textarea id="djust" placeholder="Ex.: rebarba de 4 mm na aba inferior, que fica escondida pelo carpete do porta-malas; liberado por (nome) da Qualidade">${esc(D.just)}</textarea></label>
+    ${rej?'<p class="hint">O resultado da amostragem continua “rejeitado” para as regras de comutação da NBR 5426 (o regime pode ir para severo). Esta decisão registra a liberação do lote como concessão.</p>':""}</div>`;
+  if(D.tipo==="segregar"){const known=tr.map(v=>DEF[v.defeito]?.nome).filter(Boolean);h+=`<div class="dform"><p class="sec-title">Como vai funcionar</p><ol class="small" style="margin:0 0 0 18px;line-height:1.7"><li>O lote é segregado e você inspeciona as ${x.N} peças, uma a uma.</li><li>Para ${known.length?"<b>"+known.map(esc).join(", ")+"</b>":"os defeitos já analisados"}, basta marcar a peça como reprovada: não abre nova árvore.</li><li>Se aparecer um defeito novo, o sistema abre uma árvore só para ele e você volta para a contagem de onde parou.</li><li>Ao concluir, o lote é aceito se a porcentagem de peças reprovadas ficar dentro do NQA do plano (${NQA[x.nqa]}%); senão, é rejeitado. As reprovadas ficam segregadas em qualquer caso.</li></ol>
+    <label class="f" style="margin-top:10px">Observação (opcional)<textarea id="djust" placeholder="Ex.: lote segregado no rack 12, gaiola vermelha">${esc(D.just)}</textarea></label></div>`}
+  if(D.tipo==="rejeitar")h+=`<div class="dform"><label class="f">Justificativa da rejeição <span class="req">*</span><textarea id="djust" placeholder="Ex.: falha de injeção em região funcional, peça não encaixa no veículo">${esc(D.just)}</textarea></label><p class="hint">O lote fica registrado como rejeitado e não pode ser liberado. A seguir, siga o plano de reação na página do lote.</p></div>`;
+  h+=`</div>`;
+  setPage(h);
+  const valid=()=>D.tipo==="segregar"||(D.tipo==="aceitar"&&D.motivo&&(!rej||D.just.trim().length>=10))||(D.tipo==="rejeitar"&&D.just.trim().length>=10);
+  const why=()=>!D.tipo?"Escolha uma das três opções":D.tipo==="aceitar"&&!D.motivo?"Escolha o motivo da aceitação":"Escreva a justificativa (mínimo 10 caracteres)";
+  const bar=()=>setBar(`<div class="bar-info"><span class="bar-plan">${D.tipo?esc(D.tipo==="aceitar"&&rej?"Aceitar lote mesmo assim":DISP[D.tipo]):"Decisão do lote "+esc(x.lote||"")}</span><span class="bar-hint">${valid()?"Pronto para registrar":why()}</span></div><button class="btn primary" id="dOk" ${valid()&&!bloq?"":"disabled"}>${D.tipo==="segregar"?"Iniciar inspeção 100% →":"Registrar decisão →"}</button>`);
+  bar();
+  $$("[data-dopt]").forEach(b=>b.onclick=()=>{D.tipo=b.dataset.dopt;const y=window.scrollY;pgDisposicao();window.scrollTo(0,y)});
+  $$("[name=dmot]").forEach(r=>r.onchange=()=>{D.motivo=r.value;bar();$("#dOk").onclick=salvar});
+  if($("#djust"))$("#djust").oninput=e=>{D.just=e.target.value;const b=$("#dOk"),ok=valid()&&!bloq;if(b.disabled===ok){bar();$("#dOk").onclick=salvar}};
+  $$("[data-goinv]").forEach(b=>b.onclick=()=>go("arvore",b.dataset.goinv));
+  $$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
+  async function salvar(){if(!valid()||bloq)return;
+    const em=new Date().toISOString(),por=decidedBy()||x.inspetor||"";
+    x.disp={tipo:D.tipo,motivo:D.tipo==="aceitar"?D.motivo:"",just:D.just.trim(),em,por,amostragem:x.result,arvores:tr.map(v=>v.id)};
+    x.dispHist=[...(x.dispHist||[]),{...x.disp}];
+    if(D.tipo==="segregar")x.c100={status:"andamento",inicio:em,por,log:[]};
+    if(D.tipo!=="aceitar"){x.reacao=x.reacao||{};x.reacao.segregar=true;x.reacao.segregar_em=Date.now()}
+    await persist("inspecoes",x);delete dispDraft[x.id];
+    toast(D.tipo==="segregar"?"Lote segregado. Comece a inspeção 100%.":D.tipo==="aceitar"?"Lote aceito. Decisão registrada.":"Lote rejeitado. Decisão registrada.");
+    go(D.tipo==="segregar"?"cem":"inspecao",x.id)}
+  $("#dOk").onclick=salvar;
+}
+
+/* ---------- Tela: Inspeção 100% (etapa complementar da inspeção do lote) ---------- */
+let c100T=null,c100X=null;
+function c100Save(x){x.updatedAt=Date.now();putLocal("inspecoes",x);c100X=x;clearTimeout(c100T);c100T=setTimeout(c100Flush,600)}
+function c100Flush(){clearTimeout(c100T);if(c100X){const y=c100X;c100X=null;return persist("inspecoes",y)}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")c100Flush()});
+window.addEventListener("pagehide",()=>c100Flush());
+function pgCem(){
+  const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("inspecoes");return}
+  if(x.disp?.tipo!=="segregar"||!x.c100||x.c100.status==="concluida"){go("inspecao",x.id);return}
+  const c=x.c100,k=c100Count(c),N=+x.N,nq=nqaPct(x),pct=k.t?k.r/k.t*100:0,tr=lotTrees(x),known=new Set(tr.map(v=>v.defeito)),pend=tr.filter(v=>!treeFilled(v));
+  const defs=DEFECTS.filter(dd=>dd.pts.includes(x.ponto)),novos=defs.filter(dd=>!known.has(dd.id)),falta=Math.max(0,N-k.t);
+  head("Lote "+(x.lote||"—")+" · "+fmtD(x.data),"Inspeção 100% do lote");
+  let h=lotFlow(x,"cem");
+  h+=`<div class="banner info"><span><b>Inspeção 100% · etapa complementar da inspeção do lote ${esc(x.lote||"")}.</b> Inspecione todas as peças. Para defeitos já analisados, só registre a peça; um defeito novo abre uma árvore só para ele.</span></div>`;
+  if(pend.length)h+=`<div class="banner warn"><span><b>Árvore de defeito novo para preencher:</b> ${pend.map(v=>esc(DEF[v.defeito]?.nome)).join(", ")}. A contagem continua salva.</span><button class="btn sm primary" data-goinv="${pend[0].id}">Preencher árvore</button></div>`;
+  h+=`<div class="grid g4 kpis" style="margin-bottom:14px"><div class="kpi"><div class="l">Inspecionadas</div><div class="v">${k.t}<span class="muted" style="font-size:16px"> / ${N}</span></div><div class="s">${falta?"faltam "+falta:"todas as peças do lote"}</div></div>
+   <div class="kpi"><div class="l">Aprovadas</div><div class="v" style="color:var(--ok)">${k.a}</div><div class="s">liberáveis</div></div>
+   <div class="kpi"><div class="l">Reprovadas (segregadas)</div><div class="v" style="color:var(--nc)">${k.r}</div><div class="s">gaiola vermelha · FS 342</div></div>
+   <div class="kpi"><div class="l">% reprovada × NQA</div><div class="v">${pctFmt(pct)}%</div><div class="s">${k.t?(pct<=nq?'<span class="pill ok">dentro do NQA</span>':'<span class="pill nc">acima do NQA</span>'):""} NQA ${NQA[x.nqa]}%</div></div></div>
+   <div class="c100prog" role="progressbar" aria-valuemin="0" aria-valuemax="${N}" aria-valuenow="${k.t}"><i style="width:${Math.min(100,k.t/N*100)}%"></i></div>`;
+  h+=`<div class="card"><h2>Registrar peça</h2><div class="c100btns"><button class="c100ok" id="cA">✓ Peça aprovada</button>
+    ${[...known].map(d=>`<button class="c100nc" data-cr="${d}">✕ Reprovada · ${esc(DEF[d]?.nome||d)}</button>`).join("")}</div>
+    <div class="row" style="margin-top:12px;align-items:flex-end;gap:10px;flex-wrap:wrap"><label class="f" style="margin:0;width:170px">Várias aprovadas de uma vez<input id="cQ" type="number" min="1" max="${Math.max(1,falta)}" inputmode="numeric" placeholder="Ex.: 20"></label><button class="btn" id="cQb">Somar aprovadas</button>
+    ${novos.length?`<label class="f" style="margin:0;min-width:230px;flex:1">Defeito novo (ainda não analisado)<select id="cNew"><option value="">Escolha para reprovar a peça e abrir a árvore…</option>${novos.map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select></label>`:""}
+    <button class="btn" id="cU" ${c.log.length?"":"disabled"}>Desfazer último registro</button></div></div>`;
+  const R=c.log.filter(e=>e.a==="R").slice().reverse();
+  h+=`<div class="card"><h2>Peças reprovadas e segregadas (${k.r})</h2>${R.length?`<div class="tw"><table class="t"><thead><tr><th>Peça nº</th><th>Defeito</th><th>Registrada em</th></tr></thead><tbody>${R.slice(0,30).map(e=>`<tr><td>${e.seq}</td><td>${esc(DEF[e.def]?.nome||e.def)}${known.has(e.def)&&tr.find(v=>v.defeito===e.def)?.de100?' <span class="pill info">defeito novo</span>':""}</td><td class="small">${new Date(e.em).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</td></tr>`).join("")}</tbody></table></div>${R.length>30?`<p class="hint">+ ${R.length-30} anteriores.</p>`:""}`:'<p class="muted">Nenhuma peça reprovada até agora.</p>'}</div>`;
+  setPage(h);
+  const ready=k.t>0&&!pend.length;
+  setBar(`<div class="bar-info"><span class="bar-plan">${k.t} de ${N} peças · ${k.r} reprovada(s)</span><span class="bar-hint">${pend.length?"Preencha a árvore do defeito novo para concluir":!k.t?"Registre as peças inspecionadas":falta?`Faltam ${falta} peças`:"Todas as peças inspecionadas"}</span></div><button class="btn primary" id="cFim" ${ready?"":"disabled"}>Concluir inspeção 100% →</button>`);
+  const redraw=()=>{const y=window.scrollY;c100Save(x);pgCem();window.scrollTo(0,y)};
+  const add=e=>{c.log.push({...e,em:Date.now()});redraw()};
+  $("#cA").onclick=()=>add({a:"A",q:1});
+  $$("[data-cr]").forEach(b=>b.onclick=()=>add({a:"R",def:b.dataset.cr,seq:k.t+1}));
+  $("#cQb").onclick=()=>{const q=Math.floor(+$("#cQ").value);if(!(q>0)){toast("Informe quantas peças aprovadas somar.");return}if(q>falta&&falta>0&&!confirm(`Isso passa do tamanho do lote (faltam ${falta}). Somar ${q} mesmo assim?`))return;add({a:"A",q})};
+  $("#cU").onclick=()=>{if(!c.log.length)return;const e=c.log.pop();toast(e.a==="A"?`Desfeito: ${e.q} aprovada(s).`:`Desfeito: peça ${e.seq} reprovada.`);redraw()};
+  if($("#cNew"))$("#cNew").onchange=async e=>{const d=e.target.value;if(!d)return;c.log.push({a:"R",def:d,seq:k.t+1,em:Date.now()});await c100Flush();await persist("inspecoes",x);const v=await createInvestigation(x,d);toast("Peça reprovada. Preencha a árvore do defeito novo; a contagem fica salva.");go("arvore",v.id)};
+  $$("[data-goinv]").forEach(b=>b.onclick=()=>go("arvore",b.dataset.goinv));
+  const concluir=async parcial=>{await c100Flush();const k2=c100Count(c),p2=k2.r/k2.t*100,res=p2<=nq?"A":"R";
+    Object.assign(c,{status:"concluida",fim:new Date().toISOString(),porFim:decidedBy()||x.inspetor||"",aprov:k2.a,reprov:k2.r,total:k2.t,pct:p2,nqa:nq,resultado:res,parcial:parcial||null,
+      criterio:`Peças reprovadas ÷ inspecionadas = ${k2.r} ÷ ${k2.t} = ${pctFmt(p2)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`});
+    if(res==="R"){x.reacao=x.reacao||{};x.reacao.cem=true;x.reacao.cem_em=Date.now()}
+    await persist("inspecoes",x);toast(res==="A"?"Inspeção 100% concluída: lote aceito.":"Inspeção 100% concluída: lote rejeitado.");go("inspecao",x.id)};
+  $("#cFim").onclick=()=>{if(!ready)return;if(k.t<N)askReason({titulo:`Concluir com ${k.t} de ${N} peças`,texto:"O total inspecionado é menor que o tamanho do lote. Explique (ex.: lote real menor que o informado).",botao:"Concluir inspeção 100%"},m=>concluir("Concluída com "+k.t+" de "+N+" peças: "+m));else concluir()};
+}
+
 async function createInvestigation(x,defId){
   const ex=S.investigacoes.find(v=>v.inspecaoId===x.id&&v.defeito===defId);if(ex)return ex;
-  const v={id:uid(),createdAt:Date.now(),inspecaoId:x.id,defeito:defId,ponto:x.ponto,pecas:(x.defeitos||{})[defId]||0,presenca:{},respostas:{},conclusao:{status:"aberta"},demo:!!x.demo};
+  const v={id:uid(),createdAt:Date.now(),inspecaoId:x.id,defeito:defId,ponto:x.ponto,pecas:(x.defeitos||{})[defId]||0,presenca:{},respostas:{},conclusao:{status:"aberta"},demo:!!x.demo,de100:x.c100?.status==="andamento"||undefined};
   await persist("investigacoes",v);return v;
 }
 async function openInvestigation(x,defId){const v=await createInvestigation(x,defId);go("arvore",v.id)}
@@ -1261,7 +1442,7 @@ function pgArvore(){
   const x=S.inspecoes.find(i=>i.id===v.inspecaoId),d=DEF[v.defeito],o=origin(v),c=v.conclusao||(v.conclusao={status:"aberta"});
   head("Árvores de falha · lote "+(x?.lote||"—"),d.nome,`<button class="btn" onclick="window.print()">Imprimir</button><button class="btn danger" id="delV">Excluir árvore</button>`);
   const irmas=S.investigacoes.filter(i=>i.inspecaoId===v.inspecaoId).sort((a,b)=>(x?.defeitos?.[b.defeito]||0)-(x?.defeitos?.[a.defeito]||0)||a.createdAt-b.createdAt),pos=irmas.findIndex(i=>i.id===v.id),prox=irmas.slice(pos+1).concat(irmas.slice(0,pos)).find(i=>!treeFilled(i)),filled=treeFilled(v);
-  let h=`<div class="flowbar noprint"><div><p class="sec-title" style="margin:0 0 6px">Árvores de falha do lote ${esc(x?.lote||"")} · ${irmas.filter(treeFilled).length} de ${irmas.length} preenchida(s)</p><div class="row">${irmas.map((i,ix)=>`<a class="fstep ${i.id===v.id?"cur":""} ${treeFilled(i)?"ok":""}" href="#arvore/${i.id}">${treeFilled(i)?"✓":ix+1} · ${esc(DEF[i.defeito]?.nome)} <small>(${x?.defeitos?.[i.defeito]||i.pecas||0} pç)</small></a>`).join("")}</div></div>
+  let h=(x?lotFlow(x,"arv"):"")+`<div class="flowbar noprint"><div><p class="sec-title" style="margin:0 0 6px">Árvores de falha do lote ${esc(x?.lote||"")} · ${irmas.filter(treeFilled).length} de ${irmas.length} preenchida(s)</p><div class="row">${irmas.map((i,ix)=>`<a class="fstep ${i.id===v.id?"cur":""} ${treeFilled(i)?"ok":""}" href="#arvore/${i.id}">${treeFilled(i)?"✓":ix+1} · ${esc(DEF[i.defeito]?.nome)} <small>(${x?.defeitos?.[i.defeito]||i.pecas||0} pç)</small></a>`).join("")}</div></div>
     </div>`;
   h+=`<div class="grid g4 kpis" style="margin-bottom:14px"><div class="kpi"><div class="l">Detectado em</div><div class="v" style="font-size:18px">${POINTS[v.ponto].nome}</div><div class="s">${x?`<a href="#inspecao/${x.id}">Lote ${esc(x.lote)} · ${fmtD(x.data)}</a>`:""}</div></div><div class="kpi"><div class="l">Especificação</div><div class="s" style="font-size:13px;color:var(--ink)">${esc(defSpec(v.defeito,prod(x?.productId)))}</div><div class="s">${esc(d.src)}</div></div><div class="kpi"><div class="l">Origem localizada</div><div class="v" style="font-size:18px">${esc(originLabel(v))}</div></div><div class="kpi"><div class="l">Status</div><div class="v" style="font-size:18px">${invPill(c.status)}</div><div class="s">${probable(v).length} desvio(s) observado(s)</div></div></div>`;
   h+=`<div class="card"><h2>Árvore de falha</h2><p class="muted" style="margin-bottom:10px">Do efeito (à esquerda) de volta às etapas do processo e às causas possíveis. Clique numa causa para ir até ela. Vermelho = desvio observado; verde = sem desvio observado; tracejado = fora da etapa de origem.</p><p class="hint onlym" style="margin:-4px 0 8px">Arraste o desenho para o lado para ver as causas.</p><div class="treebox">${treeSVG(v)}</div></div>`;
@@ -1284,7 +1465,8 @@ function pgArvore(){
   setPage(h);
   const nFilled=irmas.filter(treeFilled).length;
   setBar(`<div class="bar-info"><span class="bar-plan">Árvore <b>${pos+1}</b> de <b>${irmas.length}</b> · ${esc(d.nome)}</span><span class="bar-hint">${filled?(prox?`Preenchida ✓ · faltam ${irmas.length-nFilled}`:"Todas as árvores do lote preenchidas ✓"):"Responda o passo 1 (origem) e verifique ao menos uma causa no passo 2"}</span></div>
-    ${filled?(prox?`<button class="btn primary" data-goinv="${prox.id}">Próxima árvore →</button>`:`<button class="btn primary" data-goinsp="${v.inspecaoId}">Concluir e voltar ao lote →</button>`):`<button class="btn primary" disabled>Próxima árvore →</button>`}`);
+    ${filled?(prox?`<button class="btn primary" data-goinv="${prox.id}">Próxima árvore →</button>`:x?.c100?.status==="andamento"?`<button class="btn primary" data-gocem="${x.id}">Voltar à inspeção 100% →</button>`:x&&lotStage(x).k==="disp"?`<button class="btn primary" data-godisp="${x.id}">Decidir destino do lote →</button>`:`<button class="btn primary" data-goinsp="${v.inspecaoId}">Concluir e voltar ao lote →</button>`):`<button class="btn primary" disabled>Próxima árvore →</button>`}`);
+  $$("[data-gocem]").forEach(b=>b.onclick=()=>go("cem",b.dataset.gocem));$$("[data-godisp]").forEach(b=>b.onclick=()=>go("disposicao",b.dataset.godisp));
   const sv=async()=>{await persist("investigacoes",v)};
   $$("[data-pres]").forEach(b=>b.onclick=async()=>{v.presenca=v.presenca||{};v.presenca[b.dataset.pres]=v.presenca[b.dataset.pres]===b.dataset.v?"":b.dataset.v;await sv();pgArvore()});
   $$("[data-ans]").forEach(b=>b.onclick=async()=>{v.respostas=v.respostas||{};const r=v.respostas[b.dataset.ans]||{};r.a=r.a===b.dataset.v?"":b.dataset.v;v.respostas[b.dataset.ans]=r;if(c.status==="aberta"&&r.a)c.status="andamento";await sv();const y=window.scrollY;pgArvore();window.scrollTo(0,y)});
@@ -1637,8 +1819,10 @@ function pgAjuda(){
     ${st(2,"Informe o tamanho do lote","O nível e o NQA vêm do cadastro do produto. Com o tamanho do lote, o sistema mostra quantas peças retirar (n) e os limites para aceitar (Ac) e rejeitar (Re).")}
     ${st(3,"Retire a amostra ao acaso e inspecione","Compare cada peça com a FS 070 e o Plano de Controle. Peça boa não precisa de registro.")}
     ${st(4,"Registre cada peça não conforme","Toque em “+ Peça NC” e marque as falhas daquela peça. Para peso úmido ou peso seco, digite o peso medido: o sistema compara com a faixa da FTP.")}
-    ${st(5,"Registre a inspeção","A barra de baixo mostra a decisão: aceitar ou rejeitar o lote. Lote rejeitado segue o plano de reação (segregar, inspeção 100%, reapresentar).")}
-    ${st(6,"Preencha a árvore de falha na hora","Havendo falha, a árvore abre sozinha, uma por tipo de falha: responda onde o defeito apareceu, verifique as causas com evidência e registre a ação.")}</div></div>
+    ${st(5,"Registre a inspeção","A barra de baixo mostra o resultado da amostragem: aceitar ou rejeitar o lote pela NBR 5426.")}
+    ${st(6,"Preencha a árvore de falha na hora","Havendo falha, a árvore abre sozinha, uma por tipo de falha: responda onde o defeito apareceu e verifique as causas com evidência. A ação e a reação vêm da Biblioteca.")}
+    ${st(7,"Decida o destino do lote","Com as árvores preenchidas, o sistema abre a decisão: aceitar o lote (com motivo e justificativa), segregar e inspecionar 100%, ou rejeitar (com justificativa).")}
+    ${st(8,"Se escolher a inspeção 100%, conte peça por peça","Marque cada peça como aprovada ou reprovada. Defeito já analisado não abre nova árvore; defeito novo abre uma árvore só para ele e você volta para a contagem. Ao concluir, o lote é aceito se a porcentagem reprovada ficar dentro do NQA do plano.")}</div></div>
    <div class="grid g2"><div class="card"><h2>O que significa cada termo</h2><dl class="gloss">
     ${g("Tamanho do lote (N)","Conjunto de peças do mesmo produto, feitas nas mesmas condições, que será aceito ou rejeitado como um todo.")}
     ${g("Tamanho da amostra (n)","Quantas peças retirar do lote para inspecionar. Vem da tabela da norma.")}
@@ -1652,6 +1836,8 @@ function pgAjuda(){
    <div class="card"><h2>Dúvidas comuns</h2>
     ${q("Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica guardado no aparelho e é enviado sozinho quando a conexão voltar. O ponto colorido no menu mostra a situação do banco.")}
     ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
+    ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede motivo e justificativa e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
+    ${q("Como o sistema decide o lote depois da inspeção 100%?","Divide as peças reprovadas pelas inspecionadas e compara com o NQA do plano do lote. Até o NQA, o lote é aceito e só as peças aprovadas são liberadas; acima, é rejeitado. As reprovadas ficam segregadas nos dois casos.")}
     ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
     ${q("O tamanho do lote ou o NQA não vieram preenchidos.","Eles vêm do cadastro do produto. Um administrador define em Cadastros › Produtos › Pré-definições de amostragem.")}
     ${q("A máquina ou o produto não aparece na lista.","Cadastre em Cadastros. Depois de salvo, aparece para todos os aparelhos.")}
@@ -1711,6 +1897,18 @@ async function loadDemo(){
         if(cs.length){const c=pick(cs);v.respostas={[c.id]:{a:"S",note:"Desvio fictício para demonstração."}};cs.filter(o=>o!==c).slice(0,2).forEach(o=>v.respostas[o.id]={a:"N"});
           v.conclusao=est==="concluida"?{status:"concluida",classif:"confirmada",sintese:c.nome+" observado(a) no período do lote, na mesma região do defeito (fictício).",resp:c.resp+" (DEMO)",prazo:x.data,contencao:"Lote segregado e inspecionado 100% (fictício).",correcao:c.acao,eficacia:c.efic}:{status:"andamento",classif:"provavel",resp:c.resp+" (DEMO)"}}}
       await persist("investigacoes",v)}}
+  // destino dos lotes com falha: decisão de disposição e, às vezes, inspeção 100%
+  for(const x of novos){if(!(x.d>0))continue;const st=lotStage(x);if(st.k!=="disp")continue;
+    const em=new Date(x.createdAt+3*3600e3).toISOString(),por="Qualidade (DEMO)",arvores=lotTrees(x).map(v=>v.id),k0=Object.keys(x.defeitos)[0];
+    const tipo=x.result!=="R"?wpick([["aceitar",9],["pend",1]]):wpick([["segregar",4],["aceitar",2],["rejeitar",2],["pend",1],["andamento",1]]);if(tipo==="pend")continue;
+    const t=tipo==="andamento"?"segregar":tipo;
+    x.disp={tipo:t,motivo:t==="aceitar"?(x.result!=="R"?"amostragem":pick(["funcao","estetico","oculto","criterio"])):"",just:t==="aceitar"&&x.result==="R"?"Defeito em região sem função, liberado pela Qualidade (fictício).":t==="rejeitar"?"Defeito compromete o uso da peça (fictício).":"",em,por,amostragem:x.result,arvores};
+    x.dispHist=[{...x.disp}];
+    if(t==="segregar"){const nq=nqaPct(x)/100,fr=nq*(chance(.6)?.2+Math.random()*.7:1.1+Math.random()*1.5),tot=tipo==="andamento"?Math.max(1,Math.round(x.N*(.2+Math.random()*.5))):x.N,r=Math.max(x.d,Math.min(tot,Math.round(tot*fr))),log=[{a:"A",q:tot-r,em:Date.parse(em)+60e3}];
+      for(let i=0;i<r;i++)log.push({a:"R",def:pick(Object.keys(x.defeitos)),seq:1+rnd(tot),em:Date.parse(em)+120e3+i*30e3});
+      x.c100={status:"andamento",inicio:em,por,log};
+      if(tipo!=="andamento"){const p2=r/tot*100,res=p2<=nqaPct(x)?"A":"R";Object.assign(x.c100,{status:"concluida",fim:new Date(Date.parse(em)+2*3600e3).toISOString(),porFim:por,aprov:tot-r,reprov:r,total:tot,pct:p2,nqa:nqaPct(x),resultado:res,criterio:`Peças reprovadas ÷ inspecionadas = ${r} ÷ ${tot} = ${pctFmt(p2)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`})}}
+    await persist("inspecoes",x)}
   toast(`${novos.length} lotes fictícios gerados${demos.length?" (histórico acumulado: "+(demos.length+novos.length)+")":""}.`);go("painel");
 }
 
@@ -1722,7 +1920,7 @@ $("#logout").onclick=signOut;
 (async function init(){
   await openDB();await loadAll();if(draftHasContent(S.meta.rascunho)){draft=S.meta.rascunho;draftRestored=true}await initCloud();
   if(cloudState!=="login"&&cloudState!=="negado")await ensureProducts();
-  const [p,id]=location.hash.slice(1).split("/");if(p&&PAGES.concat([{id:"inspecao"},{id:"arvore"}]).some(x=>x.id===p))route={p,id:id||null};
+  const [p,id]=location.hash.slice(1).split("/");if(p&&(PAGES.some(x=>x.id===p)||DETAIL[p]))route={p,id:id||null};
   render();
   const digitando=()=>{const a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))||!!$("#dlg")?.open};
   let _tick=0;
