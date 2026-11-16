@@ -282,6 +282,7 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .verdict.info{background:var(--info-soft);color:var(--info)}
 .lotflow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px}.lotflow .lfarr{color:var(--muted)}.lotflow a.fstep:not([href]){cursor:default}
 .dsum>*{min-width:0}.dsum .verdict{flex-wrap:wrap}
+.fixval{font-size:18px;font-weight:700;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);margin-top:6px}
 .dopts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .dopt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;border:2px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface);cursor:pointer;font:inherit;color:var(--ink)}
 .dopt b{font-size:15.5px}.dopt ul{margin:0 0 0 16px;padding:0;font-size:12.5px;color:var(--ink2);line-height:1.5}.dopt-q{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
@@ -1344,7 +1345,7 @@ window.addEventListener("pagehide",()=>c100Flush());
 function pgCem(){
   const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("inspecoes");return}
   if(x.disp?.tipo!=="segregar"||!x.c100||x.c100.status==="concluida"){go("inspecao",x.id);return}
-  const c=x.c100;c.qtd=c.qtd||{};c.novos=c.novos||[];if(c.N==null)c.N=x.N;
+  const c=x.c100;c.qtd=c.qtd||{};c.novos=c.novos||[];c.N=x.N;
   const tr=lotTrees(x),known=tr.map(v=>v.defeito),pend=tr.filter(v=>!treeFilled(v)),nq=nqaPct(x);
   const defs=DEFECTS.filter(dd=>dd.pts.includes(x.ponto)),livres=defs.filter(dd=>!known.includes(dd.id)&&!c.novos.includes(dd.id));
   const linhas=[...known,...c.novos.filter(d=>!known.includes(d))];
@@ -1352,7 +1353,7 @@ function pgCem(){
   let h=lotFlow(x,"cem");
   h+=`<div class="banner info"><span><b>Inspeção 100% · etapa complementar da inspeção do lote ${esc(x.lote||"")}.</b> Inspecione todas as peças do lote e informe quantas ficaram não conformes. Defeito já analisado não abre nova árvore; defeito novo abre uma árvore só para ele.</span></div>`;
   if(pend.length)h+=`<div class="banner warn"><span><b>Preencha a árvore do defeito novo:</b> ${pend.map(v=>esc(DEF[v.defeito]?.nome)).join(", ")}. Os números informados ficam salvos.</span><button class="btn sm primary" data-goinv="${pend[0].id}">Preencher árvore</button></div>`;
-  h+=`<div class="card"><p class="sec-title">1 · Lote</p><div class="grid g2"><label class="f">Tamanho do lote (<span class="sym">N</span>) · peças inspecionadas <span class="req">*</span><input id="c_N" type="number" min="1" inputmode="numeric" value="${esc(String(c.N??""))}"><span class="hint">Na amostragem: N = ${x.N}. Corrija se o lote real tiver outra quantidade.</span></label>
+  h+=`<div class="card"><p class="sec-title">1 · Lote</p><div class="grid g2"><div class="f"><span>Tamanho do lote (<span class="sym">N</span>) · peças a inspecionar</span><div class="fixval">${x.N} peças</div><span class="hint">Mesmo lote da inspeção por amostragem; não pode ser alterado.</span></div>
     <div class="f"><span>Plano do lote</span><div class="muted" style="padding-top:8px">NQA ${NQA[x.nqa]}% · nível ${x.nivel} · amostragem ${x.result==="R"?"rejeitou":"aceitou"} o lote (d = ${x.d})</div></div></div></div>`;
   h+=`<div class="card"><p class="sec-title">2 · Peças não conformes</p><p class="muted small" style="margin-bottom:10px">Informe quantas peças ficaram reprovadas em cada falha. Peça com mais de uma falha: conte só na principal.</p>
     <div class="tw"><table class="t c100t"><thead><tr><th>Falha</th><th style="width:170px">Peças não conformes</th><th></th></tr></thead><tbody>${linhas.map(d=>{const novo=!known.includes(d);return `<tr><td>${esc(DEF[d]?.nome||d)} ${novo?'<span class="pill info">defeito novo</span>':'<span class="pill">já analisado</span>'}</td><td><input type="number" min="0" inputmode="numeric" data-q="${d}" value="${c.qtd[d]??""}" placeholder="0"></td><td>${novo&&!tr.some(v=>v.defeito===d)?`<button class="btn sm" data-rmnew="${d}">Remover</button>`:""}</td></tr>`}).join("")}</tbody></table></div>
@@ -1364,11 +1365,10 @@ function pgCem(){
   const upd=()=>{const k=calc(),ok=k.N>0&&k.r<=k.N,res=k.p<=nq?"A":"R",nv=novosQ();
     $("#kT").textContent=k.N||"—";$("#kA").textContent=ok?k.a:"—";$("#kR").textContent=k.r;$("#kP").textContent=ok?pctFmt(k.p)+"%":"—";
     $("#kS").innerHTML=ok?`${res==="A"?'<span class="pill ok">dentro do NQA</span>':'<span class="pill nc">acima do NQA</span>'} NQA ${NQA[x.nqa]}%`:`NQA ${NQA[x.nqa]}%`;
-    $("#kMsg").innerHTML=!k.N?'<div class="banner info"><span>Informe o tamanho do lote.</span></div>':k.r>k.N?'<div class="banner nc"><span>As peças não conformes passam do tamanho do lote.</span></div>':`<div class="banner ${res==="A"?"ok":"nc"}"><span>Se concluir agora: <b>lote ${res==="A"?"aceito":"rejeitado"}</b> (${k.r} ÷ ${k.N} = ${pctFmt(k.p)}%, ${res==="A"?"dentro do":"acima do"} NQA ${NQA[x.nqa]}%).${nv.length?" Antes, o sistema abre a árvore de: "+nv.map(d=>esc(DEF[d]?.nome)).join(", ")+".":""}</span></div>`;
+    $("#kMsg").innerHTML=k.r>k.N?'<div class="banner nc"><span>As peças não conformes passam do tamanho do lote.</span></div>':`<div class="banner ${res==="A"?"ok":"nc"}"><span>Se concluir agora: <b>lote ${res==="A"?"aceito":"rejeitado"}</b> (${k.r} ÷ ${k.N} = ${pctFmt(k.p)}%, ${res==="A"?"dentro do":"acima do"} NQA ${NQA[x.nqa]}%).${nv.length?" Antes, o sistema abre a árvore de: "+nv.map(d=>esc(DEF[d]?.nome)).join(", ")+".":""}</span></div>`;
     const okAll=ok&&!pend.length;
-    setBar(`<div class="bar-info"><span class="bar-plan">${k.N?`${k.r} de ${k.N} peças não conformes`:"Inspeção 100%"}</span><span class="bar-hint">${pend.length?"Preencha a árvore do defeito novo":!ok?"Confira o tamanho do lote e as quantidades":nv.length?"Ao concluir, abre a árvore do defeito novo":"Pronto para concluir"}</span></div><button class="btn primary" id="cFim" ${okAll?"":"disabled"}>${nv.length?"Concluir e abrir árvore do defeito novo →":"Concluir inspeção 100% →"}</button>`);
+    setBar(`<div class="bar-info"><span class="bar-plan">${k.N?`${k.r} de ${k.N} peças não conformes`:"Inspeção 100%"}</span><span class="bar-hint">${pend.length?"Preencha a árvore do defeito novo":!ok?"As não conformes passam do tamanho do lote":nv.length?"Ao concluir, abre a árvore do defeito novo":"Pronto para concluir"}</span></div><button class="btn primary" id="cFim" ${okAll?"":"disabled"}>${nv.length?"Concluir e abrir árvore do defeito novo →":"Concluir inspeção 100% →"}</button>`);
     $("#cFim").onclick=concluir};
-  $("#c_N").oninput=e=>{c.N=e.target.value;c100Save(x);upd()};
   $$("[data-q]").forEach(i=>i.oninput=()=>{c.qtd[i.dataset.q]=i.value;c100Save(x);upd()});
   $$("[data-rmnew]").forEach(b=>b.onclick=()=>{const d=b.dataset.rmnew;c.novos=c.novos.filter(z=>z!==d);delete c.qtd[d];c100Save(x);pgCem()});
   if($("#cNew"))$("#cNew").onchange=e=>{const d=e.target.value;if(!d)return;c.novos.push(d);c.qtd[d]=c.qtd[d]||"1";c100Save(x);pgCem();const el=document.querySelector(`[data-q="${d}"]`);if(el){el.focus();el.select()}};
@@ -1377,7 +1377,7 @@ function pgCem(){
     const nv=novosQ();
     if(nv.length){await c100Flush();let first=null;for(const d of nv){const v=await createInvestigation(x,d);first=first||v}await persist("inspecoes",x);toast("Preencha a árvore do defeito novo. Depois volte para concluir a inspeção 100%.");go("arvore",first.id);return}
     await c100Flush();const res=k.p<=nq?"A":"R",qtd=Object.fromEntries(Object.entries(c.qtd).map(([d,v])=>[d,Math.floor(+v)||0]).filter(([,v])=>v>0));
-    Object.assign(c,{status:"concluida",fim:new Date().toISOString(),porFim:decidedBy()||x.inspetor||"",N:k.N,qtd,novos:c.novos.filter(d=>qtd[d]),aprov:k.a,reprov:k.r,total:k.N,pct:k.p,nqa:nq,resultado:res,parcial:k.N!==+x.N?`Lote real com ${k.N} peças (na amostragem: ${x.N})`:null,
+    Object.assign(c,{status:"concluida",fim:new Date().toISOString(),porFim:decidedBy()||x.inspetor||"",N:k.N,qtd,novos:c.novos.filter(d=>qtd[d]),aprov:k.a,reprov:k.r,total:k.N,pct:k.p,nqa:nq,resultado:res,parcial:null,
       criterio:`Peças reprovadas ÷ inspecionadas = ${k.r} ÷ ${k.N} = ${pctFmt(k.p)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`});
     if(res==="R"){x.reacao=x.reacao||{};x.reacao.cem=true;x.reacao.cem_em=Date.now()}
     await persist("inspecoes",x);toast(res==="A"?"Inspeção 100% concluída: lote aceito.":"Inspeção 100% concluída: lote rejeitado.");go("inspecao",x.id)}
@@ -1825,7 +1825,7 @@ function pgAjuda(){
     ${st(5,"Registre a inspeção","A barra de baixo mostra o resultado da amostragem: aceitar ou rejeitar o lote pela NBR 5426.")}
     ${st(6,"Preencha a árvore de falha na hora","Havendo falha, a árvore abre sozinha, uma por tipo de falha: responda onde o defeito apareceu e verifique as causas com evidência. A ação e a reação vêm da Biblioteca.")}
     ${st(7,"Decida o destino do lote","Com as árvores preenchidas, o sistema abre a decisão: aceitar o lote (escolhendo o motivo), segregar e inspecionar 100%, ou rejeitar. A justificativa é opcional.")}
-    ${st(8,"Se escolher a inspeção 100%, informe os números","Como na inspeção normal: confirme o tamanho do lote e informe quantas peças ficaram não conformes em cada falha. Defeito já analisado não abre nova árvore; defeito novo, incluído no formulário, abre uma árvore só para ele. Ao concluir, o lote é aceito se a porcentagem reprovada ficar dentro do NQA do plano.")}</div></div>
+    ${st(8,"Se escolher a inspeção 100%, informe os números","Como na inspeção normal, para o mesmo lote (o tamanho já vem fixo): informe quantas peças ficaram não conformes em cada falha. Defeito já analisado não abre nova árvore; defeito novo, incluído no formulário, abre uma árvore só para ele. Ao concluir, o lote é aceito se a porcentagem reprovada ficar dentro do NQA do plano.")}</div></div>
    <div class="grid g2"><div class="card"><h2>O que significa cada termo</h2><dl class="gloss">
     ${g("Tamanho do lote (N)","Conjunto de peças do mesmo produto, feitas nas mesmas condições, que será aceito ou rejeitado como um todo.")}
     ${g("Tamanho da amostra (n)","Quantas peças retirar do lote para inspecionar. Vem da tabela da norma.")}
