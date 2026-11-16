@@ -423,10 +423,10 @@ const maqLabel=m=>m.codigo+(m.tipo?" · "+m.tipo:"");
 function machineOptions(cur){const L=[...S.maquinas].sort((a,b)=>a.codigo.localeCompare(b.codigo,"pt-BR",{numeric:true}));
   let o=L.map(m=>`<option value="${esc(m.codigo)}" ${m.codigo===cur?"selected":""}>${esc(maqLabel(m))}</option>`).join("");
   if(cur&&!L.some(m=>m.codigo===cur))o+=`<option value="${esc(cur)}" selected>${esc(cur)} (não cadastrada)</option>`;return o}
-function presetOf(p,pt){const ps=p?.preset?.[pt]||{};return {N:ps.N??null,nivel:ps.nivel||p?.nivel||"II",nqa:ps.nqa??(p?.nqa?.[pt]??null),proposta:!!ps.proposta}}
+function presetOf(p,pt){const ps=p?.preset?.[pt]||{};return {N:ps.N??null,nivel:"II",nqa:ps.nqa??(p?.nqa?.[pt]??null),proposta:!!ps.proposta}}
 function applyPreset(d){const p=prod(d.productId),ps=presetOf(p,d.ponto);const last=S.meta["lastN|"+d.productId+"|"+d.ponto];
   if(!p||!d.ponto){d.N="";d.nivel="";d.nqa="";return d}
-  d.N=ps.N!=null?String(ps.N):(last!=null?String(last):"");d.nivel=ps.nivel;d.nqa=ps.nqa!=null?String(ps.nqa):"";return d}
+  d.N=ps.N!=null?String(ps.N):(last!=null?String(last):"");d.nivel="II";d.nqa=ps.nqa!=null?String(ps.nqa):"";return d}
 // Defeitos: nomes da FS 070 (Moldagem e Final de Linha) + características do Plano de Controle
 const DEFECTS=[
  {id:"rebarba",nome:"Rebarba acima do especificado",pts:["MOLD","FL"],spec:"Até 3 mm, conforme desenho; calibrador P/NP (OK/NOK). Remover sem prejudicar geometria e aparência.",src:"Plano de Controle op. 30/50 · FS 070"},
@@ -1060,6 +1060,7 @@ function pgNova(){
   saveDraftSoon();
   head("Operação","Nova inspeção por amostragem",`<button class="btn" id="clr">Limpar formulário</button>`);
   const d=draft,p=prod(d.productId);d._rN=d.N;
+  if(p&&d.ponto&&!d.editOf){const ps0=presetOf(p,d.ponto);d.nivel="II";d.nqa=ps0.nqa!=null?String(ps0.nqa):""}else if(!d.nivel)d.nivel="II";
   const nqaVal=d.nqa===""||d.nqa==null?"":+d.nqa;
   const rs=d.productId&&d.ponto&&nqaVal!==""?regimeState(d.productId,d.ponto,nqaVal,d.editOf,localMode()):null;
   let reg=rs?rs.reg:"N";if(rs&&reg==="N"&&rs.eligibleR?.ok&&d.applyR)reg="R";
@@ -1094,16 +1095,16 @@ function pgNova(){
     <div id="dupBox">${dupHtml()}</div>
     ${d.ponto?`<p class="hint" style="margin-top:10px"><b>Controle atual no ${POINTS[d.ponto].nome} (Plano de Controle):</b> ${esc(POINTS[d.ponto].atual)}</p>`:""}</div>`;
   const ps=presetOf(p,d.ponto),lastN=S.meta["lastN|"+d.productId+"|"+d.ponto];
-  const difN=ps.N!=null&&String(ps.N)!==String(d.N),difNiv=ps.nivel!==d.nivel,difNqa=ps.nqa!=null&&String(ps.nqa)!==String(d.nqa);
+  const difN=ps.N!=null&&String(ps.N)!==String(d.N),difNiv=false,difNqa=false;
   const tag=(dif,txt)=>dif?`<span class="pill warn" style="margin-left:6px">alterado · padrão ${txt}</span>`:`<span class="pill" style="margin-left:6px">pré-definido</span>`;
-  if(!p||!d.ponto)h+=`<div class="card"><p class="sec-title">2 · Parâmetros da amostragem (NBR 5426)</p><div class="pcempty">Escolha o <b>produto</b> e o <b>ponto de inspeção</b> na etapa 1. O tamanho do lote, o nível e o NQA são preenchidos com as especificações cadastradas para o produto.</div></div>`;
+  if(!p||!d.ponto)h+=`<div class="card"><p class="sec-title">2 · Parâmetros da amostragem (NBR 5426)</p><div class="pcempty">Escolha o <b>produto</b> e o <b>ponto de inspeção</b> na etapa 1. O tamanho do lote e o NQA vêm do cadastro do produto; o nível de inspeção é sempre o II.</div></div>`;
   else   h+=`<div class="card"><p class="sec-title">2 · Parâmetros da amostragem (NBR 5426)</p>
-    <div class="banner info" style="margin-bottom:12px"><span><b>Pré-definição de ${esc(p?.nome||"produto")} · ${POINTS[d.ponto].nome}:</b> lote ${ps.N!=null?"<b>"+ps.N+" peças</b>":lastN!=null?"<b>"+lastN+" peças</b> (último usado)":"<b>a definir</b>"}, nível <b>${ps.nivel}</b>, NQA <b>${ps.nqa!=null?NQA[ps.nqa]:"a definir"}</b>${ps.proposta?' <span class="pill warn">NQA proposto pelo grupo · validar com a Qualidade</span>':""}. Os valores já vêm preenchidos; altere se a situação do lote for diferente. O plano (n, Ac, Re) é calculado automaticamente, seguindo as setas da tabela.</span></div>
+    <div class="banner info" style="margin-bottom:12px"><span><b>Pré-definição de ${esc(p?.nome||"produto")} · ${POINTS[d.ponto].nome}:</b> lote ${ps.N!=null?"<b>"+ps.N+" peças</b>":lastN!=null?"<b>"+lastN+" peças</b> (último usado)":"<b>a definir</b>"}, nível <b>${ps.nivel}</b>, NQA <b>${ps.nqa!=null?NQA[ps.nqa]:"a definir"}</b>${ps.proposta?' <span class="pill warn">NQA proposto pelo grupo · validar com a Qualidade</span>':""}. O nível e o NQA são fixos; só o tamanho do lote pode ser ajustado se o lote real for diferente. O plano (n, Ac, Re) é calculado automaticamente, seguindo as setas da tabela.</span></div>
     <div class="grid g3">
     <label class="f">Tamanho do lote (N) <span class="req">*</span>${d.N!==""?tag(difN,ps.N):""}<input id="f_N" type="number" min="1" step="1" value="${esc(d.N)}" placeholder="Nº de peças do lote"><span class="hint">Lote homogêneo: mesmo produto, mesmas condições e período (4.4).</span></label>
-    <label class="f">NQA <span class="req">*</span>${d.nqa!==""?tag(difNqa,ps.nqa!=null?NQA[ps.nqa]:""):""}<select id="f_nqa"><option value="">Selecione…</option>${NQA_P.map((v,i)=>`<option value="${i}" ${String(i)===String(d.nqa)?"selected":""}>${v}%</option>`).join("")}</select><span class="hint">Nível de qualidade aceitável, em % de peças não conformes aceito como média do processo. Definido pela Qualidade / cliente (4.2).</span></label>
-    <label class="f">Nível de inspeção${tag(difNiv,ps.nivel)}<select id="f_nivel">${LEVELS.map(l=>`<option ${l===d.nivel?"selected":""}>${l}</option>`).join("")}</select><span class="hint">Nível II é o padrão da norma (4.7.1).</span></label></div>
-    ${(difN||difNiv||difNqa||(ps.N==null&&d.N!==""))?`<div class="row" style="margin-top:10px">${isAdmin()?'<button class="btn sm" id="setDefault">Salvar estes valores como padrão do produto neste ponto</button>':""}<button class="btn sm" id="useDefault" ${ps.N==null&&!difNiv&&!difNqa?"hidden":""}>Voltar à pré-definição</button></div>`:""}
+    <label class="f">NQA <span class="pill" style="margin-left:6px">do cadastro</span>${d.nqa!==""?`<div class="fixval">${NQA[d.nqa]}%</div><span class="hint">Definido no cadastro do produto (4.2). Não pode ser alterado na inspeção.</span>`:`<div class="fixval" style="color:var(--nc)">Não cadastrado</div><span class="hint">${isAdmin()?`Defina o NQA em <a href="#produto/${esc(p.id)}">Cadastros › ${esc(p.nome)}</a> para inspecionar este ponto.`:"Peça a um administrador para definir o NQA no cadastro do produto."}</span>`}</label>
+    <label class="f">Nível de inspeção <span class="pill" style="margin-left:6px">fixo</span><div class="fixval">II</div><span class="hint">Nível geral II, o padrão da norma (4.7.1).</span></label></div>
+    ${(difN||(ps.N==null&&d.N!==""))?`<div class="row" style="margin-top:10px">${isAdmin()?'<button class="btn sm" id="setDefault">Salvar este tamanho de lote como padrão do produto neste ponto</button>':""}<button class="btn sm" id="useDefault" ${ps.N==null?"hidden":""}>Voltar ao tamanho cadastrado</button></div>`:""}
     ${rs?`<div class="banner ${reg==="T"?"nc":reg==="R"?"ok":"info"}" style="margin:12px 0 0"><span><b>Regime: ${REG[reg]}.</b> ${esc(rs.reason)} ${rs.lots?`(${rs.lots} lote(s) desta série no banco)`:""}</span></div>`:""}
     ${rs?.interrupt?`<div class="banner nc" style="margin-top:8px"><span><b>10 lotes seguidos em inspeção severa.</b> A norma recomenda interromper a inspeção por amostragem até haver ação de melhoria da qualidade (5.4).</span></div>`:""}
     ${rs?.eligibleR?`<div class="banner ${rs.eligibleR.ok?"ok":"info"}" style="margin-top:8px"><span>${rs.eligibleR.ok?`<b>Elegível para inspeção atenuada (5.3.3):</b> 10 lotes aceitos em normal, ${rs.eligibleR.sumD} defeituosa(s) em ${rs.eligibleR.sumN} peças ≤ limite ${rs.eligibleR.lim} da Tabela 17. Requer produção regular e aprovação do responsável.<label style="display:flex;gap:8px;margin-top:6px;align-items:center"><input type="checkbox" id="f_applyR" style="width:auto;margin:0" ${d.applyR?"checked":""}> Aplicar regime atenuado neste lote (aprovado pelo responsável)</label>`:`10 lotes aceitos em normal, mas ${rs.eligibleR.lim==null?"a amostragem acumulada ainda não é suficiente para este NQA (Tabela 17, *)":`${rs.eligibleR.sumD} defeituosa(s) excede o limite ${rs.eligibleR.lim} da Tabela 17`}. Mantém normal.`}</span></div>`:""}
@@ -1138,7 +1139,7 @@ function pgNova(){
   $("#f_lote").addEventListener("input",()=>{const b=$("#dupBox");if(b)b.innerHTML=dupHtml()});
   $("#f_data").onblur=()=>{if(d.data&&d.data>today()){d.data="";$("#f_data").value="";toast("A data não pode ser futura.");canSave()}};
   ["productId","ponto","nqa","nivel","turno"].forEach(k=>{const el=$("#f_"+k);if(el)el.onchange=e=>{d[k]=e.target.value;if(k==="productId"||k==="ponto")applyPreset(d);if(k!=="turno")pgNova();else canSave()}});
-  if($("#setDefault"))$("#setDefault").onclick=async()=>{p.preset=p.preset||{};p.preset[d.ponto]={N:d.N===""?null:+d.N,nivel:d.nivel,nqa:d.nqa===""?null:+d.nqa,proposta:false};await persist("produtos",p);toast("Pré-definição salva para "+POINTS[d.ponto].nome+".");pgNova()};
+  if($("#setDefault"))$("#setDefault").onclick=async()=>{p.preset=p.preset||{};p.preset[d.ponto]={...presetOf(p,d.ponto),N:d.N===""?null:+d.N,nivel:"II"};await persist("produtos",p);toast("Pré-definição salva para "+POINTS[d.ponto].nome+".");pgNova()};
   if($("#useDefault"))$("#useDefault").onclick=()=>{const keep={...d};applyPreset(d);if(d.N==="")d.N=keep.N;pgNova()};
   if($("#f_N"))$("#f_N").oninput=e=>{d.N=e.target.value;clearTimeout(window._nt);window._nt=setTimeout(()=>{if(document.activeElement?.id!=="f_N")return;const y=window.scrollY;pgNova();window.scrollTo(0,y);const n=$("#f_N");if(!n)return;n.focus();const v=n.value;n.value="";n.value=v},800)};
   if($("#f_N"))$("#f_N").onchange=e=>{d.N=e.target.value;clearTimeout(window._nt);if(d.N!==d._rN)pgNova()};
@@ -1353,7 +1354,7 @@ function pgCem(){
   let h=lotFlow(x,"cem");
   h+=`<div class="banner info"><span><b>Inspeção 100% · etapa complementar da inspeção do lote ${esc(x.lote||"")}.</b> Inspecione todas as peças do lote e informe quantas ficaram não conformes. Defeito já analisado não abre nova árvore; defeito novo abre uma árvore só para ele.</span></div>`;
   if(pend.length)h+=`<div class="banner warn"><span><b>Preencha a árvore do defeito novo:</b> ${pend.map(v=>esc(DEF[v.defeito]?.nome)).join(", ")}. Os números informados ficam salvos.</span><button class="btn sm primary" data-goinv="${pend[0].id}">Preencher árvore</button></div>`;
-  h+=`<div class="card"><p class="sec-title">1 · Lote</p><div class="grid g2"><div class="f"><span>Tamanho do lote (<span class="sym">N</span>) · peças a inspecionar</span><div class="fixval">${x.N} peças</div><span class="hint">Mesmo lote da inspeção por amostragem; não pode ser alterado.</span></div>
+  h+=`<div class="card"><p class="sec-title">1 · Lote</p><div class="grid g2"><label class="f">Tamanho do lote (<span class="sym">N</span>) · peças a inspecionar<div class="fixval">${x.N} peças</div><span class="hint">Mesmo lote da inspeção por amostragem; não pode ser alterado.</span></label>
     <div class="f"><span>Plano do lote</span><div class="muted" style="padding-top:8px">NQA ${NQA[x.nqa]}% · nível ${x.nivel} · amostragem ${x.result==="R"?"rejeitou":"aceitou"} o lote (d = ${x.d})</div></div></div></div>`;
   h+=`<div class="card"><p class="sec-title">2 · Peças não conformes</p><p class="muted small" style="margin-bottom:10px">Informe quantas peças ficaram reprovadas em cada falha. Peça com mais de uma falha: conte só na principal.</p>
     <div class="tw"><table class="t c100t"><thead><tr><th>Falha</th><th style="width:170px">Peças não conformes</th><th></th></tr></thead><tbody>${linhas.map(d=>{const novo=!known.includes(d);return `<tr><td>${esc(DEF[d]?.nome||d)} ${novo?'<span class="pill info">defeito novo</span>':'<span class="pill">já analisado</span>'}</td><td><input type="number" min="0" inputmode="numeric" data-q="${d}" value="${c.qtd[d]??""}" placeholder="0"></td><td>${novo&&!tr.some(v=>v.defeito===d)?`<button class="btn sm" data-rmnew="${d}">Remover</button>`:""}</td></tr>`}).join("")}</tbody></table></div>
@@ -1778,7 +1779,7 @@ function pgProduto(){
     <div style="align-self:end"><button class="lnk" id="pd_newm" type="button">+ Cadastrar outra máquina</button></div></div></div>`;
   h+=`<div class="card"><p class="sec-title">2 · Pré-definições de amostragem (NBR 5426)</p><p class="muted small" style="margin-bottom:10px">Preenchem a nova inspeção automaticamente e podem ser alteradas em cada lote. O NQA deve ser confirmado pela Qualidade da JSP ou pelo contrato com o cliente (NBR 5426, 4.2).</p>
     <div class="presets">${Object.entries(POINTS).map(([k,pt])=>{const ps=presetOf(P,k),pl=ps.N&&ps.nqa!=null?samplingPlan(ps.N,ps.nivel,ps.nqa,"N"):null;
-      return `<div class="preset"><b>${pt.nome}</b><span class="small muted">${pt.op}</span><div class="grid g3" style="margin-top:6px"><label class="f">Tamanho do lote (N)<input type="number" min="1" data-pp="${k}" data-f="N" value="${ps.N??""}" placeholder="A definir"></label><label class="f">Nível<select data-pp="${k}" data-f="nivel">${LEVELS.map(l=>`<option ${l===ps.nivel?"selected":""}>${l}</option>`).join("")}</select></label><label class="f">NQA (%)<select data-pp="${k}" data-f="nqa"><option value="">A definir</option>${NQA_P.map((v,i)=>`<option value="${i}" ${ps.nqa===i?"selected":""}>${v}</option>`).join("")}</select></label></div>
+      return `<div class="preset"><b>${pt.nome}</b><span class="small muted">${pt.op}</span><div class="grid g3" style="margin-top:6px"><label class="f">Tamanho do lote (N)<input type="number" min="1" data-pp="${k}" data-f="N" value="${ps.N??""}" placeholder="A definir"></label><label class="f">Nível<div class="fixval" style="font-size:15px;padding:7px 10px">II (fixo)</div></label><label class="f">NQA (%)<select data-pp="${k}" data-f="nqa"><option value="">A definir</option>${NQA_P.map((v,i)=>`<option value="${i}" ${ps.nqa===i?"selected":""}>${v}</option>`).join("")}</select></label></div>
         <div class="small" style="margin-top:6px">${ps.proposta?'<span class="pill warn">NQA proposto pelo grupo · validar</span> ':""}${pl?`Plano normal: letra ${pl.letter} · <b>tamanho da amostra n = ${pl.n}</b> · Ac ${pl.ac} / Re ${pl.re}`:'<span class="muted">Informe lote e NQA para ver o plano.</span>'}</div></div>`}).join("")}</div></div>`;
   const groups=[...FTP_GROUPS.filter(g=>P.ftp.params.some(q=>q.grupo===g)),...[...new Set(P.ftp.params.map(q=>q.grupo))].filter(g=>!FTP_GROUPS.includes(g))];
   h+=`<div class="card"><p class="sec-title">3 · Parâmetros de processo (FTP)</p><p class="muted small" style="margin-bottom:10px">Preencha conforme a Ficha Técnica de Processo vigente. A lista é um modelo sugerido pelo grupo: ajuste nomes e unidades, remova o que não se aplica e inclua parâmetros que faltarem. A faixa de peso úmido e de peso seco aparece para o inspetor na hora de registrar a falha.</p>
@@ -1796,7 +1797,7 @@ function pgProduto(){
   $("#ftp_rev").oninput=e=>P.ftp.rev=e.target.value;$("#ftp_data").onchange=e=>P.ftp.data=e.target.value;
   $("#pd_newm").onclick=()=>{cadTab="maquinas";go("cadastros")};
   $$("[data-pp]").forEach(el=>el.onchange=()=>{const k=el.dataset.pp,f=el.dataset.f;P.preset=P.preset||{};const ps={...presetOf(P,k)};
-    ps[f]=f==="nivel"?el.value:(el.value===""?null:Math.max(f==="N"?1:0,+el.value));if(f==="nqa")ps.proposta=false;P.preset[k]=ps;const y=window.scrollY;pgProduto();window.scrollTo(0,y)});
+    ps[f]=el.value===""?null:Math.max(f==="N"?1:0,+el.value);ps.nivel="II";if(f==="nqa")ps.proposta=false;P.preset[k]=ps;const y=window.scrollY;pgProduto();window.scrollTo(0,y)});
   $$("[data-fp]").forEach(el=>el.oninput=()=>{P.ftp.params[+el.dataset.fp][el.dataset.ff]=el.value});
   $$("[data-fpdel]").forEach(b=>b.onclick=()=>{const q=P.ftp.params[+b.dataset.fpdel];if(!confirm(`Remover o parâmetro “${q.nome}”?`))return;P.ftp.params.splice(+b.dataset.fpdel,1);const y=window.scrollY;pgProduto();window.scrollTo(0,y)});
   $("#np_ok").onclick=()=>{const n=$("#np_n").value.trim();if(!n){toast("Informe o nome do parâmetro.");return}P.ftp.params.push({id:"x_"+uid().slice(0,8),grupo:$("#np_g").value,nome:n,un:$("#np_u").value.trim(),nom:"",min:"",max:""});const y=window.scrollY;pgProduto();window.scrollTo(0,y)};
@@ -1819,7 +1820,7 @@ function pgAjuda(){
   const q=(t,x)=>`<details class="faq"><summary>${t}</summary><p>${x}</p></details>`;
   setPage(`<div class="card"><h2>Inspeção de um lote, passo a passo</h2><p class="muted" style="margin:4px 0 14px">Para o inspetor, no posto. Leva de 2 a 5 minutos por lote.</p><div class="steps col">
     ${st(1,"Abra “Nova inspeção” e identifique o lote","Escolha o produto e o ponto (Moldagem, Estufa ou Final de linha). Preencha data, lote ou rack, turno, máquina e seu nome. Tudo começa em branco de propósito, para ninguém registrar com dados de outro lote.")}
-    ${st(2,"Informe o tamanho do lote","O nível e o NQA vêm do cadastro do produto. Com o tamanho do lote, o sistema mostra quantas peças retirar (n) e os limites para aceitar (Ac) e rejeitar (Re).")}
+    ${st(2,"Informe o tamanho do lote","O NQA vem do cadastro do produto e o nível é sempre o II; nenhum dos dois muda na inspeção. Com o tamanho do lote, o sistema mostra quantas peças retirar (n) e os limites para aceitar (Ac) e rejeitar (Re).")}
     ${st(3,"Retire a amostra ao acaso e inspecione","Compare cada peça com a FS 070 e o Plano de Controle. Peça boa não precisa de registro.")}
     ${st(4,"Registre cada peça não conforme","Toque em “+ Peça NC” e marque as falhas daquela peça. Para peso úmido ou peso seco, digite o peso medido: o sistema compara com a faixa da FTP.")}
     ${st(5,"Registre a inspeção","A barra de baixo mostra o resultado da amostragem: aceitar ou rejeitar o lote pela NBR 5426.")}
@@ -1832,7 +1833,7 @@ function pgAjuda(){
     ${g("NQA","Nível de qualidade aceitável: a porcentagem de peças não conformes que a empresa aceita como média do processo. É escolhido pela Qualidade ou pelo cliente, não é calculado.")}
     ${g("d","Número de peças não conformes encontradas na amostra. Uma peça com duas falhas conta uma vez.")}
     ${g("Ac e Re","Se d for menor ou igual a Ac, o lote é aceito. Se d for maior ou igual a Re, o lote é rejeitado.")}
-    ${g("Nível de inspeção","Define o tamanho da amostra para o mesmo lote. O nível II é o padrão da norma.")}
+    ${g("Nível de inspeção","Define o tamanho da amostra para o mesmo lote. O sistema usa sempre o nível II, o padrão da norma.")}
     ${g("Regime","Normal, severo ou atenuado. O sistema muda sozinho: 2 lotes rejeitados em 5 levam ao severo; 5 aceitos seguidos voltam ao normal.")}
     ${g("FTP","Ficha Técnica de Processo: os valores nominais e as faixas de cada parâmetro do produto.")}
     ${g("Árvore de falha","Investigação que parte do defeito encontrado e volta pelo processo, etapa por etapa, até a causa.")}</dl></div>
@@ -1842,7 +1843,7 @@ function pgAjuda(){
     ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
     ${q("Como o sistema decide o lote depois da inspeção 100%?","Divide as peças reprovadas pelas inspecionadas e compara com o NQA do plano do lote. Até o NQA, o lote é aceito e só as peças aprovadas são liberadas; acima, é rejeitado. As reprovadas ficam segregadas nos dois casos.")}
     ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
-    ${q("O tamanho do lote ou o NQA não vieram preenchidos.","Eles vêm do cadastro do produto. Um administrador define em Cadastros › Produtos › Pré-definições de amostragem.")}
+    ${q("O tamanho do lote ou o NQA não vieram preenchidos.","Eles vêm do cadastro do produto. Um administrador define em Cadastros › Produtos › Pré-definições de amostragem. Sem NQA cadastrado, a inspeção daquele ponto não pode ser registrada.")}
     ${q("A máquina ou o produto não aparece na lista.","Cadastre em Cadastros. Depois de salvo, aparece para todos os aparelhos.")}
     ${q("Como libero o acesso de um colega?","Ele cria a conta na tela de entrada e confirma o e-mail. O administrador aceita o pedido em Cadastros › Usuários.")}
     ${q("Uma causa da árvore está marcada como “hipótese”. Posso usar?","Pode verificar, mas trate como suspeita: ela foi levantada pelo grupo e ainda não foi confirmada pela Engenharia de Processos.")}
