@@ -1198,7 +1198,7 @@ function destinoCard(x,ls){
      <dl class="list-kv"><dt>Decisão</dt><dd>${esc(dp.tipo==="aceitar"&&dp.amostragem==="R"?"Aceitar lote mesmo assim":DISP[dp.tipo])}</dd>${dp.motivo?`<dt>Motivo</dt><dd>${esc(motLabel(dp.motivo))}</dd>`:""}${dp.just?`<dt>${dp.tipo==="segregar"?"Observação":"Justificativa"}</dt><dd>${esc(dp.just)}</dd>`:""}<dt>Decidido por</dt><dd>${esc(dp.por||"—")} · ${new Date(dp.em).toLocaleString("pt-BR")}</dd><dt>Árvores consideradas</dt><dd>${(dp.arvores||[]).map(id=>{const v=S.investigacoes.find(i=>i.id===id);return v?`<a href="#arvore/${v.id}">${esc(DEF[v.defeito]?.nome||v.defeito)}</a>`:""}).filter(Boolean).join(", ")||"—"}</dd></dl>`;
     if(c){const k=c.status==="concluida"?{a:c.aprov,r:c.reprov,t:c.total}:c100Count(c);
       h+=`<h3 style="margin:14px 0 8px">Inspeção 100% ${c.status==="concluida"?"· concluída":"· em andamento"}</h3><div class="grid g4 kpis"><div class="kpi"><div class="l">Inspecionadas</div><div class="v">${k.t}</div><div class="s">lote N = ${x.N}</div></div><div class="kpi"><div class="l">Aprovadas</div><div class="v" style="color:var(--ok)">${k.a}</div><div class="s">${c.status==="concluida"&&c.resultado==="A"?"liberadas":"liberáveis"}</div></div><div class="kpi"><div class="l">Reprovadas</div><div class="v" style="color:var(--nc)">${k.r}</div><div class="s">segregadas (FS 342)</div></div><div class="kpi"><div class="l">% reprovada</div><div class="v">${k.t?pctFmt(k.r/k.t*100):"0"}%</div><div class="s">NQA ${NQA[x.nqa]}%</div></div></div>
-       ${c.status==="concluida"?`<div class="banner ${c.resultado==="A"?"ok":"nc"}" style="margin-top:10px"><span><b>Critério da decisão final:</b> ${esc(c.criterio)}. ${c.resultado==="A"?"Lote aceito: liberar só as peças aprovadas.":"Lote rejeitado: o lote não é liberado."}${c.parcial?" "+esc(c.parcial)+".":""}</span></div>`:`<p class="noprint" style="margin-top:10px"><button class="btn primary sm" id="cemB2">Continuar inspeção 100%</button></p>`}`}
+       ${c.qtd&&Object.keys(c.qtd).length?`<p class="small" style="margin-top:10px"><b>Não conformes por falha:</b> ${Object.entries(c.qtd).filter(([,v])=>+v>0).map(([d,v])=>esc(DEF[d]?.nome||d)+": "+v+((c.novos||[]).includes(d)?" (defeito novo)":"")).join(" · ")}</p>`:""}${c.status==="concluida"?`<div class="banner ${c.resultado==="A"?"ok":"nc"}" style="margin-top:10px"><span><b>Critério da decisão final:</b> ${esc(c.criterio)}. ${c.resultado==="A"?"Lote aceito: liberar só as peças aprovadas.":"Lote rejeitado: o lote não é liberado."}${c.parcial?" "+esc(c.parcial)+".":""}</span></div>`:`<p class="noprint" style="margin-top:10px"><button class="btn primary sm" id="cemB2">Continuar inspeção 100%</button></p>`}`}
     h+=`</div>`}
   const hs=lotHistory(x);
   if(hs.length>1)h+=`<div class="card"><h2>Histórico do lote</h2><ol class="tl">${hs.map(([t,txt,por])=>`<li><span class="tl-t">${new Date(t).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span><span>${esc(txt)}${por?` <span class="muted small">· ${esc(por)}</span>`:""}</span></li>`).join("")}</ol></div>`;
@@ -1226,7 +1226,7 @@ function pgInspecao(){
   const pendLot=invs.filter(v=>!treeFilled(v));
   if(pendLot.length&&ls.k!=="final")setBar(`<div class="bar-info"><span class="bar-plan">${pendLot.length} árvore(s) de falha deste lote sem preencher</span><span class="bar-hint">${ls.k==="cem"?"Depois volte à inspeção 100%":"Depois delas vem a decisão do lote"}</span></div><button class="btn primary" data-goinv="${pendLot[0].id}">Preencher árvores →</button>`);
   else if(ls.k==="disp")setBar(`<div class="bar-info"><span class="bar-plan">Árvores preenchidas · falta decidir o destino do lote</span><span class="bar-hint">Aceitar, inspecionar 100% ou rejeitar</span></div><button class="btn primary" id="dispB">Decidir destino do lote →</button>`);
-  else if(ls.k==="cem")setBar(`<div class="bar-info"><span class="bar-plan">Lote em inspeção 100%</span><span class="bar-hint">${(()=>{const k=c100Count(x.c100);return k.t+" de "+x.N+" peças inspecionadas"})()}</span></div><button class="btn primary" id="cemB">Continuar inspeção 100% →</button>`);
+  else if(ls.k==="cem")setBar(`<div class="bar-info"><span class="bar-plan">Lote em inspeção 100%</span><span class="bar-hint">Informe as peças não conformes e conclua</span></div><button class="btn primary" id="cemB">Continuar inspeção 100% →</button>`);
   else if(ls.st==="R")setBar(`<div class="bar-info"><span class="bar-plan">Lote rejeitado · bloqueado</span><span class="bar-hint">Siga o plano de reação</span></div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
   else setBar(`<div class="bar-info"><span class="bar-plan">${esc(ls.label)} · lote liberado</span>${x.c100?.status==="concluida"?`<span class="bar-hint">Liberar só as ${x.c100.aprov} peças aprovadas</span>`:""}</div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
   if($("#dispB"))$("#dispB").onclick=()=>go("disposicao",x.id);if($("#cemB"))$("#cemB").onclick=()=>go("cem",x.id);
@@ -1248,7 +1248,7 @@ function pgInspecao(){
 const nqaPct=x=>parseFloat(String(NQA[x.nqa]).replace(",","."));
 const pctFmt=v=>(Math.round(v*100)/100).toLocaleString("pt-BR",{maximumFractionDigits:2});
 const lotTrees=x=>S.investigacoes.filter(v=>v.inspecaoId===x.id);
-const c100Count=c=>{let a=0,r=0;(c?.log||[]).forEach(e=>{if(e.a==="A")a+=e.q||1;else r++});return {a,r,t:a+r}};
+const c100Count=c=>{if(c?.qtd){const r=Object.values(c.qtd).reduce((s,v)=>s+(Math.floor(+v)||0),0),t=Math.floor(+c.N)||0;return {a:Math.max(0,t-r),r,t}}let a=0,r=0;(c?.log||[]).forEach(e=>{if(e.a==="A")a+=e.q||1;else r++});return {a,r,t:a+r}};
 const DISP={aceitar:"Aceitar lote",segregar:"Segregar e inspecionar 100%",rejeitar:"Rejeitar lote"};
 const ACEITE_MOT=[["amostragem","Lote aceito pela amostragem (d ≤ Ac)"],["funcao","O defeito não afeta função, segurança ou desempenho"],["estetico","Defeito apenas estético, sem relevância para a aplicação"],["oculto","Região oculta após a montagem ou sem relevância para o cliente"],["criterio","Dentro da condição aceitável definida pela JSP"]];
 const motLabel=k=>(ACEITE_MOT.find(m=>m[0]===k)||[,k||""])[1];
@@ -1309,7 +1309,7 @@ function pgDisposicao(){
   if(D.tipo==="aceitar")h+=`<div class="dform"><p class="sec-title">Motivo da aceitação <span class="req">*</span></p>${ACEITE_MOT.filter(([k])=>k!=="amostragem"||!rej).map(([k,l])=>`<label class="chk"><input type="radio" name="dmot" value="${k}" ${D.motivo===k?"checked":""}> <span>${l}</span></label>`).join("")}
     <label class="f" style="margin-top:10px">Justificativa (opcional)<textarea id="djust" placeholder="Ex.: rebarba de 4 mm na aba inferior, que fica escondida pelo carpete do porta-malas; liberado por (nome) da Qualidade">${esc(D.just)}</textarea></label>
     ${rej?'<p class="hint">O resultado da amostragem continua “rejeitado” para as regras de comutação da NBR 5426 (o regime pode ir para severo). Esta decisão registra a liberação do lote como concessão.</p>':""}</div>`;
-  if(D.tipo==="segregar"){const known=tr.map(v=>DEF[v.defeito]?.nome).filter(Boolean);h+=`<div class="dform"><p class="sec-title">Como vai funcionar</p><ol class="small" style="margin:0 0 0 18px;line-height:1.7"><li>O lote é segregado e você inspeciona as ${x.N} peças, uma a uma.</li><li>Para ${known.length?"<b>"+known.map(esc).join(", ")+"</b>":"os defeitos já analisados"}, basta marcar a peça como reprovada: não abre nova árvore.</li><li>Se aparecer um defeito novo, o sistema abre uma árvore só para ele e você volta para a contagem de onde parou.</li><li>Ao concluir, o lote é aceito se a porcentagem de peças reprovadas ficar dentro do NQA do plano (${NQA[x.nqa]}%); senão, é rejeitado. As reprovadas ficam segregadas em qualquer caso.</li></ol>
+  if(D.tipo==="segregar"){const known=tr.map(v=>DEF[v.defeito]?.nome).filter(Boolean);h+=`<div class="dform"><p class="sec-title">Como vai funcionar</p><ol class="small" style="margin:0 0 0 18px;line-height:1.7"><li>O lote é segregado e todas as peças são inspecionadas.</li><li>Você informa o tamanho do lote e quantas peças ficaram não conformes em cada falha, como na inspeção normal. ${known.length?"<b>"+known.map(esc).join(", ")+"</b> já foi analisado e não abre nova árvore.":""}</li><li>Se aparecer um defeito novo, você o inclui no formulário e o sistema abre uma árvore só para ele.</li><li>Ao concluir, o lote é aceito se a porcentagem de peças reprovadas ficar dentro do NQA do plano (${NQA[x.nqa]}%); senão, é rejeitado. As reprovadas ficam segregadas em qualquer caso.</li></ol>
     <label class="f" style="margin-top:10px">Observação (opcional)<textarea id="djust" placeholder="Ex.: lote segregado no rack 12, gaiola vermelha">${esc(D.just)}</textarea></label></div>`}
   if(D.tipo==="rejeitar")h+=`<div class="dform"><label class="f">Justificativa da rejeição (opcional)<textarea id="djust" placeholder="Ex.: falha de injeção em região funcional, peça não encaixa no veículo">${esc(D.just)}</textarea></label><p class="hint">O lote fica registrado como rejeitado e não pode ser liberado. A seguir, siga o plano de reação na página do lote.</p></div>`;
   h+=`</div>`;
@@ -1327,7 +1327,7 @@ function pgDisposicao(){
     const em=new Date().toISOString(),por=decidedBy()||x.inspetor||"";
     x.disp={tipo:D.tipo,motivo:D.tipo==="aceitar"?D.motivo:"",just:D.just.trim(),em,por,amostragem:x.result,arvores:tr.map(v=>v.id)};
     x.dispHist=[...(x.dispHist||[]),{...x.disp}];
-    if(D.tipo==="segregar")x.c100={status:"andamento",inicio:em,por,log:[]};
+    if(D.tipo==="segregar")x.c100={status:"andamento",inicio:em,por,N:x.N,qtd:{},novos:[]};
     if(D.tipo!=="aceitar"){x.reacao=x.reacao||{};x.reacao.segregar=true;x.reacao.segregar_em=Date.now()}
     await persist("inspecoes",x);delete dispDraft[x.id];
     toast(D.tipo==="segregar"?"Lote segregado. Comece a inspeção 100%.":D.tipo==="aceitar"?"Lote aceito. Decisão registrada.":"Lote rejeitado. Decisão registrada.");
@@ -1344,41 +1344,44 @@ window.addEventListener("pagehide",()=>c100Flush());
 function pgCem(){
   const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("inspecoes");return}
   if(x.disp?.tipo!=="segregar"||!x.c100||x.c100.status==="concluida"){go("inspecao",x.id);return}
-  const c=x.c100,k=c100Count(c),N=+x.N,nq=nqaPct(x),pct=k.t?k.r/k.t*100:0,tr=lotTrees(x),known=new Set(tr.map(v=>v.defeito)),pend=tr.filter(v=>!treeFilled(v));
-  const defs=DEFECTS.filter(dd=>dd.pts.includes(x.ponto)),novos=defs.filter(dd=>!known.has(dd.id)),falta=Math.max(0,N-k.t);
+  const c=x.c100;c.qtd=c.qtd||{};c.novos=c.novos||[];if(c.N==null)c.N=x.N;
+  const tr=lotTrees(x),known=tr.map(v=>v.defeito),pend=tr.filter(v=>!treeFilled(v)),nq=nqaPct(x);
+  const defs=DEFECTS.filter(dd=>dd.pts.includes(x.ponto)),livres=defs.filter(dd=>!known.includes(dd.id)&&!c.novos.includes(dd.id));
+  const linhas=[...known,...c.novos.filter(d=>!known.includes(d))];
   head("Lote "+(x.lote||"—")+" · "+fmtD(x.data),"Inspeção 100% do lote");
   let h=lotFlow(x,"cem");
-  h+=`<div class="banner info"><span><b>Inspeção 100% · etapa complementar da inspeção do lote ${esc(x.lote||"")}.</b> Inspecione todas as peças. Para defeitos já analisados, só registre a peça; um defeito novo abre uma árvore só para ele.</span></div>`;
-  if(pend.length)h+=`<div class="banner warn"><span><b>Árvore de defeito novo para preencher:</b> ${pend.map(v=>esc(DEF[v.defeito]?.nome)).join(", ")}. A contagem continua salva.</span><button class="btn sm primary" data-goinv="${pend[0].id}">Preencher árvore</button></div>`;
-  h+=`<div class="grid g4 kpis" style="margin-bottom:14px"><div class="kpi"><div class="l">Inspecionadas</div><div class="v">${k.t}<span class="muted" style="font-size:16px"> / ${N}</span></div><div class="s">${falta?"faltam "+falta:"todas as peças do lote"}</div></div>
-   <div class="kpi"><div class="l">Aprovadas</div><div class="v" style="color:var(--ok)">${k.a}</div><div class="s">liberáveis</div></div>
-   <div class="kpi"><div class="l">Reprovadas (segregadas)</div><div class="v" style="color:var(--nc)">${k.r}</div><div class="s">gaiola vermelha · FS 342</div></div>
-   <div class="kpi"><div class="l">% reprovada × NQA</div><div class="v">${pctFmt(pct)}%</div><div class="s">${k.t?(pct<=nq?'<span class="pill ok">dentro do NQA</span>':'<span class="pill nc">acima do NQA</span>'):""} NQA ${NQA[x.nqa]}%</div></div></div>
-   <div class="c100prog" role="progressbar" aria-valuemin="0" aria-valuemax="${N}" aria-valuenow="${k.t}"><i style="width:${Math.min(100,k.t/N*100)}%"></i></div>`;
-  h+=`<div class="card"><h2>Registrar peça</h2><div class="c100btns"><button class="c100ok" id="cA">✓ Peça aprovada</button>
-    ${[...known].map(d=>`<button class="c100nc" data-cr="${d}">✕ Reprovada · ${esc(DEF[d]?.nome||d)}</button>`).join("")}</div>
-    <div class="row" style="margin-top:12px;align-items:flex-end;gap:10px;flex-wrap:wrap"><label class="f" style="margin:0;width:170px">Várias aprovadas de uma vez<input id="cQ" type="number" min="1" max="${Math.max(1,falta)}" inputmode="numeric" placeholder="Ex.: 20"></label><button class="btn" id="cQb">Somar aprovadas</button>
-    ${novos.length?`<label class="f" style="margin:0;min-width:230px;flex:1">Defeito novo (ainda não analisado)<select id="cNew"><option value="">Escolha para reprovar a peça e abrir a árvore…</option>${novos.map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select></label>`:""}
-    <button class="btn" id="cU" ${c.log.length?"":"disabled"}>Desfazer último registro</button></div></div>`;
-  const R=c.log.filter(e=>e.a==="R").slice().reverse();
-  h+=`<div class="card"><h2>Peças reprovadas e segregadas (${k.r})</h2>${R.length?`<div class="tw"><table class="t"><thead><tr><th>Peça nº</th><th>Defeito</th><th>Registrada em</th></tr></thead><tbody>${R.slice(0,30).map(e=>`<tr><td>${e.seq}</td><td>${esc(DEF[e.def]?.nome||e.def)}${known.has(e.def)&&tr.find(v=>v.defeito===e.def)?.de100?' <span class="pill info">defeito novo</span>':""}</td><td class="small">${new Date(e.em).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</td></tr>`).join("")}</tbody></table></div>${R.length>30?`<p class="hint">+ ${R.length-30} anteriores.</p>`:""}`:'<p class="muted">Nenhuma peça reprovada até agora.</p>'}</div>`;
+  h+=`<div class="banner info"><span><b>Inspeção 100% · etapa complementar da inspeção do lote ${esc(x.lote||"")}.</b> Inspecione todas as peças do lote e informe quantas ficaram não conformes. Defeito já analisado não abre nova árvore; defeito novo abre uma árvore só para ele.</span></div>`;
+  if(pend.length)h+=`<div class="banner warn"><span><b>Preencha a árvore do defeito novo:</b> ${pend.map(v=>esc(DEF[v.defeito]?.nome)).join(", ")}. Os números informados ficam salvos.</span><button class="btn sm primary" data-goinv="${pend[0].id}">Preencher árvore</button></div>`;
+  h+=`<div class="card"><p class="sec-title">1 · Lote</p><div class="grid g2"><label class="f">Tamanho do lote (<span class="sym">N</span>) · peças inspecionadas <span class="req">*</span><input id="c_N" type="number" min="1" inputmode="numeric" value="${esc(String(c.N??""))}"><span class="hint">Na amostragem: N = ${x.N}. Corrija se o lote real tiver outra quantidade.</span></label>
+    <div class="f"><span>Plano do lote</span><div class="muted" style="padding-top:8px">NQA ${NQA[x.nqa]}% · nível ${x.nivel} · amostragem ${x.result==="R"?"rejeitou":"aceitou"} o lote (d = ${x.d})</div></div></div></div>`;
+  h+=`<div class="card"><p class="sec-title">2 · Peças não conformes</p><p class="muted small" style="margin-bottom:10px">Informe quantas peças ficaram reprovadas em cada falha. Peça com mais de uma falha: conte só na principal.</p>
+    <div class="tw"><table class="t c100t"><thead><tr><th>Falha</th><th style="width:170px">Peças não conformes</th><th></th></tr></thead><tbody>${linhas.map(d=>{const novo=!known.includes(d);return `<tr><td>${esc(DEF[d]?.nome||d)} ${novo?'<span class="pill info">defeito novo</span>':'<span class="pill">já analisado</span>'}</td><td><input type="number" min="0" inputmode="numeric" data-q="${d}" value="${c.qtd[d]??""}" placeholder="0"></td><td>${novo&&!tr.some(v=>v.defeito===d)?`<button class="btn sm" data-rmnew="${d}">Remover</button>`:""}</td></tr>`}).join("")}</tbody></table></div>
+    ${livres.length?`<div class="row" style="margin-top:12px;gap:10px;align-items:flex-end;flex-wrap:wrap"><label class="f" style="margin:0;flex:1;min-width:240px">Encontrou um defeito novo?<select id="cNew"><option value="">Escolha a falha para incluir…</option>${livres.map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select></label></div><p class="hint" style="margin-top:6px">Ao concluir, o sistema abre a árvore de falha de cada defeito novo antes do resultado.</p>`:""}</div>`;
+  h+=`<div class="card"><p class="sec-title">3 · Resultado</p><div class="grid g4 kpis"><div class="kpi"><div class="l">Inspecionadas</div><div class="v" id="kT">—</div><div class="s">tamanho do lote</div></div><div class="kpi"><div class="l">Aprovadas</div><div class="v" id="kA" style="color:var(--ok)">—</div><div class="s">liberáveis</div></div><div class="kpi"><div class="l">Reprovadas (segregadas)</div><div class="v" id="kR" style="color:var(--nc)">—</div><div class="s">gaiola vermelha · FS 342</div></div><div class="kpi"><div class="l">% reprovada × NQA</div><div class="v" id="kP">—</div><div class="s" id="kS">NQA ${NQA[x.nqa]}%</div></div></div><div id="kMsg" style="margin-top:10px"></div></div>`;
   setPage(h);
-  const ready=k.t>0&&!pend.length;
-  setBar(`<div class="bar-info"><span class="bar-plan">${k.t} de ${N} peças · ${k.r} reprovada(s)</span><span class="bar-hint">${pend.length?"Preencha a árvore do defeito novo para concluir":!k.t?"Registre as peças inspecionadas":falta?`Faltam ${falta} peças`:"Todas as peças inspecionadas"}</span></div><button class="btn primary" id="cFim" ${ready?"":"disabled"}>Concluir inspeção 100% →</button>`);
-  const redraw=()=>{const y=window.scrollY;c100Save(x);pgCem();window.scrollTo(0,y)};
-  const add=e=>{c.log.push({...e,em:Date.now()});redraw()};
-  $("#cA").onclick=()=>add({a:"A",q:1});
-  $$("[data-cr]").forEach(b=>b.onclick=()=>add({a:"R",def:b.dataset.cr,seq:k.t+1}));
-  $("#cQb").onclick=()=>{const q=Math.floor(+$("#cQ").value);if(!(q>0)){toast("Informe quantas peças aprovadas somar.");return}if(q>falta&&falta>0&&!confirm(`Isso passa do tamanho do lote (faltam ${falta}). Somar ${q} mesmo assim?`))return;add({a:"A",q})};
-  $("#cU").onclick=()=>{if(!c.log.length)return;const e=c.log.pop();toast(e.a==="A"?`Desfeito: ${e.q} aprovada(s).`:`Desfeito: peça ${e.seq} reprovada.`);redraw()};
-  if($("#cNew"))$("#cNew").onchange=async e=>{const d=e.target.value;if(!d)return;c.log.push({a:"R",def:d,seq:k.t+1,em:Date.now()});await c100Flush();await persist("inspecoes",x);const v=await createInvestigation(x,d);toast("Peça reprovada. Preencha a árvore do defeito novo; a contagem fica salva.");go("arvore",v.id)};
+  const calc=()=>{const N=Math.floor(+c.N||0),r=Object.entries(c.qtd).reduce((a,[,v])=>a+(Math.floor(+v)||0),0);return {N,r,a:N-r,p:N?r/N*100:0}};
+  const novosQ=()=>c.novos.filter(d=>(Math.floor(+c.qtd[d])||0)>0&&!tr.some(v=>v.defeito===d));
+  const upd=()=>{const k=calc(),ok=k.N>0&&k.r<=k.N,res=k.p<=nq?"A":"R",nv=novosQ();
+    $("#kT").textContent=k.N||"—";$("#kA").textContent=ok?k.a:"—";$("#kR").textContent=k.r;$("#kP").textContent=ok?pctFmt(k.p)+"%":"—";
+    $("#kS").innerHTML=ok?`${res==="A"?'<span class="pill ok">dentro do NQA</span>':'<span class="pill nc">acima do NQA</span>'} NQA ${NQA[x.nqa]}%`:`NQA ${NQA[x.nqa]}%`;
+    $("#kMsg").innerHTML=!k.N?'<div class="banner info"><span>Informe o tamanho do lote.</span></div>':k.r>k.N?'<div class="banner nc"><span>As peças não conformes passam do tamanho do lote.</span></div>':`<div class="banner ${res==="A"?"ok":"nc"}"><span>Se concluir agora: <b>lote ${res==="A"?"aceito":"rejeitado"}</b> (${k.r} ÷ ${k.N} = ${pctFmt(k.p)}%, ${res==="A"?"dentro do":"acima do"} NQA ${NQA[x.nqa]}%).${nv.length?" Antes, o sistema abre a árvore de: "+nv.map(d=>esc(DEF[d]?.nome)).join(", ")+".":""}</span></div>`;
+    const okAll=ok&&!pend.length;
+    setBar(`<div class="bar-info"><span class="bar-plan">${k.N?`${k.r} de ${k.N} peças não conformes`:"Inspeção 100%"}</span><span class="bar-hint">${pend.length?"Preencha a árvore do defeito novo":!ok?"Confira o tamanho do lote e as quantidades":nv.length?"Ao concluir, abre a árvore do defeito novo":"Pronto para concluir"}</span></div><button class="btn primary" id="cFim" ${okAll?"":"disabled"}>${nv.length?"Concluir e abrir árvore do defeito novo →":"Concluir inspeção 100% →"}</button>`);
+    $("#cFim").onclick=concluir};
+  $("#c_N").oninput=e=>{c.N=e.target.value;c100Save(x);upd()};
+  $$("[data-q]").forEach(i=>i.oninput=()=>{c.qtd[i.dataset.q]=i.value;c100Save(x);upd()});
+  $$("[data-rmnew]").forEach(b=>b.onclick=()=>{const d=b.dataset.rmnew;c.novos=c.novos.filter(z=>z!==d);delete c.qtd[d];c100Save(x);pgCem()});
+  if($("#cNew"))$("#cNew").onchange=e=>{const d=e.target.value;if(!d)return;c.novos.push(d);c.qtd[d]=c.qtd[d]||"1";c100Save(x);pgCem();const el=document.querySelector(`[data-q="${d}"]`);if(el){el.focus();el.select()}};
   $$("[data-goinv]").forEach(b=>b.onclick=()=>go("arvore",b.dataset.goinv));
-  const concluir=async parcial=>{await c100Flush();const k2=c100Count(c),p2=k2.r/k2.t*100,res=p2<=nq?"A":"R";
-    Object.assign(c,{status:"concluida",fim:new Date().toISOString(),porFim:decidedBy()||x.inspetor||"",aprov:k2.a,reprov:k2.r,total:k2.t,pct:p2,nqa:nq,resultado:res,parcial:parcial||null,
-      criterio:`Peças reprovadas ÷ inspecionadas = ${k2.r} ÷ ${k2.t} = ${pctFmt(p2)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`});
+  async function concluir(){const k=calc();if(!(k.N>0)||k.r>k.N||pend.length)return;
+    const nv=novosQ();
+    if(nv.length){await c100Flush();let first=null;for(const d of nv){const v=await createInvestigation(x,d);first=first||v}await persist("inspecoes",x);toast("Preencha a árvore do defeito novo. Depois volte para concluir a inspeção 100%.");go("arvore",first.id);return}
+    await c100Flush();const res=k.p<=nq?"A":"R",qtd=Object.fromEntries(Object.entries(c.qtd).map(([d,v])=>[d,Math.floor(+v)||0]).filter(([,v])=>v>0));
+    Object.assign(c,{status:"concluida",fim:new Date().toISOString(),porFim:decidedBy()||x.inspetor||"",N:k.N,qtd,novos:c.novos.filter(d=>qtd[d]),aprov:k.a,reprov:k.r,total:k.N,pct:k.p,nqa:nq,resultado:res,parcial:k.N!==+x.N?`Lote real com ${k.N} peças (na amostragem: ${x.N})`:null,
+      criterio:`Peças reprovadas ÷ inspecionadas = ${k.r} ÷ ${k.N} = ${pctFmt(k.p)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`});
     if(res==="R"){x.reacao=x.reacao||{};x.reacao.cem=true;x.reacao.cem_em=Date.now()}
-    await persist("inspecoes",x);toast(res==="A"?"Inspeção 100% concluída: lote aceito.":"Inspeção 100% concluída: lote rejeitado.");go("inspecao",x.id)};
-  $("#cFim").onclick=()=>{if(!ready)return;if(k.t<N)askReason({titulo:`Concluir com ${k.t} de ${N} peças`,texto:"O total inspecionado é menor que o tamanho do lote. Explique (ex.: lote real menor que o informado).",botao:"Concluir inspeção 100%"},m=>concluir("Concluída com "+k.t+" de "+N+" peças: "+m));else concluir()};
+    await persist("inspecoes",x);toast(res==="A"?"Inspeção 100% concluída: lote aceito.":"Inspeção 100% concluída: lote rejeitado.");go("inspecao",x.id)}
+  upd();
 }
 
 async function createInvestigation(x,defId){
@@ -1465,7 +1468,7 @@ function pgArvore(){
   setPage(h);
   const nFilled=irmas.filter(treeFilled).length;
   setBar(`<div class="bar-info"><span class="bar-plan">Árvore <b>${pos+1}</b> de <b>${irmas.length}</b> · ${esc(d.nome)}</span><span class="bar-hint">${filled?(prox?`Preenchida ✓ · faltam ${irmas.length-nFilled}`:"Todas as árvores do lote preenchidas ✓"):"Responda o passo 1 (origem) e verifique ao menos uma causa no passo 2"}</span></div>
-    ${filled?(prox?`<button class="btn primary" data-goinv="${prox.id}">Próxima árvore →</button>`:x?.c100?.status==="andamento"?`<button class="btn primary" data-gocem="${x.id}">Voltar à inspeção 100% →</button>`:x&&lotStage(x).k==="disp"?`<button class="btn primary" data-godisp="${x.id}">Decidir destino do lote →</button>`:`<button class="btn primary" data-goinsp="${v.inspecaoId}">Concluir e voltar ao lote →</button>`):`<button class="btn primary" disabled>Próxima árvore →</button>`}`);
+    ${filled?(prox?`<button class="btn primary" data-goinv="${prox.id}">Próxima árvore →</button>`:x?.c100?.status==="andamento"?`<button class="btn primary" data-gocem="${x.id}">Voltar e concluir a inspeção 100% →</button>`:x&&lotStage(x).k==="disp"?`<button class="btn primary" data-godisp="${x.id}">Decidir destino do lote →</button>`:`<button class="btn primary" data-goinsp="${v.inspecaoId}">Concluir e voltar ao lote →</button>`):`<button class="btn primary" disabled>Próxima árvore →</button>`}`);
   $$("[data-gocem]").forEach(b=>b.onclick=()=>go("cem",b.dataset.gocem));$$("[data-godisp]").forEach(b=>b.onclick=()=>go("disposicao",b.dataset.godisp));
   const sv=async()=>{await persist("investigacoes",v)};
   $$("[data-pres]").forEach(b=>b.onclick=async()=>{v.presenca=v.presenca||{};v.presenca[b.dataset.pres]=v.presenca[b.dataset.pres]===b.dataset.v?"":b.dataset.v;await sv();pgArvore()});
@@ -1822,7 +1825,7 @@ function pgAjuda(){
     ${st(5,"Registre a inspeção","A barra de baixo mostra o resultado da amostragem: aceitar ou rejeitar o lote pela NBR 5426.")}
     ${st(6,"Preencha a árvore de falha na hora","Havendo falha, a árvore abre sozinha, uma por tipo de falha: responda onde o defeito apareceu e verifique as causas com evidência. A ação e a reação vêm da Biblioteca.")}
     ${st(7,"Decida o destino do lote","Com as árvores preenchidas, o sistema abre a decisão: aceitar o lote (escolhendo o motivo), segregar e inspecionar 100%, ou rejeitar. A justificativa é opcional.")}
-    ${st(8,"Se escolher a inspeção 100%, conte peça por peça","Marque cada peça como aprovada ou reprovada. Defeito já analisado não abre nova árvore; defeito novo abre uma árvore só para ele e você volta para a contagem. Ao concluir, o lote é aceito se a porcentagem reprovada ficar dentro do NQA do plano.")}</div></div>
+    ${st(8,"Se escolher a inspeção 100%, informe os números","Como na inspeção normal: confirme o tamanho do lote e informe quantas peças ficaram não conformes em cada falha. Defeito já analisado não abre nova árvore; defeito novo, incluído no formulário, abre uma árvore só para ele. Ao concluir, o lote é aceito se a porcentagem reprovada ficar dentro do NQA do plano.")}</div></div>
    <div class="grid g2"><div class="card"><h2>O que significa cada termo</h2><dl class="gloss">
     ${g("Tamanho do lote (N)","Conjunto de peças do mesmo produto, feitas nas mesmas condições, que será aceito ou rejeitado como um todo.")}
     ${g("Tamanho da amostra (n)","Quantas peças retirar do lote para inspecionar. Vem da tabela da norma.")}
@@ -1904,9 +1907,9 @@ async function loadDemo(){
     const t=tipo==="andamento"?"segregar":tipo;
     x.disp={tipo:t,motivo:t==="aceitar"?(x.result!=="R"?"amostragem":pick(["funcao","estetico","oculto","criterio"])):"",just:t==="aceitar"&&x.result==="R"?"Defeito em região sem função, liberado pela Qualidade (fictício).":t==="rejeitar"?"Defeito compromete o uso da peça (fictício).":"",em,por,amostragem:x.result,arvores};
     x.dispHist=[{...x.disp}];
-    if(t==="segregar"){const nq=nqaPct(x)/100,fr=nq*(chance(.6)?.2+Math.random()*.7:1.1+Math.random()*1.5),tot=tipo==="andamento"?Math.max(1,Math.round(x.N*(.2+Math.random()*.5))):x.N,r=Math.max(x.d,Math.min(tot,Math.round(tot*fr))),log=[{a:"A",q:tot-r,em:Date.parse(em)+60e3}];
-      for(let i=0;i<r;i++)log.push({a:"R",def:pick(Object.keys(x.defeitos)),seq:1+rnd(tot),em:Date.parse(em)+120e3+i*30e3});
-      x.c100={status:"andamento",inicio:em,por,log};
+    if(t==="segregar"){const nq=nqaPct(x)/100,fr=nq*(chance(.6)?.2+Math.random()*.7:1.1+Math.random()*1.5),tot=x.N,r=Math.max(x.d,Math.min(tot,Math.round(tot*fr))),ks=Object.keys(x.defeitos),qtd={};
+      if(tipo!=="andamento")for(let i=0;i<r;i++){const d=pick(ks);qtd[d]=(qtd[d]||0)+1}
+      x.c100={status:"andamento",inicio:em,por,N:tot,qtd,novos:[]};
       if(tipo!=="andamento"){const p2=r/tot*100,res=p2<=nqaPct(x)?"A":"R";Object.assign(x.c100,{status:"concluida",fim:new Date(Date.parse(em)+2*3600e3).toISOString(),porFim:por,aprov:tot-r,reprov:r,total:tot,pct:p2,nqa:nqaPct(x),resultado:res,criterio:`Peças reprovadas ÷ inspecionadas = ${r} ÷ ${tot} = ${pctFmt(p2)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`})}}
     await persist("inspecoes",x)}
   toast(`${novos.length} lotes fictícios gerados${demos.length?" (histórico acumulado: "+(demos.length+novos.length)+")":""}.`);go("painel");
