@@ -423,7 +423,7 @@ const maqLabel=m=>m.codigo+(m.tipo?" · "+m.tipo:"");
 function machineOptions(cur){const L=[...S.maquinas].sort((a,b)=>a.codigo.localeCompare(b.codigo,"pt-BR",{numeric:true}));
   let o=L.map(m=>`<option value="${esc(m.codigo)}" ${m.codigo===cur?"selected":""}>${esc(maqLabel(m))}</option>`).join("");
   if(cur&&!L.some(m=>m.codigo===cur))o+=`<option value="${esc(cur)}" selected>${esc(cur)} (não cadastrada)</option>`;return o}
-function presetOf(p,pt){const ps=p?.preset?.[pt]||{};return {N:ps.N??null,nivel:"II",nqa:ps.nqa??(p?.nqa?.[pt]??null),proposta:!!ps.proposta}}
+function presetOf(p,pt){const ps=p?.preset?.[pt]||{};return {N:ps.N>0?+ps.N:null,nivel:"II",nqa:ps.nqa??(p?.nqa?.[pt]??null),proposta:!!ps.proposta}}
 function applyPreset(d){const p=prod(d.productId),ps=presetOf(p,d.ponto);const last=S.meta["lastN|"+d.productId+"|"+d.ponto];
   if(!p||!d.ponto){d.N="";d.nivel="";d.nqa="";return d}
   d.N=ps.N!=null?String(ps.N):(last!=null?String(last):"");d.nivel="II";d.nqa=ps.nqa!=null?String(ps.nqa):"";return d}
@@ -1139,7 +1139,7 @@ function pgNova(){
   $("#f_lote").addEventListener("input",()=>{const b=$("#dupBox");if(b)b.innerHTML=dupHtml()});
   $("#f_data").onblur=()=>{if(d.data&&d.data>today()){d.data="";$("#f_data").value="";toast("A data não pode ser futura.");canSave()}};
   ["productId","ponto","nqa","nivel","turno"].forEach(k=>{const el=$("#f_"+k);if(el)el.onchange=e=>{d[k]=e.target.value;if(k==="productId"||k==="ponto")applyPreset(d);if(k!=="turno")pgNova();else canSave()}});
-  if($("#setDefault"))$("#setDefault").onclick=async()=>{p.preset=p.preset||{};p.preset[d.ponto]={...presetOf(p,d.ponto),N:d.N===""?null:+d.N,nivel:"II"};await persist("produtos",p);toast("Pré-definição salva para "+POINTS[d.ponto].nome+".");pgNova()};
+  if($("#setDefault"))$("#setDefault").onclick=async()=>{p.preset=p.preset||{};p.preset[d.ponto]={...presetOf(p,d.ponto),N:+d.N>0?Math.floor(+d.N):null,nivel:"II"};await persist("produtos",p);toast("Pré-definição salva para "+POINTS[d.ponto].nome+".");pgNova()};
   if($("#useDefault"))$("#useDefault").onclick=()=>{const keep={...d};applyPreset(d);if(d.N==="")d.N=keep.N;pgNova()};
   if($("#f_N"))$("#f_N").oninput=e=>{d.N=e.target.value;clearTimeout(window._nt);window._nt=setTimeout(()=>{if(document.activeElement?.id!=="f_N")return;const y=window.scrollY;pgNova();window.scrollTo(0,y);const n=$("#f_N");if(!n)return;n.focus();const v=n.value;n.value="";n.value=v},800)};
   if($("#f_N"))$("#f_N").onchange=e=>{d.N=e.target.value;clearTimeout(window._nt);if(d.N!==d._rN)pgNova()};
@@ -1392,7 +1392,7 @@ async function createInvestigation(x,defId){
 }
 async function openInvestigation(x,defId){const v=await createInvestigation(x,defId);go("arvore",v.id)}
 // Uma árvore está "preenchida" quando a origem foi localizada (se houver pergunta) e ao menos uma causa foi verificada
-function treeFilled(v){const qs=presenceQs(v);const locOK=qs.every(q=>(v.presenca||{})[q.id]);const causeOK=Object.values(v.respostas||{}).some(r=>r.a);return locOK&&causeOK}
+function treeFilled(v){const qs=presenceQs(v),pz=v.presenca||{};const locOK=qs.every(q=>pz[q.id]||(q.id==="est"&&pz.fl==="N"));const causeOK=Object.values(v.respostas||{}).some(r=>r.a);return locOK&&causeOK}
 function pendingTrees(){return S.investigacoes.filter(v=>!v.demo&&!treeFilled(v)&&(v.conclusao?.status||"aberta")!=="concluida")}
 
 /* =========================================================================
@@ -1450,7 +1450,7 @@ function pgArvore(){
     </div>`;
   h+=`<div class="grid g4 kpis" style="margin-bottom:14px"><div class="kpi"><div class="l">Detectado em</div><div class="v" style="font-size:18px">${POINTS[v.ponto].nome}</div><div class="s">${x?`<a href="#inspecao/${x.id}">Lote ${esc(x.lote)} · ${fmtD(x.data)}</a>`:""}</div></div><div class="kpi"><div class="l">Especificação</div><div class="s" style="font-size:13px;color:var(--ink)">${esc(defSpec(v.defeito,prod(x?.productId)))}</div><div class="s">${esc(d.src)}</div></div><div class="kpi"><div class="l">Origem localizada</div><div class="v" style="font-size:18px">${esc(originLabel(v))}</div></div><div class="kpi"><div class="l">Status</div><div class="v" style="font-size:18px">${invPill(c.status)}</div><div class="s">${probable(v).length} desvio(s) observado(s)</div></div></div>`;
   h+=`<div class="card"><h2>Árvore de falha</h2><p class="muted" style="margin-bottom:10px">Do efeito (à esquerda) de volta às etapas do processo e às causas possíveis. Clique numa causa para ir até ela. Vermelho = desvio observado; verde = sem desvio observado; tracejado = fora da etapa de origem.</p><p class="hint onlym" style="margin:-4px 0 8px">Arraste o desenho para o lado para ver as causas.</p><div class="treebox">${treeSVG(v)}</div></div>`;
-  const qs=presenceQs(v);
+  const qs=presenceQs(v).filter(q=>!(q.id==="est"&&(v.presenca||{}).fl==="N"));
   h+=`<div class="card"><p class="sec-title">Passo 1 · Localizar a origem (voltar no processo)</p>${qs.length?qs.map(q=>{const a=(v.presenca||{})[q.id]||"";return `<div class="cause"><div class="top2"><div><h3>${esc(q.t)}</h3><p class="hint">Evidência: ${esc(q.ev)}</p></div><div class="seg" role="group">${[["S","Sim"],["N","Não"],["X","Sem registro"]].map(([k,l])=>`<button data-pres="${q.id}" data-v="${k}" aria-pressed="${a===k}">${l}</button>`).join("")}</div></div>${a==="S"?`<p class="small" style="margin-top:6px;color:var(--brand)">→ ${esc(q.yes)}</p>`:a==="N"?`<p class="small" style="margin-top:6px;color:var(--brand)">→ ${esc(q.no)}</p>`:""}</div>`}).join(""):`<p class="muted">Defeito detectado na própria moldagem: a origem está nos parâmetros da máquina, no molde/setup ou na matéria-prima.</p>`}</div>`;
   h+=`<div class="card"><p class="sec-title">Passo 2 · Verificar as causas possíveis com evidência</p><p class="muted small">Para cada causa: houve desvio dessa condição no período do lote? Responda com base em registro, não em suposição. Uma condição observada no mesmo período não comprova sozinha a causa.</p>`;
   stagesFor(v).forEach(s=>{const on=stageActive(v,s);h+=`<div class="stagehead ${on?"":"off"}"><div><b>${esc(ST[s].nome)}</b> <span class="muted small">· ${esc(ST[s].sub)}</span></div>${on?"":'<span class="pill">Fora da etapa de origem</span>'}</div>`;
@@ -1797,7 +1797,7 @@ function pgProduto(){
   $("#ftp_rev").oninput=e=>P.ftp.rev=e.target.value;$("#ftp_data").onchange=e=>P.ftp.data=e.target.value;
   $("#pd_newm").onclick=()=>{cadTab="maquinas";go("cadastros")};
   $$("[data-pp]").forEach(el=>el.onchange=()=>{const k=el.dataset.pp,f=el.dataset.f;P.preset=P.preset||{};const ps={...presetOf(P,k)};
-    ps[f]=el.value===""?null:Math.max(f==="N"?1:0,+el.value);ps.nivel="II";if(f==="nqa")ps.proposta=false;P.preset[k]=ps;const y=window.scrollY;pgProduto();window.scrollTo(0,y)});
+    ps[f]=el.value===""||(f==="N"&&!(+el.value>0))?null:Math.max(f==="N"?1:0,+el.value);ps.nivel="II";if(f==="nqa")ps.proposta=false;P.preset[k]=ps;const y=window.scrollY;pgProduto();window.scrollTo(0,y)});
   $$("[data-fp]").forEach(el=>el.oninput=()=>{P.ftp.params[+el.dataset.fp][el.dataset.ff]=el.value});
   $$("[data-fpdel]").forEach(b=>b.onclick=()=>{const q=P.ftp.params[+b.dataset.fpdel];if(!confirm(`Remover o parâmetro “${q.nome}”?`))return;P.ftp.params.splice(+b.dataset.fpdel,1);const y=window.scrollY;pgProduto();window.scrollTo(0,y)});
   $("#np_ok").onclick=()=>{const n=$("#np_n").value.trim();if(!n){toast("Informe o nome do parâmetro.");return}P.ftp.params.push({id:"x_"+uid().slice(0,8),grupo:$("#np_g").value,nome:n,un:$("#np_u").value.trim(),nom:"",min:"",max:""});const y=window.scrollY;pgProduto();window.scrollTo(0,y)};
@@ -1872,10 +1872,10 @@ async function loadDemo(){
     const qtd=dt.getDay()===6?rnd(2):1+rnd(3);
     for(let q=0;q<qtd;q++){
       const p=pick(S.produtos),ponto=wpick([["FL",5],["MOLD",3],["EST",2]]),ps=presetOf(p,ponto);
-      const N=ps.N??pick([150,280,300,480,500,520,800,1200]),nivel=ps.nivel||"II",nqa=ps.nqa??10;
+      const N=ps.N>0?ps.N:pick([150,280,300,480,500,520,800,1200]),nivel="II",nqa=ps.nqa??10;
       const maquina=p.maquina&&chance(.7)?p.maquina:(maqs.length?pick(maqs):p.maquina||"");
       novos.push({id:uid(),createdAt:dt.getTime()+q*3600e3+rnd(3000e3),productId:p.id,produto:p.nome,ponto,data:iso(dt),turno:pick(turnos),maquina,molde:"",op:"DEMO-"+(1000+rnd(9000)),lote:"DEMO-"+iso(dt).slice(5).replace("-","")+"-"+(q+1),inspetor:pick(nomes),N,nivel,nqa,
-        _frac:(parseFloat(String(NQA[nqa]).replace(",","."))/100)*(chance(.18)?3+Math.random()*4:.2+Math.random()*.9),obs:"Registro fictício para demonstração.",reap:false,reacao:{},demo:true});
+        _frac:(parseFloat(String(NQA[nqa]).replace(",","."))/100)*(chance(.12)?3+Math.random()*4:.2+Math.random()*.9),obs:"Registro fictício para demonstração.",reap:false,reacao:{},demo:true});
     }
   }
   novos.forEach(x=>S.inspecoes.push(x));
@@ -1894,17 +1894,22 @@ async function loadDemo(){
     Object.assign(x,{regime:rs.reg,letra0:pl.letter0,letra:pl.letter,n:pl.n,ac:pl.ac,re:pl.re,inspecao100:pl.full,d,defeitos,result:d<=pl.ac?"A":d>=pl.re?"R":"AR"});
     if(mudou)await persist("inspecoes",x);
   }
-  // árvores de falha: lotes rejeitados sempre; aceitos com falha, às vezes
-  for(const x of novos){const tipos=Object.keys(x.defeitos||{});if(!tipos.length||(x.result!=="R"&&!chance(.35)))continue;
-    for(const k of tipos.slice(0,2)){const v=await createInvestigation(x,k);v.createdAt=x.createdAt+1;const est=wpick([["concluida",4],["andamento",3],["aberta",3]]);
-      if(est!=="aberta"){v.presenca=x.ponto==="FL"?{fl:"S",est:"S"}:x.ponto==="EST"?{est:"S"}:{};const cs=CAUSES.filter(c=>c.defs.includes(k)&&stageActive(v,c.st));
+  // árvores de falha: como no registro real, uma por tipo de falha. Lotes com mais de 3 dias ficam com tudo preenchido;
+  // só os mais recentes podem ficar pendentes, para mostrar o fluxo em andamento.
+  const recente=x=>Date.now()-x.createdAt<3*864e5;
+  const presCands=pt=>pt==="FL"?[{fl:"S",est:"S"},{fl:"S",est:"N"},{fl:"N"}]:pt==="EST"?[{est:"S"},{est:"N"}]:[{}];
+  for(const x of novos){const tipos=Object.keys(x.defeitos||{});if(!tipos.length)continue;
+    for(const k of tipos){const v=await createInvestigation(x,k);v.createdAt=x.createdAt+1;
+      const est=recente(x)?wpick([["concluida",3],["andamento",2],["aberta",2]]):Date.now()-x.createdAt<10*864e5?wpick([["concluida",4],["andamento",1]]):"concluida";
+      if(est!=="aberta"){let cs=[];for(const pr of presCands(x.ponto)){v.presenca=pr;cs=CAUSES.filter(c=>c.defs.includes(k)&&stageActive(v,c.st));if(cs.length)break}
         if(cs.length){const c=pick(cs);v.respostas={[c.id]:{a:"S",note:"Desvio fictício para demonstração."}};cs.filter(o=>o!==c).slice(0,2).forEach(o=>v.respostas[o.id]={a:"N"});
-          v.conclusao=est==="concluida"?{status:"concluida",classif:"confirmada",sintese:c.nome+" observado(a) no período do lote, na mesma região do defeito (fictício).",resp:c.resp+" (DEMO)",prazo:x.data,contencao:"Lote segregado e inspecionado 100% (fictício).",correcao:c.acao,eficacia:c.efic}:{status:"andamento",classif:"provavel",resp:c.resp+" (DEMO)"}}}
+          v.conclusao=est==="concluida"?{status:"concluida",classif:"confirmada",sintese:c.nome+" observado(a) no período do lote, na mesma região do defeito (fictício)."}:{status:"andamento",classif:"provavel"}}
+        else{v.presenca={};v.conclusao={status:"aberta"}}}
       await persist("investigacoes",v)}}
   // destino dos lotes com falha: decisão de disposição e, às vezes, inspeção 100%
   for(const x of novos){if(!(x.d>0))continue;const st=lotStage(x);if(st.k!=="disp")continue;
     const em=new Date(x.createdAt+3*3600e3).toISOString(),por="Qualidade (DEMO)",arvores=lotTrees(x).map(v=>v.id),k0=Object.keys(x.defeitos)[0];
-    const tipo=x.result!=="R"?wpick([["aceitar",9],["pend",1]]):wpick([["segregar",4],["aceitar",2],["rejeitar",2],["pend",1],["andamento",1]]);if(tipo==="pend")continue;
+    const rc=recente(x),tipo=x.result!=="R"?(rc?wpick([["aceitar",4],["pend",1]]):"aceitar"):wpick(rc?[["segregar",3],["aceitar",1],["rejeitar",1],["pend",2],["andamento",2]]:[["segregar",5],["aceitar",2],["rejeitar",2]]);if(tipo==="pend")continue;
     const t=tipo==="andamento"?"segregar":tipo;
     x.disp={tipo:t,motivo:t==="aceitar"?(x.result!=="R"?"amostragem":pick(["funcao","estetico","oculto","criterio"])):"",just:t==="aceitar"&&x.result==="R"?"Defeito em região sem função, liberado pela Qualidade (fictício).":t==="rejeitar"?"Defeito compromete o uso da peça (fictício).":"",em,por,amostragem:x.result,arvores};
     x.dispHist=[{...x.disp}];
