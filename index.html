@@ -1226,7 +1226,7 @@ function pgInspecao(){
   if(invs.length)h+=`<div class="card"><h2>Árvores de falha deste lote</h2><div class="tw"><table class="t"><thead><tr><th>Defeito</th><th>Origem localizada</th><th>Causa provável</th><th>Responsável</th><th>Status</th></tr></thead><tbody>${invs.map(v=>`<tr class="click" data-inv="${v.id}"><td>${esc(DEF[v.defeito]?.nome)}</td><td>${esc(originLabel(v))}</td><td class="small">${esc(probable(v).map(c=>c.nome).join("; ")||"—")}</td><td>${esc(acaoRec(v).resp||"—")}</td><td>${invPill(v.conclusao?.status)}</td></tr>`).join("")}</tbody></table></div></div>`;
   setPage(h);
   const pendLot=invs.filter(v=>!treeFilled(v));
-  if(pendLot.length&&ls.k!=="final")setBar(`<div class="bar-info"><span class="bar-plan">${pendLot.length} árvore(s) de falha deste lote sem preencher</span><span class="bar-hint">${ls.k==="cem"?"Depois volte à inspeção 100%":"Depois delas vem a decisão do lote"}</span></div><button class="btn primary" data-goinv="${pendLot[0].id}">Preencher árvores →</button>`);
+  if(pendLot.length&&(ls.k!=="final"||ls.auto))setBar(`<div class="bar-info"><span class="bar-plan">${pendLot.length} árvore(s) de falha deste lote sem preencher</span><span class="bar-hint">${ls.k==="cem"?"Depois volte à inspeção 100%":x.result==="R"?"Depois delas vem a decisão do lote":"Lote aceito: registre a causa da falha encontrada"}</span></div><button class="btn primary" data-goinv="${pendLot[0].id}">Preencher árvores →</button>`);
   else if(ls.k==="disp")setBar(`<div class="bar-info"><span class="bar-plan">Árvores preenchidas · falta decidir o destino do lote</span><span class="bar-hint">Aceitar, inspecionar 100% ou rejeitar</span></div><button class="btn primary" id="dispB">Decidir destino do lote →</button>`);
   else if(ls.k==="cem")setBar(`<div class="bar-info"><span class="bar-plan">Lote em inspeção 100%</span><span class="bar-hint">Informe as peças não conformes e conclua</span></div><button class="btn primary" id="cemB">Continuar inspeção 100% →</button>`);
   else if(ls.st==="R")setBar(`<div class="bar-info"><span class="bar-plan">Lote rejeitado · bloqueado</span><span class="bar-hint">Siga o plano de reação</span></div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
@@ -1257,10 +1257,12 @@ const motLabel=k=>(ACEITE_MOT.find(m=>m[0]===k)||[,k||""])[1];
 // Em que etapa o lote está e qual a situação dele
 function lotStage(x){
   const tr=lotTrees(x),pend=tr.filter(v=>!treeFilled(v)),dp=x.disp,c=x.c100;
-  if(dp?.tipo==="aceitar")return {k:"final",st:"A",label:x.result==="R"?"Aceito mesmo assim":"Aceito",cls:"ok"};
+  // Lote aceito pela amostragem não passa pela decisão de disposição
+  if(x.result!=="R")return {k:"final",st:"A",label:"Aceito",cls:"ok",auto:true};
+  if(dp?.tipo==="aceitar")return {k:"final",st:"A",label:"Aceito mesmo assim",cls:"ok"};
   if(dp?.tipo==="rejeitar")return {k:"final",st:"R",label:"Rejeitado",cls:"nc"};
   if(dp?.tipo==="segregar"){if(c?.status==="concluida")return {k:"final",st:c.resultado,label:c.resultado==="A"?"Aceito após inspeção 100%":"Rejeitado após inspeção 100%",cls:c.resultado==="A"?"ok":"nc"};return {k:"cem",label:"Em inspeção 100%",cls:"info"}}
-  if(x.reap||(!(x.d>0)&&!tr.length))return {k:"final",st:x.result==="R"?"R":"A",label:x.result==="R"?"Rejeitado":"Aceito",cls:x.result==="R"?"nc":"ok",auto:true};
+  if(x.reap)return {k:"final",st:"R",label:"Rejeitado",cls:"nc",auto:true};
   if(pend.length)return {k:"arvore",label:"Aguardando árvore de falha",cls:"warn",pend};
   return {k:"disp",label:"Aguardando decisão",cls:"warn"};
 }
@@ -1296,7 +1298,7 @@ function pgDisposicao(){
   const s=lotStage(x),tr=lotTrees(x);
   if(x.disp){go(x.disp.tipo==="segregar"&&x.c100?.status!=="concluida"?"cem":"inspecao",x.id);return}
   if(s.auto){go("inspecao",x.id);return}
-  const D=dispDraft[x.id]||(dispDraft[x.id]={tipo:"",motivo:x.result==="R"?"":"amostragem",just:"",por:""});
+  const D=dispDraft[x.id]||(dispDraft[x.id]={tipo:"",motivo:"",just:"",por:""});
   const rej=x.result==="R",bloq=s.k==="arvore";
   head("Lote "+(x.lote||"—")+" · "+fmtD(x.data),"Decisão de disposição do lote");
   let h=lotFlow(x,"disp");
@@ -1825,7 +1827,7 @@ function pgAjuda(){
     ${st(4,"Registre cada peça não conforme","Toque em “+ Peça NC” e marque as falhas daquela peça. Para peso úmido ou peso seco, digite o peso medido: o sistema compara com a faixa da FTP.")}
     ${st(5,"Registre a inspeção","A barra de baixo mostra o resultado da amostragem: aceitar ou rejeitar o lote pela NBR 5426.")}
     ${st(6,"Preencha a árvore de falha na hora","Havendo falha, a árvore abre sozinha, uma por tipo de falha: responda onde o defeito apareceu e verifique as causas com evidência. A ação e a reação vêm da Biblioteca.")}
-    ${st(7,"Decida o destino do lote","Com as árvores preenchidas, o sistema abre a decisão: aceitar o lote (escolhendo o motivo), segregar e inspecionar 100%, ou rejeitar. A justificativa é opcional.")}
+    ${st(7,"Lote rejeitado: decida o destino","Só quando a amostragem rejeita o lote. Com as árvores preenchidas, o sistema abre a decisão: aceitar o lote (escolhendo o motivo), segregar e inspecionar 100%, ou rejeitar. A justificativa é opcional.")}
     ${st(8,"Se escolher a inspeção 100%, informe os números","Como na inspeção normal, para o mesmo lote (o tamanho já vem fixo): informe quantas peças ficaram não conformes em cada falha. Defeito já analisado não abre nova árvore; defeito novo, incluído no formulário, abre uma árvore só para ele. Ao concluir, o lote é aceito se a porcentagem reprovada ficar dentro do NQA do plano.")}</div></div>
    <div class="grid g2"><div class="card"><h2>O que significa cada termo</h2><dl class="gloss">
     ${g("Tamanho do lote (N)","Conjunto de peças do mesmo produto, feitas nas mesmas condições, que será aceito ou rejeitado como um todo.")}
@@ -1907,9 +1909,9 @@ async function loadDemo(){
         else{v.presenca={};v.conclusao={status:"aberta"}}}
       await persist("investigacoes",v)}}
   // destino dos lotes com falha: decisão de disposição e, às vezes, inspeção 100%
-  for(const x of novos){if(!(x.d>0))continue;const st=lotStage(x);if(st.k!=="disp")continue;
+  for(const x of novos){if(x.result!=="R")continue;const st=lotStage(x);if(st.k!=="disp")continue;
     const em=new Date(x.createdAt+3*3600e3).toISOString(),por="Qualidade (DEMO)",arvores=lotTrees(x).map(v=>v.id),k0=Object.keys(x.defeitos)[0];
-    const rc=recente(x),tipo=x.result!=="R"?(rc?wpick([["aceitar",4],["pend",1]]):"aceitar"):wpick(rc?[["segregar",3],["aceitar",1],["rejeitar",1],["pend",2],["andamento",2]]:[["segregar",5],["aceitar",2],["rejeitar",2]]);if(tipo==="pend")continue;
+    const rc=recente(x),tipo=wpick(rc?[["segregar",3],["aceitar",1],["rejeitar",1],["pend",2],["andamento",2]]:[["segregar",5],["aceitar",2],["rejeitar",2]]);if(tipo==="pend")continue;
     const t=tipo==="andamento"?"segregar":tipo;
     x.disp={tipo:t,motivo:t==="aceitar"?(x.result!=="R"?"amostragem":pick(["funcao","estetico","oculto","criterio"])):"",just:t==="aceitar"&&x.result==="R"?"Defeito em região sem função, liberado pela Qualidade (fictício).":t==="rejeitar"?"Defeito compromete o uso da peça (fictício).":"",em,por,amostragem:x.result,arvores};
     x.dispHist=[{...x.disp}];
