@@ -641,7 +641,13 @@ async function loadAll(){
 }
 // Só cria os cadastros iniciais se a tabela nunca teve registros (assim um produto ou máquina excluído não volta sozinho)
 // Cadastros (produtos, máquinas, pré-definições) são alterados só por administradores; no modo local, por quem usa o aparelho
+// Papéis: admin = Administrador do sistema (tudo, inclusive cadastros); gestor = Gestor da qualidade (tudo, menos cadastros);
+// inspetor = Inspetor(a) de qualidade (inspeções, árvores e destino do lote)
+const PAPEL_NOME={admin:"Administrador do sistema",gestor:"Gestor da qualidade",inspetor:"Inspetor(a) de qualidade"};
+const PAPEL_DESC={admin:"Tudo, inclusive cadastros de produtos, máquinas e usuários",gestor:"Tudo, menos os cadastros",inspetor:"Inspeções, árvores de falha e destino do lote"};
+const papelOpts=sel=>["inspetor","gestor","admin"].map(k=>`<option value="${k}" ${k===sel?"selected":""}>${PAPEL_NOME[k]}</option>`).join("");
 const isAdmin=()=>localMode()||cloudState==="off"||colab?.papel==="admin";
+const isGestor=()=>isAdmin()||colab?.papel==="gestor";
 async function canSeed(t){
   if(!isAdmin())return false;
   if(S[t].length){if(!S.meta["seeded|"+t])await setMeta("seeded|"+t,1);return false}
@@ -774,7 +780,7 @@ async function signOut(){window._saindo=true;const fila=(S.meta.fila||[]).length
 function updateDbStatus(){
   const dot=$("#dbdot"),st=$("#dbstatus");if(!dot)return;
   const fila=(S.meta.fila||[]).length;
-  if(cloudState==="ok"){dot.className=fila?"dbdot warn":"dbdot";st.textContent=fila?`Enviando ${fila} alteração(ões)…`:"Banco JSP na nuvem · "+(colab?.nome||user?.email||"")}
+  if(cloudState==="ok"){dot.className=fila?"dbdot warn":"dbdot";st.textContent=fila?`Enviando ${fila} alteração(ões)…`:"Banco JSP na nuvem · "+(colab?.nome||user?.email||"")+(colab?.papel?" · "+(PAPEL_NOME[colab.papel]||""):"")}
   else if(cloudState==="offline"){dot.className="dbdot warn";st.textContent="Sem conexão · "+fila+" alteração(ões) a enviar"}
   else if(cloudState==="local"){dot.className="dbdot warn";st.textContent="Modo local (não compartilhado)"}
   else{dot.className="dbdot warn";st.textContent=cloudConfigured()?"Entre para acessar o banco":"Banco na nuvem não configurado"}
@@ -1196,7 +1202,7 @@ const REACTION_STEPS=[["segregar","Lote segregado e identificado (FS 342 – Flu
 function destinoCard(x,ls){
   const dp=x.disp;let h="";
   if(dp){const c=x.c100;
-    h+=`<div class="card destino ${ls.cls}"><div class="row" style="justify-content:space-between;align-items:flex-start"><h2>Destino do lote</h2>${isAdmin()?'<button class="btn sm noprint" id="reabB">Reabrir decisão</button>':""}</div>
+    h+=`<div class="card destino ${ls.cls}"><div class="row" style="justify-content:space-between;align-items:flex-start"><h2>Destino do lote</h2>${isGestor()?'<button class="btn sm noprint" id="reabB">Reabrir decisão</button>':""}</div>
      <dl class="list-kv"><dt>Decisão</dt><dd>${esc(dp.tipo==="aceitar"&&dp.amostragem==="R"?"Aceitar lote mesmo assim":DISP[dp.tipo])}</dd>${dp.motivo?`<dt>Motivo</dt><dd>${esc(motLabel(dp.motivo))}</dd>`:""}${dp.just?`<dt>${dp.tipo==="segregar"?"Observação":"Justificativa"}</dt><dd>${esc(dp.just)}</dd>`:""}<dt>Decidido por</dt><dd>${esc(dp.por||"—")} · ${new Date(dp.em).toLocaleString("pt-BR")}</dd><dt>Árvores consideradas</dt><dd>${(dp.arvores||[]).map(id=>{const v=S.investigacoes.find(i=>i.id===id);return v?`<a href="#arvore/${v.id}">${esc(DEF[v.defeito]?.nome||v.defeito)}</a>`:""}).filter(Boolean).join(", ")||"—"}</dd></dl>`;
     if(c){const k=c.status==="concluida"?{a:c.aprov,r:c.reprov,t:c.total}:c100Count(c);
       h+=`<h3 style="margin:14px 0 8px">Inspeção 100% ${c.status==="concluida"?"· concluída":"· em andamento"}</h3><div class="grid g4 kpis"><div class="kpi"><div class="l">Inspecionadas</div><div class="v">${k.t}</div><div class="s">lote N = ${x.N}</div></div><div class="kpi"><div class="l">Aprovadas</div><div class="v" style="color:var(--ok)">${k.a}</div><div class="s">${c.status==="concluida"&&c.resultado==="A"?"liberadas":"liberáveis"}</div></div><div class="kpi"><div class="l">Reprovadas</div><div class="v" style="color:var(--nc)">${k.r}</div><div class="s">segregadas (FS 342)</div></div><div class="kpi"><div class="l">% reprovada</div><div class="v">${k.t?pctFmt(k.r/k.t*100):"0"}%</div><div class="s">NQA ${NQA[x.nqa]}%</div></div></div>
@@ -1466,7 +1472,7 @@ function pgArvore(){
    <label class="f">Status da investigação<select data-c="status">${Object.entries(invStatus).map(([k,l])=>`<option value="${k}" ${c.status===k?"selected":""}>${l}</option>`).join("")}</select><span class="hint">Conclua apenas após verificar a eficácia da ação.</span></label></div>
    <label class="f" style="margin-top:12px">Síntese da causa e evidência que sustenta a conclusão<textarea data-c="sintese" placeholder="${esc(pr.length?"Ex.: "+pr[0].nome+" — o que foi observado, em qual componente ou parâmetro, em que momento, e por que isso explica o defeito neste lote":"Relação entre o defeito, a etapa, o componente e a condição observada")}">${esc(c.sintese||"")}</textarea></label>
    <p class="hint" style="margin-top:8px">Uma condição observada não comprova, isoladamente, a causa: ela pode coexistir com o defeito sem tê-lo provocado. Classifique como “confirmada” quando a evidência ligar a condição ao defeito deste lote (mesma região, mesmo período, defeito desaparece ao corrigir).</p></div>
-  <div class="card"><p class="sec-title">Passo 4 · Ação e reação recomendadas</p>${pr.length?pr.map(pc=>`<div class="acrec"><div class="acrec-h"><span class="pill nc">Desvio</span> <b>${esc(pc.nome)}</b></div><dl class="list-kv"><dt>Reação imediata (contenção)</dt><dd>${esc(reactOf(pc))}</dd><dt>Ação corretiva</dt><dd>${esc(pc.acao||"—")}</dd><dt>Responsável</dt><dd>${esc(pc.resp||"—")}</dd><dt>Como saber se resolveu</dt><dd>${esc(pc.efic||"—")}</dd></dl>${isAdmin()?`<a class="small noprint" href="#causa/${pc.id}">Ajustar este texto na Biblioteca</a>`:""}</div>`).join(""):`<div class="banner info"><span>Marque <b>Desvio</b> em uma causa do passo 2 e a ação e a reação recomendadas pela Biblioteca aparecem aqui automaticamente.</span></div><dl class="list-kv"><dt>Reação padrão até achar a causa</dt><dd>${esc(REACT[v.ponto]||"—")}</dd></dl>`}
+  <div class="card"><p class="sec-title">Passo 4 · Ação e reação recomendadas</p>${pr.length?pr.map(pc=>`<div class="acrec"><div class="acrec-h"><span class="pill nc">Desvio</span> <b>${esc(pc.nome)}</b></div><dl class="list-kv"><dt>Reação imediata (contenção)</dt><dd>${esc(reactOf(pc))}</dd><dt>Ação corretiva</dt><dd>${esc(pc.acao||"—")}</dd><dt>Responsável</dt><dd>${esc(pc.resp||"—")}</dd><dt>Como saber se resolveu</dt><dd>${esc(pc.efic||"—")}</dd></dl>${isGestor()?`<a class="small noprint" href="#causa/${pc.id}">Ajustar este texto na Biblioteca</a>`:""}</div>`).join(""):`<div class="banner info"><span>Marque <b>Desvio</b> em uma causa do passo 2 e a ação e a reação recomendadas pela Biblioteca aparecem aqui automaticamente.</span></div><dl class="list-kv"><dt>Reação padrão até achar a causa</dt><dd>${esc(REACT[v.ponto]||"—")}</dd></dl>`}
    <p class="hint" style="margin-top:8px">Nada a preencher aqui: o texto vem da Biblioteca causa/efeito e ação/reação.</p></div>`;
   setPage(h);
   const nFilled=irmas.filter(treeFilled).length;
@@ -1500,7 +1506,7 @@ const fontesOf=c=>[...new Set((c.evid||[]).map(e=>(e[1]||e[0]||"").trim()).filte
 const natPill=c=>`<span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info":"warn"}">${NAT[c.nat]||NAT.hip}</span>`;
 const causeMark=c=>c._custom||c._mod?`<span class="hint" style="display:block">${c._custom?"Incluída":"Alterada"} pela JSP</span>`:"";
 function pgBiblioteca(){
-  const ed=isAdmin();
+  const ed=isGestor();
   head("Análise","Biblioteca causa/efeito e ação/reação",`<button class="btn" id="exB">Exportar CSV</button>`);
   const qq=bf.q.trim().toLowerCase();
   const match=c=>(!bf.st||c.st===bf.st)&&(!bf.nat||c.nat===bf.nat)&&(!qq||[c.nome,c.mech,c.acao,c.resp,fontesOf(c),(c.evid||[]).map(e=>e[0]).join(" ")].join(" ").toLowerCase().includes(qq));
@@ -1542,7 +1548,7 @@ async function splitCause(orig,df,novo,acao){
   return nid;
 }
 function pgCausa(){
-  if(!isAdmin()){go("biblioteca");return}
+  if(!isGestor()){go("biblioteca");return}
   const isNew=route.id==="nova",orig=isNew?null:CA[route.id];if(!isNew&&!orig){go("biblioteca");return}
   const df0=cDef&&(isNew||orig.defs.includes(cDef))?cDef:(orig?.defs[0]||"");
   if(!cdraft||cdraft._for!==route.id+"|"+df0)cdraft=isNew?{_for:"nova|"+df0,id:"jsp_"+uid().replace(/-/g,"").slice(0,10),df:df0,st:"",nome:"",mech:"",evid:[["",""]],nat:"fato",fonte:"Experiência da fábrica (JSP)",acao:"",resp:"",efic:"",reacao:""}
@@ -1662,7 +1668,7 @@ function pgDados(){
   const c=cfg(),adm=colab?.papel==="admin";
   const stTxt={ok:"Conectado",offline:"Sem conexão (usando cópia local)",local:"Modo local, sem compartilhar",off:"Não configurado",login:"Aguardando login",negado:"E-mail não autorizado"}[cloudState];
   let h=`<div class="grid g2"><div class="card"><h2>Banco de dados compartilhado</h2>
-   <dl class="list-kv"><dt>Situação</dt><dd><span class="pill ${cloudState==="ok"?"ok":"warn"}">${stTxt}</span></dd>${user?`<dt>Usuário</dt><dd>${esc(colab?.nome||"")} ${esc(user.email)} ${adm?'<span class="pill brand">administrador</span>':""}</dd>`:""}<dt>Registros</dt><dd>${S.inspecoes.length} inspeções · ${S.investigacoes.length} árvores · ${S.produtos.length} produto(s)</dd><dt>A enviar</dt><dd>${(S.meta.fila||[]).length} alteração(ões)</dd>${S.meta.lastSync?`<dt>Última sincronização</dt><dd>${new Date(S.meta.lastSync).toLocaleString("pt-BR")}</dd>`:""}</dl>
+   <dl class="list-kv"><dt>Situação</dt><dd><span class="pill ${cloudState==="ok"?"ok":"warn"}">${stTxt}</span></dd>${user?`<dt>Usuário</dt><dd>${esc(colab?.nome||"")} ${esc(user.email)} ${colab?.papel?`<span class="pill brand">${PAPEL_NOME[colab.papel]||colab.papel}</span>`:""}</dd>`:""}<dt>Registros</dt><dd>${S.inspecoes.length} inspeções · ${S.investigacoes.length} árvores · ${S.produtos.length} produto(s)</dd><dt>A enviar</dt><dd>${(S.meta.fila||[]).length} alteração(ões)</dd>${S.meta.lastSync?`<dt>Última sincronização</dt><dd>${new Date(S.meta.lastSync).toLocaleString("pt-BR")}</dd>`:""}</dl>
    <p class="muted small" style="margin:12px 0">Os registros ficam num banco na nuvem (Supabase) e aparecem para todos os colaboradores autorizados, em qualquer computador ou celular. Cada aparelho guarda uma cópia para continuar funcionando sem internet; as alterações são enviadas assim que a conexão volta.</p>
    <div class="row">${user?'<button class="btn" id="syncNow">Sincronizar agora</button><button class="btn" id="sairB">Sair</button>':""}${cloudState==="local"?'<button class="btn primary" id="sairLocal">Sair do modo local e entrar no banco</button>':""}</div>
    <details style="margin-top:14px" ${cloudConfigured()?"":"open"}><summary class="small" style="cursor:pointer;font-weight:600">Configuração técnica (TI)</summary>
@@ -1709,6 +1715,7 @@ function pgDados(){
    CADASTROS: produtos (com FTP), máquinas e usuários
    ========================================================================= */
 let cadTab="produtos",maqEdit=null,pdraft=null;
+let cbEdit=null;
 function pgCadastros(){
   const adm=colab?.papel==="admin"&&cloudState==="ok";if(cadTab==="usuarios"&&!adm)cadTab="produtos";
   const ed=isAdmin();
@@ -1730,7 +1737,7 @@ function pgCadastros(){
   }else{
     h+=`<div class="card" id="filaCard"><h2>Pedidos de acesso</h2><p class="muted small" style="margin-bottom:10px">Quem cria uma conta pela tela de entrada aparece aqui. Aceite escolhendo o papel ou recuse. Recusados ficam na lista abaixo como bloqueados e podem ser liberados ou excluídos depois.</p><div id="filaList" class="muted small">Carregando…</div></div>
     <div class="card"><h2>Usuários</h2><p class="muted small" style="margin-bottom:10px">Só os e-mails liberados desta lista conseguem ver e registrar dados. “Excluir” apaga a conta de acesso; as inspeções que a pessoa registrou continuam guardadas. Também dá para cadastrar um e-mail antes de a pessoa criar a conta.</p><div id="colabList" class="muted small">Carregando…</div>
-    <div class="grid g4" style="margin-top:12px;grid-template-columns:2fr 2fr 1fr auto"><label class="f">E-mail<input id="cbEmail" type="email"></label><label class="f">Nome<input id="cbNome"></label><label class="f">Papel<select id="cbPapel"><option value="inspetor">Inspetor(a)</option><option value="admin">Administrador</option></select></label><div style="align-self:end"><button class="btn primary" id="cbAdd">Incluir</button></div></div></div>`;
+    <div class="grid g4" style="margin-top:12px;grid-template-columns:2fr 2fr minmax(220px,1.3fr) auto"><label class="f">E-mail<input id="cbEmail" type="email"></label><label class="f">Nome<input id="cbNome"></label><label class="f">Papel<select id="cbPapel">${papelOpts("inspetor")}</select></label><div style="align-self:end"><button class="btn primary" id="cbAdd">Incluir</button></div></div></div>`;
   }
   setPage(h);
   $$("[data-ct]").forEach(b=>b.onclick=()=>{cadTab=b.dataset.ct;maqEdit=null;pgCadastros()});
@@ -1749,13 +1756,21 @@ function pgCadastros(){
     await persist("maquinas",rec);toast(old?"Máquina atualizada.":"Máquina cadastrada.");maqEdit=null;pgCadastros()};
   if(cadTab==="usuarios"&&adm){
     {const loadC=async()=>{const {data,error}=await sb.from("colaboradores").select("*").order("nome");if(error){$("#colabList").textContent="Não foi possível carregar.";return}
-      $("#colabList").innerHTML=`<div class="tw"><table class="t"><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Acesso</th></tr></thead><tbody>${data.map(c=>`<tr><td>${esc(c.nome||"")}</td><td>${esc(c.email)}</td><td>${c.papel==="admin"?"Administrador":"Inspetor(a)"}</td><td>${c.email===user.email?'<span class="muted">você</span>':`<div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sm" data-cbt="${esc(c.email)}" data-on="${c.ativo?0:1}">${c.ativo?"Bloquear":"Liberar"}</button><button class="btn sm danger" data-cbdel="${esc(c.email)}">Excluir</button></div>`}</td></tr>`).join("")}</tbody></table></div>`;
+      const eu=c=>c.email===(user.email||"").toLowerCase();
+      $("#colabList").innerHTML=`<div class="tw"><table class="t"><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Acesso</th></tr></thead><tbody>${data.map(c=>cbEdit===c.email?`<tr class="editing"><td><input data-cbn value="${esc(c.nome||"")}" placeholder="Nome"></td><td>${esc(c.email)}</td><td>${eu(c)?`${PAPEL_NOME[c.papel]}<div class="hint">Você não pode mudar o próprio papel.</div>`:`<select data-cbp>${papelOpts(c.papel)}</select>`}</td><td><div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sm primary" data-cbsave="${esc(c.email)}">Salvar</button><button class="btn sm" data-cbcancel>Cancelar</button></div></td></tr>`
+        :`<tr><td>${esc(c.nome||"")||'<span class="muted">sem nome</span>'}</td><td>${esc(c.email)}</td><td>${PAPEL_NOME[c.papel]||c.papel}${c.ativo?"":' <span class="pill nc">bloqueado</span>'}</td><td><div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sm" data-cbedit="${esc(c.email)}">Editar</button>${eu(c)?'<span class="muted">você</span>':`<button class="btn sm" data-cbt="${esc(c.email)}" data-on="${c.ativo?0:1}">${c.ativo?"Bloquear":"Liberar"}</button><button class="btn sm danger" data-cbdel="${esc(c.email)}">Excluir</button>`}</div></td></tr>`).join("")}</tbody></table></div>
+        <p class="hint" style="margin-top:8px">${["admin","gestor","inspetor"].map(k=>`<b>${PAPEL_NOME[k]}:</b> ${PAPEL_DESC[k].toLowerCase()}.`).join(" ")}</p>`;
+      $$("[data-cbedit]").forEach(b=>b.onclick=()=>{cbEdit=b.dataset.cbedit;loadC()});
+      $$("[data-cbcancel]").forEach(b=>b.onclick=()=>{cbEdit=null;loadC()});
+      $$("[data-cbsave]").forEach(b=>b.onclick=async()=>{const e=b.dataset.cbsave,upd={nome:($("[data-cbn]").value||"").trim()||null};const ps=$("[data-cbp]");if(ps)upd.papel=ps.value;
+        b.disabled=true;const {error}=await sb.from("colaboradores").update(upd).eq("email",e);if(error){b.disabled=false;toast("Não foi possível salvar: "+error.message);return}
+        cbEdit=null;toast("Cadastro atualizado.");if(e===(user.email||"").toLowerCase()&&colab)colab.nome=upd.nome;loadC()});
       $$("[data-cbt]").forEach(b=>b.onclick=async()=>{await sb.from("colaboradores").update({ativo:b.dataset.on==="1"}).eq("email",b.dataset.cbt);loadC()});
       $$("[data-cbdel]").forEach(b=>b.onclick=async()=>{const e=b.dataset.cbdel;if(!confirm("Excluir o usuário "+e+"?\n\nA conta de acesso é apagada e a pessoa sai da lista. As inspeções que ela registrou continuam guardadas."))return;
         const {error}=await sb.rpc("excluir_usuario",{p_email:e});if(error){toast("Não foi possível excluir: "+error.message);return}toast("Usuário excluído.");loadC();loadF()})};
     const loadF=async()=>{await loadPendentes();renderNav();const el=$("#filaList");if(!el)return;
       if(!pendentes.length){el.innerHTML='<span class="muted">Nenhum pedido aguardando.</span>';return}
-      el.innerHTML=`<div class="fila">${pendentes.map((p,i)=>`<div class="filarow"><div class="filainfo"><b>${esc(p.email)}</b><span class="small muted">Pedido em ${new Date(p.criado_em).toLocaleString("pt-BR")} · ${p.confirmado?'<span style="color:var(--ok)">e-mail confirmado</span>':'<span style="color:var(--warn)">e-mail ainda não confirmado</span>'}</span></div><div class="filaact"><input data-fnome="${i}" placeholder="Nome (opcional)"><select data-fpapel="${i}"><option value="inspetor">Inspetor(a)</option><option value="admin">Administrador</option></select><button class="btn sm primary" data-faceitar="${i}">Aceitar</button><button class="btn sm danger" data-frecusar="${i}">Recusar</button></div></div>`).join("")}</div>`;
+      el.innerHTML=`<div class="fila">${pendentes.map((p,i)=>`<div class="filarow"><div class="filainfo"><b>${esc(p.email)}</b><span class="small muted">Pedido em ${new Date(p.criado_em).toLocaleString("pt-BR")} · ${p.confirmado?'<span style="color:var(--ok)">e-mail confirmado</span>':'<span style="color:var(--warn)">e-mail ainda não confirmado</span>'}</span></div><div class="filaact"><input data-fnome="${i}" placeholder="Nome (opcional)"><select data-fpapel="${i}">${papelOpts("inspetor")}</select><button class="btn sm primary" data-faceitar="${i}">Aceitar</button><button class="btn sm danger" data-frecusar="${i}">Recusar</button></div></div>`).join("")}</div>`;
       const act=async(i,ativo)=>{const p=pendentes[i];if(!ativo&&!confirm("Recusar o acesso de "+p.email+"?"))return;const {error}=await sb.from("colaboradores").upsert({email:p.email,nome:($(`[data-fnome="${i}"]`)?.value||"").trim()||null,papel:ativo?$(`[data-fpapel="${i}"]`).value:"inspetor",ativo});if(error){toast("Não foi possível salvar: "+error.message);return}toast(ativo?"Acesso liberado para "+p.email+".":"Pedido recusado.");loadF();loadC()};
       $$("[data-faceitar]").forEach(b=>b.onclick=()=>act(+b.dataset.faceitar,true));$$("[data-frecusar]").forEach(b=>b.onclick=()=>act(+b.dataset.frecusar,false))};
     loadF();loadC();$("#cbAdd").onclick=async()=>{const email=$("#cbEmail").value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email)){toast("Informe um e-mail válido.");return}const {error}=await sb.from("colaboradores").upsert({email,nome:$("#cbNome").value.trim(),papel:$("#cbPapel").value,ativo:true});if(error){toast("Não foi possível incluir: "+error.message);return}$("#cbEmail").value="";$("#cbNome").value="";toast("Colaborador incluído.");loadC()}}
@@ -1842,6 +1857,7 @@ function pgAjuda(){
    <div class="card"><h2>Dúvidas comuns</h2>
     ${q("Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica guardado no aparelho e é enviado sozinho quando a conexão voltar. O ponto colorido no menu mostra a situação do banco.")}
     ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
+    ${q("Quem pode fazer o quê?","Há três papéis. Administrador do sistema: tudo, inclusive os cadastros de produtos, máquinas e usuários. Gestor da qualidade: tudo, menos os cadastros (edita a Biblioteca e pode reabrir a decisão de um lote). Inspetor(a) de qualidade: registra inspeções, preenche as árvores de falha e segue o destino do lote. Só o administrador do sistema muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
     ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
     ${q("Como o sistema decide o lote depois da inspeção 100%?","Divide as peças reprovadas pelas inspecionadas e compara com o NQA do plano do lote. Até o NQA, o lote é aceito e só as peças aprovadas são liberadas; acima, é rejeitado. As reprovadas ficam segregadas nos dois casos.")}
     ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
