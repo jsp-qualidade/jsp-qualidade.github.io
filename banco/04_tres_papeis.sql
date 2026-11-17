@@ -1,7 +1,7 @@
 -- 04 · Três papéis de acesso
---   admin    = Administrador do sistema: tudo, inclusive cadastros (produtos, máquinas, usuários)
---   gestor   = Gestor da qualidade: tudo, menos os cadastros (pode editar a Biblioteca causa/efeito)
---   inspetor = Inspetor(a) de qualidade: inspeções, árvores de falha e destino do lote
+--   admin    = Administrador: tudo, inclusive cadastros (produtos, máquinas, usuários)
+--   gestor   = Gestor: tudo, menos os cadastros (pode editar a Biblioteca causa/efeito)
+--   inspetor = Inspetor: inspeções, árvores de falha e destino do lote
 
 alter table public.colaboradores drop constraint colaboradores_papel_check;
 alter table public.colaboradores add constraint colaboradores_papel_check check (papel in ('admin','gestor','inspetor'));
@@ -15,20 +15,20 @@ $$;
 revoke all on function private.e_gestor() from public;
 grant execute on function private.e_gestor() to authenticated;
 
--- Biblioteca causa/efeito: administrador do sistema e gestor da qualidade
+-- Biblioteca causa/efeito: administrador e gestor
 drop policy "admin inclui" on public.causas;
 drop policy "admin altera" on public.causas;
 create policy "gestor inclui" on public.causas for insert to authenticated with check ((select private.e_gestor()));
 create policy "gestor altera" on public.causas for update to authenticated using ((select private.e_gestor())) with check ((select private.e_gestor()));
 
--- O administrador do sistema não pode tirar o próprio acesso total nem se bloquear (evita ficar sem ninguém com acesso total)
+-- O administrador não pode tirar o próprio acesso total nem se bloquear (evita ficar sem ninguém com acesso total)
 create or replace function private.protege_proprio_admin()
  returns trigger language plpgsql security definer set search_path to ''
 as $$
 begin
   if old.email = lower((select auth.jwt()) ->> 'email') and old.papel = 'admin'
      and (new.papel <> 'admin' or not new.ativo or new.email <> old.email) then
-    raise exception 'Você não pode tirar o seu próprio acesso de administrador do sistema';
+    raise exception 'Você não pode tirar o seu próprio acesso de administrador';
   end if;
   return new;
 end $$;

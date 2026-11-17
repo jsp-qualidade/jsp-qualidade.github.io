@@ -641,9 +641,9 @@ async function loadAll(){
 }
 // Só cria os cadastros iniciais se a tabela nunca teve registros (assim um produto ou máquina excluído não volta sozinho)
 // Cadastros (produtos, máquinas, pré-definições) são alterados só por administradores; no modo local, por quem usa o aparelho
-// Papéis: admin = Administrador do sistema (tudo, inclusive cadastros); gestor = Gestor da qualidade (tudo, menos cadastros);
-// inspetor = Inspetor(a) de qualidade (inspeções, árvores e destino do lote)
-const PAPEL_NOME={admin:"Administrador do sistema",gestor:"Gestor da qualidade",inspetor:"Inspetor(a) de qualidade"};
+// Papéis: admin = Administrador (tudo, inclusive cadastros); gestor = Gestor (tudo, menos cadastros);
+// inspetor = Inspetor (inspeções, árvores e destino do lote)
+const PAPEL_NOME={admin:"Administrador",gestor:"Gestor",inspetor:"Inspetor"};
 const PAPEL_DESC={admin:"Tudo, inclusive cadastros de produtos, máquinas e usuários",gestor:"Tudo, menos os cadastros",inspetor:"Inspeções, árvores de falha e destino do lote"};
 const papelOpts=sel=>["inspetor","gestor","admin"].map(k=>`<option value="${k}" ${k===sel?"selected":""}>${PAPEL_NOME[k]}</option>`).join("");
 const isAdmin=()=>localMode()||cloudState==="off"||colab?.papel==="admin";
@@ -1857,7 +1857,7 @@ function pgAjuda(){
    <div class="card"><h2>Dúvidas comuns</h2>
     ${q("Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica guardado no aparelho e é enviado sozinho quando a conexão voltar. O ponto colorido no menu mostra a situação do banco.")}
     ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
-    ${q("Quem pode fazer o quê?","Há três papéis. Administrador do sistema: tudo, inclusive os cadastros de produtos, máquinas e usuários. Gestor da qualidade: tudo, menos os cadastros (edita a Biblioteca e pode reabrir a decisão de um lote). Inspetor(a) de qualidade: registra inspeções, preenche as árvores de falha e segue o destino do lote. Só o administrador do sistema muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
+    ${q("Quem pode fazer o quê?","Há três papéis. Administrador: tudo, inclusive os cadastros de produtos, máquinas e usuários. Gestor: tudo, menos os cadastros (edita a Biblioteca e pode reabrir a decisão de um lote). Inspetor: registra inspeções, preenche as árvores de falha e segue o destino do lote. Só o administrador muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
     ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
     ${q("Como o sistema decide o lote depois da inspeção 100%?","Divide as peças reprovadas pelas inspecionadas e compara com o NQA do plano do lote. Até o NQA, o lote é aceito e só as peças aprovadas são liberadas; acima, é rejeitado. As reprovadas ficam segregadas nos dois casos.")}
     ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
