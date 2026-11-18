@@ -1334,12 +1334,12 @@ function pgInspecao(){
   if(pendLot.length&&(ls.k!=="final"||ls.auto))setBar(`<div class="bar-info"><span class="bar-plan">${pendLot.length} árvore(s) de falha deste lote sem preencher</span><span class="bar-hint">${ls.k==="cem"?"Depois volte à inspeção 100%":x.result==="R"?"Depois delas vem a decisão do lote":"Lote aceito: registre a causa da falha encontrada"}</span></div><button class="btn primary" data-goinv="${pendLot[0].id}">Preencher árvores →</button>`);
   else if(ls.k==="disp")setBar(`<div class="bar-info"><span class="bar-plan">Árvores preenchidas · falta decidir o destino do lote</span><span class="bar-hint">Aceitar, inspecionar 100% ou rejeitar</span></div><button class="btn primary" id="dispB">Decidir destino do lote →</button>`);
   else if(ls.k==="cem")setBar(`<div class="bar-info"><span class="bar-plan">Lote em inspeção 100% · com o operador</span><span class="bar-hint">O aviso já está na tela do operador</span></div><button class="btn" id="cemB">Registrar a 100% por aqui</button><button class="btn primary" id="painelB">Voltar ao painel</button>`);
-  else if(ls.st==="R")setBar(`<div class="bar-info"><span class="bar-plan">Lote rejeitado · bloqueado</span><span class="bar-hint">Siga o plano de reação</span></div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
-  else setBar(`<div class="bar-info"><span class="bar-plan">${esc(ls.label)} · lote liberado</span>${x.c100?.status==="concluida"?`<span class="bar-hint">Liberar só as ${x.c100.aprov} peças aprovadas</span>`:""}</div><button class="btn primary" id="novaB">Nova inspeção →</button>`);
+  else if(ls.st==="R")setBar(`<div class="bar-info"><span class="bar-plan">Lote rejeitado · bloqueado</span><span class="bar-hint">Siga o plano de reação</span></div><button class="btn primary" id="novaB">Voltar ao painel →</button>`);
+  else setBar(`<div class="bar-info"><span class="bar-plan">${esc(ls.label)} · lote liberado</span>${x.c100?.status==="concluida"?`<span class="bar-hint">Liberar só as ${x.c100.aprov} peças aprovadas</span>`:""}</div><button class="btn primary" id="novaB">Voltar ao painel →</button>`);
   if($("#dispB"))$("#dispB").onclick=()=>go("disposicao",x.id);if($("#cemB"))$("#cemB").onclick=()=>go("opcem",x.id);if($("#painelB"))$("#painelB").onclick=()=>go("painel");
   if($("#reabB"))$("#reabB").onclick=()=>askReason({titulo:"Reabrir a decisão do lote "+(x.lote||""),texto:"A decisão atual e a inspeção 100% (se houver) ficam guardadas no histórico. O lote volta para a decisão de disposição.",botao:"Reabrir decisão"},async m=>{x.dispHist=[...(x.dispHist||[]),{tipo:"reaberta",just:m,em:new Date().toISOString(),por:decidedBy()||""}];if(x.c100)x.c100Hist=[...(x.c100Hist||[]),x.c100];delete x.disp;delete x.c100;await persist("inspecoes",x);toast("Decisão reaberta.");go("disposicao",x.id)});
   if($("#cemB2"))$("#cemB2").onclick=()=>go("opcem",x.id);
-  $$("[data-goinv]").forEach(b=>b.onclick=()=>go("arvore",b.dataset.goinv));if($("#novaB"))$("#novaB").onclick=()=>{draft=null;go("nova")};
+  $$("[data-goinv]").forEach(b=>b.onclick=()=>go("arvore",b.dataset.goinv));if($("#novaB"))$("#novaB").onclick=()=>go(soOperador()?"operador":"painel");
   $$("[data-open]").forEach(b=>b.onclick=()=>openInvestigation(x,b.dataset.open));
   $("#anyDef").onchange=e=>{if(e.target.value)openInvestigation(x,e.target.value)};
   $$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
@@ -1675,8 +1675,8 @@ function pgOpLote(){
   if(pr.length)h+=`<h2 class="opsec">O que fazer com a causa</h2>`+pr.map(c=>`<div class="opcard"><span class="opkick" style="color:var(--nc)">Causa encontrada</span><b class="opq">${esc(c.nome)}</b><div class="oprec"><small>Faça agora (reação)</small><span>${esc(reactOf(c))}</span></div><div class="oprec"><small>Ação para corrigir</small><span>${esc(c.acao||"—")}</span></div>${c.resp?`<span class="ophint">Avisar: <b>${esc(c.resp)}</b></span>`:""}</div>`).join("");
   else if(tr.length&&tr.every(treeFilled))h+=`<div class="opcard"><b>Nenhuma causa confirmada</b><span class="ophint">Avise o líder de produção. A Qualidade vai analisar a falha.</span></div>`;
   setPage(h+`</div>`);opBind();
-  setBar(`<button class="btn" id="opBack">Início</button><div class="bar-info"><span class="bar-hint">${esc(lotStage(x).label)}</span></div><button class="btn primary" id="opNew2">Nova inspeção</button>`);
-  $("#opBack").onclick=()=>go("operador");$("#opNew2").onclick=()=>{OP=opNovo();setMeta("opRascunho",null);go("opnova")};
+  setBar(`<div class="bar-info"><span class="bar-hint">${esc(lotStage(x).label)}</span></div><button class="btn primary" id="opNew2">Ir para o início →</button>`);
+  $("#opNew2").onclick=()=>go("operador");
 }
 
 /* ---------- Inspeção 100% (operador) ---------- */
@@ -1776,8 +1776,8 @@ function pgOpOc(){
   else if(!pend)h+=`<div class="opcard"><b>Nenhuma causa confirmada</b><span class="ophint">Avise o líder de produção. A Qualidade vai analisar a falha.</span></div>`;
   setPage(h+`</div>`);opBind();
   $$("[data-goarv]").forEach(b=>b.onclick=()=>go("oparvore",b.dataset.goarv));
-  setBar(`<button class="btn" id="opBack">Início</button><div class="bar-info"><span class="bar-hint">Ocorrência enviada à Qualidade</span></div><button class="btn primary" id="opNew2">Nova inspeção</button>`);
-  $("#opBack").onclick=()=>go("operador");$("#opNew2").onclick=()=>{OP=opNovo();setMeta("opRascunho",null);go("opnova")};
+  setBar(`<div class="bar-info"><span class="bar-hint">Ocorrência enviada à Qualidade</span></div><button class="btn primary" id="opNew2">Ir para o início →</button>`);
+  $("#opNew2").onclick=()=>go("operador");
 }
 
 /* ---------- Ocorrências no processo (visão da Qualidade) ---------- */
