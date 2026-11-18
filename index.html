@@ -947,6 +947,7 @@ function csv(rows){const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';return "�
 const ICON={
  dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
  new:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+ oc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5v.5"/></svg>',
  op:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18h4"/></svg>',
  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
  tree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-2.5h14V17M12 12v2.5"/></svg>',
@@ -961,6 +962,7 @@ const PAGES=[
  {id:"nova",t:"Nova inspeção",ic:"new",grp:"Operação"},
  {id:"operador",t:"Tela do operador",ic:"op",grp:"Operação"},
  {id:"inspecoes",t:"Inspeções",ic:"list",grp:"Operação"},
+ {id:"ocorrencias",t:"Ocorrências",ic:"oc",grp:"Operação"},
  {id:"investigacoes",t:"Árvores de falha",ic:"tree",grp:"Análise"},
  {id:"biblioteca",t:"Biblioteca causa/efeito",ic:"book",grp:"Análise"},
  {id:"cadastros",t:"Cadastros",ic:"cad",grp:"Referência"},
@@ -971,7 +973,7 @@ const PAGES=[
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
 const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1,disposicao:1,cem:1};
-const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",ocorrencias:"Ocorrências",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
@@ -979,16 +981,16 @@ function backTarget(peek){
     if(ok){if(!peek)navStack.length=i;return t}}
   if(!peek)navStack.length=0;
   if(route.p==="disposicao"||route.p==="cem")return {p:"inspecao",id:route.id,y:0};
-  if(route.p==="arvore"){const v=S.investigacoes.find(v=>v.id===route.id);if(v&&S.inspecoes.some(x=>x.id===v.inspecaoId))return {p:"inspecao",id:v.inspecaoId,y:0};return {p:"investigacoes",id:null,y:0}}
+  if(route.p==="arvore"){const v=S.investigacoes.find(v=>v.id===route.id);if(v&&S.inspecoes.some(x=>x.id===v.inspecaoId))return {p:"inspecao",id:v.inspecaoId,y:0};if(v?.ocId)return {p:"ocorrencias",id:null,y:0};return {p:"investigacoes",id:null,y:0}}
   return {p:route.p==="produto"?"cadastros":route.p==="causa"?"biblioteca":"inspecoes",id:null,y:0};
 }
 function goBack(){const t=backTarget(false);route={p:t.p,id:t.id||null};location.hash=t.p+(t.id?"/"+t.id:"");render();window.scrollTo(0,t.y||0)}
 window.addEventListener("hashchange",()=>{const [p,id0]=location.hash.slice(1).split("/"),id=id0||null;if(p&&(p!==route.p||id!==route.id)){const top=navStack[navStack.length-1];let y=0;if(top&&top.p===p&&(top.id||null)===id){y=top.y||0;navStack.pop()}else navStack.push({p:route.p,id:route.id,y:window.scrollY});route={p,id};render();window.scrollTo(0,y)}});
 function renderNav(){
   let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
-    const act=route.p===p.id||(OPR[route.p]&&p.id==="operador")||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
-    const badge=p.id==="investigacoes"?pendingTrees().length:p.id==="inspecoes"?pendingLots().length:p.id==="cadastros"?pendentes.length:0;
-    h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
+    const act=route.p===p.id||(OPR[route.p]&&p.id==="operador")||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id===(S.investigacoes.find(v=>v.id===route.id)?.ocId?"ocorrencias":"investigacoes"))||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
+    const badge=p.id==="ocorrencias"?ocGrupos(36500).filter(g=>!g.every(v=>(v.conclusao?.status||"aberta")==="concluida")).length:p.id==="investigacoes"?pendingTrees().length:p.id==="inspecoes"?pendingLots().length:p.id==="cadastros"?pendentes.length:0;
+    h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":p.id==="ocorrencias"?"Ocorrências com análise em aberto":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
 }
 function head(crumb,title,right=""){$("#crumb").textContent=crumb;
@@ -1001,7 +1003,7 @@ function render(){
   if(soOperador()&&!OPR[route.p]){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
   document.body.classList.toggle("opmode",!!OPR[route.p]);
   const demo=S.inspecoes.some(x=>x.demo);
-  ({operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
+  ({ocorrencias:pgOcorrencias,operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO ficam só neste aparelho e servem para treinamento e apresentação. Remova-os em “Dados e configuração” quando terminar.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
@@ -1094,7 +1096,7 @@ function pgPainel(){
   if(pendentes.length&&colab?.papel==="admin")h+=`<div class="banner info"><span><b>${pendentes.length} pedido(s) de acesso aguardando aprovação.</b> ${pendentes.slice(0,3).map(p=>esc(p.email)).join(", ")}${pendentes.length>3?"…":""}</span><button class="btn sm primary" id="verPed">Ver pedidos</button></div>`;
   const pend=pendingTrees(),pl=pendingLots();
   const ocs=ocGrupos(7).filter(g=>!g[0].demo);
-  if(ocs.length)h+=`<div class="banner info"><span><b>${ocs.length} ocorrência(s) registrada(s) pelo operador nos últimos 7 dias.</b> ${ocs.slice(0,3).map(g=>esc(g.map(v=>DEF[v.defeito]?.nome||v.defeito).join(" + "))+" · lote "+esc(g[0].oc?.lote||"—")+" ("+(g[0].oc?.qtd||0)+" pç)").join("; ")}${ocs.length>3?"…":""}</span><button class="btn sm" data-inv="${ocs[0][0].id}">Ver a mais recente</button></div>`;
+  if(ocs.length)h+=`<div class="banner info"><span><b>${ocs.length} ocorrência(s) registrada(s) pelo operador nos últimos 7 dias.</b> ${ocs.slice(0,3).map(g=>esc(g.map(v=>DEF[v.defeito]?.nome||v.defeito).join(" + "))+" · lote "+esc(g[0].oc?.lote||"—")+" ("+(g[0].oc?.qtd||0)+" pç)").join("; ")}${ocs.length>3?"…":""}</span><button class="btn sm" id="goOcs">Ver ocorrências</button></div>`;
   if(pl.length)h+=`<div class="banner warn"><span><b>${pl.length} lote(s) aguardando decisão ou em inspeção 100%.</b> ${pl.slice(0,3).map(x=>"Lote "+esc(x.lote||"")+" ("+lotStage(x).label.toLowerCase()+")").join(", ")}${pl.length>3?"…":""}</span><button class="btn sm primary" id="goLots">Ver lotes</button></div>`;
   if(pend.length)h+=`<div class="banner warn"><span><b>${pend.length} árvore(s) de falha ainda não preenchida(s).</b> Preencha logo após a inspeção, enquanto as evidências estão no posto.</span><button class="btn sm primary" id="goPend">Preencher agora</button></div>`;
   if(!S.inspecoes.length){
@@ -1127,6 +1129,7 @@ function pgPainel(){
   h+=`<div class="card"><h2>Árvores de falha em aberto</h2>${inv.length?`<div class="tw"><table class="t"><thead><tr><th>Defeito</th><th>Detectado em</th><th>Lote</th><th>Causa provável</th><th>Status</th></tr></thead><tbody>${inv.map(v=>{const x=S.inspecoes.find(i=>i.id===v.inspecaoId);return `<tr class="click" data-inv="${v.id}"><td>${esc(DEF[v.defeito]?.nome)}</td><td>${POINTS[v.ponto]?.nome}</td><td>${esc(x?.lote||"—")}</td><td class="small">${esc(probable(v).map(c=>c.nome).join("; ")||"—")}</td><td>${invPill(v.conclusao?.status)}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">Nenhuma.</p>'}</div>`;
   setPage(h);
   if($("#goPend"))$("#goPend").onclick=()=>go("arvore",pend[0].id);
+  if($("#goOcs"))$("#goOcs").onclick=()=>go("ocorrencias");
   if($("#goLots"))$("#goLots").onclick=()=>{const k=lotStage(pl[0]).k;if(pl.length===1)go(k==="cem"?"cem":"disposicao",pl[0].id);else{filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""};filt.res=pl.every(x=>lotStage(x).k==="cem")?"C":pl.every(x=>lotStage(x).k!=="cem")?"P":"";go("inspecoes")}};
   if($("#verRegras"))$("#verRegras").onclick=()=>{ptab="com";go("planos")};
   if($("#pfD"))$("#pfD").onchange=e=>{pf.dias=e.target.value;pgPainel()};if($("#pfP"))$("#pfP").onchange=e=>{pf.prod=e.target.value;pgPainel()};if($("#pfX"))$("#pfX").onclick=()=>{pf={dias:"",prod:""};pgPainel()};
@@ -1760,6 +1763,30 @@ function pgOpOc(){
   $("#opBack").onclick=()=>go("operador");$("#opNew2").onclick=()=>{OP=opNovo();setMeta("opRascunho",null);go("opnova")};
 }
 
+/* ---------- Ocorrências no processo (visão da Qualidade) ---------- */
+let ocFilt={q:"",ponto:"",st:""};
+const ocSit=g=>g.some(v=>!treeFilled(v))?"P":g.every(v=>(v.conclusao?.status||"aberta")==="concluida")?"C":"A";
+const ocSitPill=k=>({P:'<span class="pill nc">Perguntas sem responder</span>',A:'<span class="pill warn">Em análise</span>',C:'<span class="pill ok">Concluída</span>'})[k];
+function pgOcorrencias(){
+  head("Operação","Ocorrências no processo",`<button class="btn" id="exO">Exportar CSV</button>`);
+  const all=ocGrupos(36500),f=ocFilt,ql=f.q.trim().toLowerCase();
+  const L=all.filter(g=>{const oc=g[0].oc||{};return (!f.ponto||oc.ponto===f.ponto)&&(!f.st||ocSit(g)===f.st)&&(!ql||[oc.lote,oc.produto,oc.maquina,oc.molde,oc.op,oc.obs,oc.por,...g.map(v=>DEF[v.defeito]?.nome)].join(" ").toLowerCase().includes(ql))});
+  const sem=all.filter(g=>ocSit(g)==="P").length,anal=all.filter(g=>ocSit(g)==="A").length,pecas=all.reduce((a,g)=>a+(+g[0].oc?.qtd||0),0);
+  let h=`<div class="banner info"><span>Defeitos que o operador viu <b>fora da inspeção por amostragem</b>, registrados na Tela do operador. Cada defeito abre uma árvore de falha. Ocorrências não contam como inspeção: não entram no plano de amostragem, no regime nem nas taxas de aprovação.</span></div>
+    <div class="grid g4 kpis" style="margin-bottom:14px"><div class="kpi"><div class="l">Ocorrências</div><div class="v">${all.length}</div></div><div class="kpi"><div class="l">Peças com defeito</div><div class="v">${pecas}</div></div><div class="kpi"><div class="l">Perguntas sem responder</div><div class="v" style="color:var(--nc)">${sem}</div></div><div class="kpi"><div class="l">Em análise</div><div class="v" style="color:var(--warn)">${anal}</div></div></div>
+    <div class="card"><div class="grid filtgrid" style="margin-bottom:12px"><label class="f">Buscar<input id="ocQ" value="${esc(f.q)}" placeholder="Lote, defeito, máquina, molde…"></label>
+      <label class="f">Ponto<select id="ocPt"><option value="">Todos</option>${Object.entries(POINTS).map(([k,pt])=>`<option value="${k}" ${f.ponto===k?"selected":""}>${esc(pt.nome)}</option>`).join("")}</select></label>
+      <label class="f">Situação<select id="ocSt"><option value="">Todas</option>${[["P","Perguntas sem responder"],["A","Em análise"],["C","Concluída"]].map(([k,l])=>`<option value="${k}" ${f.st===k?"selected":""}>${l}</option>`).join("")}</select></label></div>`;
+  h+=L.length?`<div class="tw hidem"><table class="t"><thead><tr><th>Registrada em</th><th>Ponto</th><th>Lote / rack</th><th>Máquina</th><th>Defeito(s)</th><th>Peças</th><th>Causa encontrada</th><th>Registrada por</th><th>Situação</th></tr></thead><tbody>${L.map(g=>{const oc=g[0].oc||{},pr=[...new Set(g.flatMap(v=>probable(v).map(c=>c.nome)))];
+      return `<tr class="click" data-ocg="${g[0].ocId}"><td>${new Date(oc.em||g[0].createdAt).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"})}</td><td>${esc(POINTS[oc.ponto]?.nome||"")}</td><td><b>${esc(oc.lote||"—")}</b></td><td>${esc(oc.maquina||"—")}${oc.molde?`<div class="small muted">molde ${esc(oc.molde)}</div>`:""}</td><td>${g.map(v=>esc(DEF[v.defeito]?.nome||v.defeito)).join("<br>")}</td><td>${oc.qtd||"—"}</td><td class="small">${esc(pr.join("; ")||"—")}</td><td class="small">${esc(oc.por||"—")}</td><td>${ocSitPill(ocSit(g))}</td></tr>`}).join("")}</tbody></table></div>
+    <div class="mcards">${L.map(g=>{const oc=g[0].oc||{};return `<button class="mcard" data-ocg="${g[0].ocId}"><div class="mc1"><b>Lote ${esc(oc.lote||"—")}</b>${ocSitPill(ocSit(g))}</div><div class="mc2">${g.map(v=>esc(DEF[v.defeito]?.nome||v.defeito)).join(" · ")} · ${oc.qtd} pç</div><div class="mc3">${esc(POINTS[oc.ponto]?.nome||"")} · ${esc(oc.maquina||"")} · ${fmtD(oc.data)}</div></button>`}).join("")}</div>`
+    :`<p class="muted" style="margin-top:8px">${all.length?"Nenhuma ocorrência com esses filtros.":"Nenhuma ocorrência registrada ainda. O operador registra pela Tela do operador, em “Registrar ocorrência”."}</p>`;
+  setPage(h+`</div>`);
+  $$("[data-ocg]").forEach(r=>r.onclick=()=>{const g=all.find(g=>g[0].ocId===r.dataset.ocg);const v=g.find(t=>!treeFilled(t))||g[0];go("arvore",v.id)});
+  $("#ocQ").oninput=e=>{ocFilt.q=e.target.value;clearTimeout(window._ocq);window._ocq=setTimeout(()=>{const pos=e.target.selectionStart;pgOcorrencias();const i=$("#ocQ");i.focus();i.setSelectionRange(pos,pos)},300)};
+  $("#ocPt").onchange=e=>{ocFilt.ponto=e.target.value;pgOcorrencias()};$("#ocSt").onchange=e=>{ocFilt.st=e.target.value;pgOcorrencias()};
+  $("#exO").onclick=()=>download("JSP_ocorrencias.csv",csv([["Registrada em","Ponto","Produto","Máquina","Molde","OP","Lote/rack","Turno","Defeito(s)","Peças com defeito","Observação","Registrada por","Origem localizada","Causa encontrada","Situação"],...all.map(g=>{const oc=g[0].oc||{};return [new Date(oc.em||g[0].createdAt).toLocaleString("pt-BR"),POINTS[oc.ponto]?.nome,oc.produto,oc.maquina,oc.molde,oc.op,oc.lote,oc.turno,g.map(v=>DEF[v.defeito]?.nome||v.defeito).join(" | "),oc.qtd,oc.obs,oc.por,g.map(originLabel).join(" | "),[...new Set(g.flatMap(v=>probable(v).map(c=>c.nome)))].join(" | "),{P:"Perguntas sem responder",A:"Em análise",C:"Concluída"}[ocSit(g)]]})]),"text/csv;charset=utf-8");
+}
 function pgCem(){
   // A inspeção 100% é registrada na tela do operador (peça por peça, com os defeitos de cada uma)
   go("opcem",route.id);
@@ -1850,8 +1877,8 @@ function pgArvore(){
   setPage(h);
   const nFilled=irmas.filter(treeFilled).length;
   setBar(`<div class="bar-info"><span class="bar-plan">Árvore <b>${pos+1}</b> de <b>${irmas.length}</b> · ${esc(d.nome)}</span><span class="bar-hint">${filled?(prox?`Preenchida ✓ · faltam ${irmas.length-nFilled}`:"Todas as árvores do lote preenchidas ✓"):"Responda o passo 1 (origem) e verifique ao menos uma causa no passo 2"}</span></div>
-    ${filled?(prox?`<button class="btn primary" data-goinv="${prox.id}">Próxima árvore →</button>`:x?.c100?.status==="andamento"?`<button class="btn primary" data-gocem="${x.id}">Voltar e concluir a inspeção 100% →</button>`:x&&lotStage(x).k==="disp"?`<button class="btn primary" data-godisp="${x.id}">Decidir destino do lote →</button>`:x?`<button class="btn primary" data-goinsp="${v.inspecaoId}">Concluir e voltar ao lote →</button>`:`<button class="btn primary" data-golist>Concluir →</button>`):`<button class="btn primary" disabled>Próxima árvore →</button>`}`);
-  $$("[data-golist]").forEach(b=>b.onclick=()=>go("investigacoes"));$$("[data-gocem]").forEach(b=>b.onclick=()=>go("cem",b.dataset.gocem));$$("[data-godisp]").forEach(b=>b.onclick=()=>go("disposicao",b.dataset.godisp));
+    ${filled?(prox?`<button class="btn primary" data-goinv="${prox.id}">Próxima árvore →</button>`:x?.c100?.status==="andamento"?`<button class="btn primary" data-gocem="${x.id}">Voltar e concluir a inspeção 100% →</button>`:x&&lotStage(x).k==="disp"?`<button class="btn primary" data-godisp="${x.id}">Decidir destino do lote →</button>`:x?`<button class="btn primary" data-goinsp="${v.inspecaoId}">Concluir e voltar ao lote →</button>`:`<button class="btn primary" data-golist>Concluir e voltar às ocorrências →</button>`):`<button class="btn primary" disabled>Próxima árvore →</button>`}`);
+  $$("[data-golist]").forEach(b=>b.onclick=()=>go(v.ocId?"ocorrencias":"investigacoes"));$$("[data-gocem]").forEach(b=>b.onclick=()=>go("cem",b.dataset.gocem));$$("[data-godisp]").forEach(b=>b.onclick=()=>go("disposicao",b.dataset.godisp));
   const sv=async()=>{await persist("investigacoes",v)};
   $$("[data-pres]").forEach(b=>b.onclick=async()=>{v.presenca=v.presenca||{};v.presenca[b.dataset.pres]=v.presenca[b.dataset.pres]===b.dataset.v?"":b.dataset.v;await sv();pgArvore()});
   $$("[data-ans]").forEach(b=>b.onclick=async()=>{v.respostas=v.respostas||{};const r=v.respostas[b.dataset.ans]||{};r.a=r.a===b.dataset.v?"":b.dataset.v;v.respostas[b.dataset.ans]=r;if(c.status==="aberta"&&r.a)c.status="andamento";await sv();const y=window.scrollY;pgArvore();window.scrollTo(0,y)});
