@@ -298,6 +298,75 @@ dialog.sheetdlg{padding:0;width:min(720px,96vw);max-height:88vh;overflow:hidden}
 .banner.ok{background:var(--ok-soft);border-color:#B7DEC8;color:var(--ok)}.banner.nc{background:var(--nc-soft);border-color:#F1C3BC;color:var(--nc)}
 ol.tl{list-style:none;margin:0;padding:0}ol.tl li{display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--line2);font-size:13px}ol.tl .tl-t{color:var(--muted);white-space:nowrap;min-width:92px}
 @media(max-width:820px){.dopts{grid-template-columns:1fr}.c100btns button{flex:1 1 100%}}
+
+/* ---------- Tela do operador ---------- */
+body.opmode .app{grid-template-columns:minmax(0,1fr)}
+body.opmode .side{display:none!important}
+body.opmode .actionbar{left:0}
+body.opmode .page{max-width:760px;margin:0 auto;width:100%;box-sizing:border-box;padding:18px 16px 120px}
+body.opmode .top{padding:12px 16px}
+.opwrap{display:flex;flex-direction:column;gap:14px}
+.opbig{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:64px;border:0;border-radius:14px;background:var(--brand);color:#fff;font:inherit;font-size:19px;font-weight:700;cursor:pointer}
+.opbig.ghost{background:var(--surface);color:var(--nc);border:2px solid var(--nc);font-size:16px;min-height:56px}
+.opbig:disabled{opacity:.45;cursor:not-allowed}
+.opsec{font-size:16px;font-weight:800;margin:8px 0 0;display:flex;align-items:center;gap:8px}
+.opcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.opcard.pc{border:2px solid var(--nc)}.opcard.pc.falta{border-color:var(--warn)}
+.oppc{color:var(--nc);font-size:16px}
+.oplab{font-size:14px;font-weight:700;margin-top:4px}
+.ophint{font-size:13px;color:var(--muted);line-height:1.45}
+.opkick{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.opt{margin:0;font-size:21px;font-weight:800}
+.opq{font-size:15.5px;line-height:1.4}
+.opin{height:54px;box-sizing:border-box;border-radius:12px;border:2px solid var(--line);padding:0 12px;font:inherit;font-size:16px;font-weight:600;background:var(--surface);color:var(--ink);width:100%}
+.opin.big{height:62px;font-size:24px;font-weight:800}
+.opin:focus{border-color:var(--brand);outline:none}
+.opgrid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.optiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.optiles.t4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.optile{min-height:58px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;padding:6px}
+.optile.sm{min-height:48px}
+.optile.on{border-color:var(--brand);background:var(--brand-soft)}
+.opplan{background:var(--nav);color:#fff;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:6px}
+.opplan b{font-size:28px;line-height:1.15}.opplan span{font-size:14.5px;color:#DCE6F0;line-height:1.5}.opplan small{font-size:12.5px;color:#B9C7D6}
+.opempty{border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;font-size:14px;color:var(--muted)}
+.opsteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.opsteps li{font-size:12.5px;font-weight:600;color:var(--muted);border-top:5px solid var(--line);padding-top:6px}
+.opsteps li.on{color:var(--brand);border-color:var(--brand)}.opsteps li.ok{color:var(--ok);border-color:var(--ok)}
+.opsum{display:flex;flex-direction:column;gap:2px}.opsum span{font-size:13px;color:var(--muted)}.opsum b{font-size:19px}
+.optri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.optri>div{background:var(--sunk);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.optri small{font-size:12px;color:var(--muted)}.optri b{font-size:21px}
+.optags{display:flex;flex-wrap:wrap;gap:6px}
+.opchips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opchip{min-height:48px;text-align:left;border-radius:10px;border:2px solid var(--line);background:var(--surface);padding:6px 10px;font:inherit;font-size:13.5px;font-weight:600;line-height:1.3;color:var(--ink);cursor:pointer}
+.opchip.on{border-color:var(--nc);background:var(--nc-soft)}
+.opres{border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:6px;color:#fff}.opres.ok{background:var(--ok)}.opres.nc{background:var(--nc)}
+.opres b{font-size:28px}.opres span{font-size:15px;opacity:.95}
+.opinst{border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;border:2px solid}
+.opinst p{margin:0;font-size:15px;line-height:1.5}
+.opinst-l{font-size:13px;font-weight:600;opacity:.85}
+.opinst-t{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800}
+.opinst-b{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.opinst.ok{background:var(--ok-soft);border-color:var(--ok);color:#0E4A2D}
+.opinst.nc{background:var(--nc-soft);border-color:var(--nc);color:#6E1510}
+.opinst.warn{background:#FFF4E5;border-color:#E8A33D;color:#5C3A07}
+.opinst.info{background:var(--brand-soft);border-color:var(--brand);color:var(--nav)}
+.opinst.cem{background:#0B4F9C;border-color:#0B4F9C;color:#fff;box-shadow:0 6px 20px rgba(11,79,156,.25)}
+.opinst.cem .opinst-t{font-size:21px}
+.opbtn{min-height:48px;border-radius:12px;border:0;background:var(--nav);color:#fff;font:inherit;font-size:15px;font-weight:700;padding:0 18px;cursor:pointer}
+.opbtn.ghost{background:transparent;color:inherit;border:2px solid currentColor}
+.opbtn.cem{background:#fff;color:#0B4F9C;font-size:17px;min-height:54px;padding:0 22px}
+.opinst.cem .opbtn.ghost{color:#fff}
+.opans3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.opans3.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opans{min-height:50px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font:inherit;font-size:14.5px;font-weight:700;color:var(--ink);cursor:pointer;padding:4px}
+.opans.on.nc{border-color:var(--nc);background:var(--nc-soft)}.opans.on.ok{border-color:var(--ok);background:var(--ok-soft)}.opans.on.mut{border-color:var(--muted);background:var(--sunk)}.opans.on.info{border-color:var(--brand);background:var(--brand-soft)}
+.oprec{display:flex;flex-direction:column;gap:2px}.oprec small{font-size:13px;font-weight:800;color:var(--warn)}.oprec+.oprec small{color:var(--brand)}.oprec span{font-size:14.5px;line-height:1.5}
+.oplist{display:flex;flex-direction:column;gap:8px}
+.oprow{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;color:var(--ink);cursor:pointer}
+.oprow span{display:flex;flex-direction:column;gap:2px}.oprow small{color:var(--muted);font-size:12.5px}
+.opol{margin:0;padding-left:20px;font-size:15px;line-height:1.6}
+.opcount{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:10px;align-items:center;border-top:1px solid var(--line2);padding-top:8px}
+.opcount .opin{height:50px;font-size:20px;font-weight:800;text-align:center}
+@media(max-width:520px){.opchips{grid-template-columns:1fr}.optri b{font-size:16.5px;overflow-wrap:anywhere}.opcount{grid-template-columns:minmax(0,1fr) 90px}}
 .acrec{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;background:var(--sunk)}.acrec-h{margin-bottom:8px}.acrec .list-kv{margin-bottom:6px}@media(max-width:600px){.acrec .list-kv{grid-template-columns:1fr;gap:2px 0}.acrec .list-kv dd{margin-bottom:8px}}
 table.t.mtx td{vertical-align:top;line-height:1.45}table.t.mtx td.mtx-def{background:var(--sunk);border-right:1px solid var(--line)}
 .mtxcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.mtxcard-h{display:flex;justify-content:space-between;gap:8px;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)}
@@ -874,6 +943,7 @@ function csv(rows){const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';return "�
 const ICON={
  dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
  new:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+ op:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18h4"/></svg>',
  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
  tree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-2.5h14V17M12 12v2.5"/></svg>',
  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
@@ -885,6 +955,7 @@ const ICON={
 const PAGES=[
  {id:"painel",t:"Painel",ic:"dash",grp:"Operação"},
  {id:"nova",t:"Nova inspeção",ic:"new",grp:"Operação"},
+ {id:"operador",t:"Tela do operador",ic:"op",grp:"Operação"},
  {id:"inspecoes",t:"Inspeções",ic:"list",grp:"Operação"},
  {id:"investigacoes",t:"Árvores de falha",ic:"tree",grp:"Análise"},
  {id:"biblioteca",t:"Biblioteca causa/efeito",ic:"book",grp:"Análise"},
@@ -896,7 +967,7 @@ const PAGES=[
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
 const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1,disposicao:1,cem:1};
-const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",disposicao:"Decisão do lote",cem:"Inspeção 100%",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
@@ -911,7 +982,7 @@ function goBack(){const t=backTarget(false);route={p:t.p,id:t.id||null};location
 window.addEventListener("hashchange",()=>{const [p,id0]=location.hash.slice(1).split("/"),id=id0||null;if(p&&(p!==route.p||id!==route.id)){const top=navStack[navStack.length-1];let y=0;if(top&&top.p===p&&(top.id||null)===id){y=top.y||0;navStack.pop()}else navStack.push({p:route.p,id:route.id,y:window.scrollY});route={p,id};render();window.scrollTo(0,y)}});
 function renderNav(){
   let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
-    const act=route.p===p.id||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
+    const act=route.p===p.id||(OPR[route.p]&&p.id==="operador")||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id==="investigacoes")||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
     const badge=p.id==="investigacoes"?pendingTrees().length:p.id==="inspecoes"?pendingLots().length:p.id==="cadastros"?pendentes.length:0;
     h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
@@ -922,8 +993,11 @@ function render(){
   c100Flush();rebuildCauses();renderNav();updateDbStatus();setBar("");
   if(authLanding){pgAuthLanding();return}
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
+  // Inspetor usa só a tela do operador
+  if(soOperador()&&!OPR[route.p]){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
+  document.body.classList.toggle("opmode",!!OPR[route.p]);
   const demo=S.inspecoes.some(x=>x.demo);
-  ({painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
+  ({operador:pgOperador,opnova:pgOpNova,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO ficam só neste aparelho e servem para treinamento e apresentação. Remova-os em “Dados e configuração” quando terminar.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
@@ -1351,6 +1425,246 @@ function c100Save(x){x.updatedAt=Date.now();putLocal("inspecoes",x);c100X=x;clea
 function c100Flush(){clearTimeout(c100T);if(c100X){const y=c100X;c100X=null;return persist("inspecoes",y)}}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")c100Flush()});
 window.addEventListener("pagehide",()=>c100Flush());
+// Conclui a inspeção 100% (tela da Qualidade e tela do operador usam a mesma regra)
+async function cemFinalizar(x){
+  const c=x.c100;if(!c||c.status==="concluida")return null;
+  const N=+x.N,nq=nqaPct(x),tr=lotTrees(x),r=Object.values(c.qtd||{}).reduce((a,v)=>a+(Math.floor(+v)||0),0);
+  if(!(N>0)||r>N||tr.some(v=>!treeFilled(v)))return null;
+  const nv=(c.novos||[]).filter(d=>(Math.floor(+c.qtd[d])||0)>0&&!tr.some(v=>v.defeito===d));
+  if(nv.length){await c100Flush();let first=null;for(const d of nv){const v=await createInvestigation(x,d);first=first||v}await persist("inspecoes",x);return {tree:first}}
+  await c100Flush();const p=r/N*100,res=p<=nq?"A":"R",qtd=Object.fromEntries(Object.entries(c.qtd||{}).map(([d,v])=>[d,Math.floor(+v)||0]).filter(([,v])=>v>0));
+  Object.assign(c,{status:"concluida",fim:new Date().toISOString(),porFim:decidedBy()||colab?.nome||x.inspetor||"",N,qtd,novos:(c.novos||[]).filter(d=>qtd[d]),aprov:N-r,reprov:r,total:N,pct:p,nqa:nq,resultado:res,parcial:null,
+    criterio:`Peças reprovadas ÷ inspecionadas = ${r} ÷ ${N} = ${pctFmt(p)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`});
+  if(res==="R"){x.reacao=x.reacao||{};x.reacao.cem=true;x.reacao.cem_em=Date.now()}
+  await persist("inspecoes",x);return {res};
+}
+/* =========================================================================
+   TELA DO OPERADOR (papel Inspetor): preenchimento simples, em passos.
+   O operador registra a inspeção e responde às árvores; a Qualidade decide
+   o destino do lote no painel; o operador recebe o que fazer com o lote.
+   ========================================================================= */
+const OPR={operador:1,opnova:1,oparvore:1,oplote:1,opcem:1};
+const soOperador=()=>!localMode()&&cloudState==="ok"&&colab?.papel==="inspetor";
+let OP=null;
+const opTurno=()=>{const h=new Date().getHours();return h>=6&&h<14?"1º":h>=14&&h<22?"2º":"3º"};
+const opNovo=()=>({step:1,ponto:"",productId:"",maquina:"",lote:"",N:"",turno:opTurno(),pecas:[]});
+function opSave(){const keep=OP&&(OP.productId||OP.lote||OP.N||OP.pecas.length);setMeta("opRascunho",keep?JSON.parse(JSON.stringify(OP)):null)}
+function opPlan(o){
+  const p=prod(o.productId);if(!p||!o.ponto)return {};
+  const ps=presetOf(p,o.ponto);if(ps.nqa==null)return {erro:`Este produto ainda não tem NQA cadastrado para ${POINTS[o.ponto].nome}. Avise a Qualidade.`};
+  const N=Math.floor(+String(o.N).replace(/\D/g,""));if(!(N>=2))return {nqa:ps.nqa};
+  const rs=regimeState(o.productId,o.ponto,ps.nqa,null,localMode()),reg=rs?rs.reg:"N";
+  return {nqa:ps.nqa,reg,N,plan:samplingPlan(N,"II",ps.nqa,reg)};
+}
+// O que o operador deve fazer com o lote, conforme a etapa e a decisão da Qualidade
+function opInstr(x){
+  const s=lotStage(x),c=x.c100,dp=x.disp;
+  if(s.k==="arvore")return {cls:"warn",tit:"Responda as perguntas sobre o defeito",txt:"Ainda faltam perguntas da árvore de falha deste lote. Leva poucos minutos.",acao:"arvore"};
+  if(s.k==="disp")return {cls:"warn",tit:"Lote reprovado · aguardando a Qualidade",txt:"Mantenha o lote separado, com a etiqueta vermelha (FS 342). Não envie nem use as peças. A Qualidade vai decidir o destino do lote e o aviso aparece aqui."};
+  if(s.k==="cem")return {cls:"cem",tit:"Faça a inspeção 100% deste lote",txt:`A Qualidade decidiu inspecionar todas as ${x.N} peças do lote. Separe as peças não conformes na gaiola vermelha e informe quantas encontrou.`,acao:"cem"};
+  if(dp?.tipo==="aceitar")return {cls:"ok",tit:"Lote aceito pela Qualidade",txt:`A Qualidade aceitou o lote mesmo com o defeito${dp.motivo?" ("+motLabel(dp.motivo).toLowerCase()+")":""}. Retire a etiqueta vermelha e libere o lote para seguir.`};
+  if(dp?.tipo==="rejeitar")return {cls:"nc",tit:"Lote rejeitado pela Qualidade",txt:"Mantenha o lote bloqueado na área de segregação, com a etiqueta vermelha. Não use nem envie as peças. Siga a orientação do líder de produção."};
+  if(c?.status==="concluida")return c.resultado==="A"
+    ?{cls:"ok",tit:"Inspeção 100% concluída · lote aceito",txt:`Libere só as ${c.aprov} peças aprovadas. As ${c.reprov} peças reprovadas ficam na gaiola vermelha (FS 342).`}
+    :{cls:"nc",tit:"Inspeção 100% concluída · lote rejeitado",txt:`${c.reprov} peças reprovadas em ${c.total}, acima do limite do plano. Mantenha o lote inteiro bloqueado, com a etiqueta vermelha, e siga a orientação do líder de produção.`};
+  return {cls:"ok",tit:"Lote aprovado",txt:x.d>0?`${x.d} peça(s) não conforme(s), dentro do limite do plano (até ${x.ac}). Separe só essas peças na gaiola vermelha e libere o lote.`:"Nenhuma peça não conforme na amostra. O lote pode seguir."};
+}
+const opChave=x=>(x.disp?.em||"")+"|"+(x.c100?.fim||"");
+const opAviso=x=>{const k=lotStage(x).k;return ["arvore","disp","cem"].includes(k)||(!!(x.disp||x.c100?.fim)&&x.opCiente!==opChave(x))};
+const opIco={ok:'<path d="M5 12.5l4.5 4.5L19 7"/>',nc:'<path d="M6 6l12 12M18 6L6 18"/>',warn:'<path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>',cem:'<path d="M4 6h16M4 12h16M4 18h10"/>'};
+function opInstrCard(x,comLote){
+  const I=opInstr(x),final=lotStage(x).k==="final",pend=final&&x.opCiente!==opChave(x)&&(x.disp||x.c100?.fim);
+  return `<div class="opinst ${I.cls}">${comLote?`<div class="opinst-l">Lote ${esc(x.lote||"—")} · ${esc(POINTS[x.ponto]?.nome||"")} · ${esc(x.produto||"")}</div>`:""}
+    <div class="opinst-t"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${opIco[I.cls]}</svg><span>${I.tit}</span></div>
+    <p>${esc(I.txt)}</p>
+    <div class="opinst-b">${I.acao==="cem"?`<button class="opbtn cem" data-opcem="${x.id}">Fazer a inspeção 100%</button>`:""}${I.acao==="arvore"?`<button class="opbtn" data-oparv="${x.id}">Responder as perguntas</button>`:""}${pend?`<button class="opbtn" data-ciente="${x.id}">Entendi</button>`:""}${comLote?`<button class="opbtn ghost" data-oplote="${x.id}">Ver o lote</button>`:""}</div></div>`;
+}
+function opBind(){
+  if($("#opSair"))$("#opSair").onclick=()=>signOut();
+  if($("#opVolta"))$("#opVolta").onclick=()=>go("painel");
+  $$("[data-opcem]").forEach(b=>b.onclick=()=>go("opcem",b.dataset.opcem));
+  $$("[data-oplote]").forEach(b=>b.onclick=()=>go("oplote",b.dataset.oplote));
+  $$("[data-oparv]").forEach(b=>b.onclick=()=>{const x=S.inspecoes.find(i=>i.id===b.dataset.oparv),v=x&&lotTrees(x).find(t=>!treeFilled(t));if(v)go("oparvore",v.id)});
+  $$("[data-ciente]").forEach(b=>b.onclick=async()=>{const x=S.inspecoes.find(i=>i.id===b.dataset.ciente);if(!x)return;x.opCiente=opChave(x);await persist("inspecoes",x);toast("Aviso marcado como lido.");render()});
+}
+const opTop=()=>soOperador()?`<button class="btn" id="opSair">Sair</button>`:`<button class="btn" id="opVolta">Voltar ao sistema</button>`;
+
+/* ---------- Início do operador ---------- */
+function pgOperador(){
+  if(!OP&&S.meta.opRascunho)OP=S.meta.opRascunho;
+  head("Tela do operador","Olá"+(colab?.nome?", "+colab.nome.split(" ")[0]:"")+"!",opTop());
+  const rec=S.inspecoes.filter(x=>Date.now()-(x.createdAt||0)<14*864e5).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const av=rec.filter(opAviso).sort((a,b)=>{const o={cem:0,disp:1,arvore:2,final:3};return o[lotStage(a).k]-o[lotStage(b).k]});
+  let h=`<div class="opwrap">`;
+  if(OP&&(OP.productId||OP.lote||OP.pecas.length))h+=`<div class="opinst info"><div class="opinst-t"><span>Inspeção em andamento${OP.lote?" · lote "+esc(OP.lote):""}</span></div><p>Você começou uma inspeção e não terminou. Os dados ficaram guardados.</p><div class="opinst-b"><button class="opbtn" id="opCont">Continuar</button><button class="opbtn ghost" id="opDesc">Descartar</button></div></div>`;
+  h+=`<button class="opbig" id="opNew"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nova inspeção</button>`;
+  h+=`<h2 class="opsec">Avisos da Qualidade${av.length?` <span class="nbadge">${av.length}</span>`:""}</h2>`;
+  h+=av.length?av.map(x=>opInstrCard(x,true)).join(""):`<p class="muted">Nenhum aviso. Quando a Qualidade decidir um lote, o que fazer aparece aqui.</p>`;
+  h+=`<h2 class="opsec">Inspeções recentes</h2>`;
+  h+=rec.length?`<div class="oplist">${rec.slice(0,15).map(x=>`<button class="oprow" data-oplote="${x.id}"><span><b>Lote ${esc(x.lote||"—")}</b><small>${esc(POINTS[x.ponto]?.nome||"")} · ${fmtD(x.data)} · ${x.d} de ${x.n} não conformes</small></span>${statusPill(x)}</button>`).join("")}</div>`:`<p class="muted">Nenhuma inspeção nos últimos 14 dias.</p>`;
+  setPage(h+`</div>`);opBind();
+  $("#opNew").onclick=()=>{if(OP&&(OP.productId||OP.lote||OP.pecas.length)&&!confirm("Descartar a inspeção em andamento e começar outra?"))return;OP=opNovo();setMeta("opRascunho",null);go("opnova")};
+  if($("#opCont"))$("#opCont").onclick=()=>go("opnova");
+  if($("#opDesc"))$("#opDesc").onclick=()=>{OP=null;setMeta("opRascunho",null);render()};
+}
+
+/* ---------- Nova inspeção (3 passos) ---------- */
+function pgOpNova(){
+  if(!OP)OP=S.meta.opRascunho||opNovo();
+  const o=OP;
+  head("Tela do operador","Nova inspeção",opTop());
+  if(!S.produtos.length){setPage(`<div class="opwrap"><div class="opinst warn"><div class="opinst-t"><span>Nenhum produto cadastrado</span></div><p>Peça à Qualidade para cadastrar os produtos.</p></div></div>`);opBind();return}
+  const P=opPlan(o),plan=P.plan,defs=DEFECTS.filter(x=>x.pts.includes(o.ponto)),d=o.pecas.length;
+  const STP=["Dados do lote","Peças não conformes","Resultado"];
+  let h=`<div class="opwrap"><ol class="opsteps">${STP.map((t,i)=>`<li class="${i+1===o.step?"on":i+1<o.step?"ok":""}">${i+1<o.step?"✓":i+1} · ${t}</li>`).join("")}</ol>`;
+  if(o.step===1){
+    h+=`<div class="opcard"><span class="oplab">Onde você está inspecionando?</span><div class="optiles">${Object.entries(POINTS).map(([k,pt])=>`<button class="optile ${o.ponto===k?"on":""}" data-opp="${k}" aria-pressed="${o.ponto===k}">${esc(pt.nome)}</button>`).join("")}</div></div>
+      <div class="opcard"><label class="oplab" for="opProd">Produto</label><select id="opProd" class="opin"><option value="">Escolha o produto…</option>${[...S.produtos].sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR")).map(p=>`<option value="${esc(p.id)}" ${p.id===o.productId?"selected":""}>${esc(p.nome)} · ${esc(p.id)}</option>`).join("")}</select>
+        ${P.nqa!=null?`<span class="ophint">NQA ${NQA[P.nqa]}% e nível II, definidos pela Qualidade no cadastro.</span>`:""}
+        <div class="opgrid2"><div><label class="oplab" for="opMaq">Máquina</label><select id="opMaq" class="opin"><option value="">Escolha…</option>${machineOptions(o.maquina)}</select></div>
+        <div><label class="oplab" for="opLote">Nº do lote</label><input id="opLote" class="opin" value="${esc(o.lote)}" placeholder="Ex.: 2611-03" autocomplete="off"></div></div>
+        <span class="oplab">Turno</span><div class="optiles t4">${["1º","2º","3º","ADM"].map(t=>`<button class="optile sm ${o.turno===t?"on":""}" data-opt="${t}" aria-pressed="${o.turno===t}">${t}</button>`).join("")}</div>
+        <label class="oplab" for="opN">Quantas peças tem o lote?</label><input id="opN" class="opin big" inputmode="numeric" value="${esc(String(o.N))}" placeholder="Ex.: 500" autocomplete="off"></div>
+      <div id="opPlanBox"></div>`;
+  }
+  if(o.step===2&&plan){
+    h+=`<div class="opcard"><div class="opsum"><span>Lote ${esc(o.lote)} · ${esc(POINTS[o.ponto].nome)}</span><b>Inspecione ${plan.n} peças</b></div>
+      <div class="optri"><div><small>Inspecionadas</small><b>${plan.n}</b></div><div><small>Conformes</small><b style="color:var(--ok)">${Math.max(0,plan.n-d)}</b></div><div><small>Não conformes</small><b style="color:${d>plan.ac?"var(--nc)":d?"var(--warn)":"var(--ok)"}">${d}</b></div></div>
+      <p class="ophint">Achou uma peça não conforme? Registre a peça e marque todos os defeitos que ela tem. Conta a peça, não o defeito.</p></div>`;
+    h+=o.pecas.length?o.pecas.map((pc,i)=>`<div class="opcard pc ${pc.def.length?"":"falta"}"><div class="row" style="justify-content:space-between;align-items:center"><b class="oppc">Peça não conforme ${i+1}</b><button class="btn sm" data-oprm="${i}">Remover</button></div>
+      ${pc.def.length&&pc.fechada?`<div class="optags">${pc.def.map(k=>`<span class="ftag">${esc(DEF[k]?.nome||k)}</span>`).join("")}</div><button class="btn sm" data-opabre="${i}" style="align-self:flex-start">Alterar defeitos</button>`
+      :`<span class="ophint">${pc.def.length?pc.def.length+" defeito(s) marcado(s). Marque todos que a peça tem.":"Marque o(s) defeito(s) desta peça"}</span>
+      <div class="opchips">${defs.map(df=>`<button class="opchip ${pc.def.includes(df.id)?"on":""}" data-oppc="${i}" data-opdf="${df.id}" aria-pressed="${pc.def.includes(df.id)}">${esc(df.nome)}</button>`).join("")}</div>${pc.def.length?`<button class="btn sm primary" data-opfecha="${i}" style="align-self:flex-start">Pronto</button>`:""}`}</div>`).join("")
+      :`<div class="opempty">Nenhuma peça não conforme registrada. Se todas estão conformes, é só avançar.</div>`;
+    h+=`<button class="opbig ghost" id="opAdd" ${d>=plan.n||o.pecas.some(pc=>!pc.def.length)?"disabled":""}>+ Registrar peça não conforme</button>`;
+  }
+  if(o.step===3&&plan){
+    const R=d>plan.ac,cnt={};o.pecas.forEach(pc=>pc.def.forEach(k=>cnt[k]=(cnt[k]||0)+1));
+    h+=`<div class="opres ${R?"nc":"ok"}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${R?opIco.nc:opIco.ok}</svg><b>${R?"Lote reprovado":"Lote aprovado"}</b><span>${d} peça(s) não conforme(s) em ${plan.n}. O limite é ${plan.ac}.</span></div>`;
+    if(R)h+=`<div class="opinst warn"><div class="opinst-t"><span>Faça agora</span></div><p>Separe o lote e coloque a etiqueta vermelha (FS 342). Não envie. A Qualidade vai decidir o destino do lote.</p></div>`;
+    else if(d)h+=`<div class="opinst info"><div class="opinst-t"><span>Faça agora</span></div><p>Separe as ${d} peça(s) não conforme(s) na gaiola vermelha (FS 342). O resto do lote pode seguir.</p></div>`;
+    if(d)h+=`<div class="opcard"><b>Próximo passo: perguntas sobre ${Object.keys(cnt).length>1?"os defeitos":"o defeito"}</b><p class="ophint">${Object.entries(cnt).map(([k,v])=>esc(DEF[k]?.nome||k)+" (em "+v+" peça"+(v>1?"s":"")+")").join(" · ")}. Uma árvore de falha para cada defeito diferente, não para cada peça.</p></div>`;
+  }
+  setPage(h+`</div>`);opBind();
+  const bar1=()=>{const P1=opPlan(o),fl=!o.ponto?"Escolha onde está inspecionando":!o.productId?"Escolha o produto":P1.erro?"Produto sem NQA cadastrado":!o.maquina?"Escolha a máquina":!o.lote.trim()?"Informe o nº do lote":!o.turno?"Escolha o turno":!P1.plan?"Informe quantas peças tem o lote":"";
+    const box=$("#opPlanBox");if(box)box.innerHTML=P1.erro?`<div class="opinst nc"><div class="opinst-t"><span>Não é possível inspecionar</span></div><p>${esc(P1.erro)}</p></div>`:P1.plan?`<div class="opplan"><small>O sistema calculou:</small><b>${P1.plan.full?`Inspecione todas as ${P1.plan.n} peças`:`Inspecione ${P1.plan.n} peças`}</b><span>Até ${P1.plan.ac} peça(s) não conforme(s): lote aprovado. A partir de ${P1.plan.re}: lote reprovado.</span><small>Letra ${P1.plan.letter} · nível II · NQA ${NQA[P1.nqa]}%${P1.reg==="T"?" · regime severo":P1.reg==="R"?" · regime atenuado":""}</small></div>`:o.productId&&o.ponto?`<div class="opempty">Digite quantas peças tem o lote para ver quantas inspecionar.</div>`:"";
+    setBar(`<button class="btn" id="opBack">Início</button><div class="bar-info"><span class="bar-hint">${fl||"Tudo certo"}</span></div><button class="btn primary" id="opNext" ${fl?"disabled":""}>Começar a inspeção →</button>`);
+    $("#opBack").onclick=()=>go("operador");$("#opNext").onclick=()=>{if(fl)return;o.step=2;opSave();pgOpNova();window.scrollTo(0,0)}};
+  if(o.step===1){bar1();
+    $$("[data-opp]").forEach(b=>b.onclick=()=>{o.ponto=b.dataset.opp;o.pecas=[];opSave();pgOpNova()});
+    $$("[data-opt]").forEach(b=>b.onclick=()=>{o.turno=b.dataset.opt;opSave();pgOpNova()});
+    $("#opProd").onchange=e=>{o.productId=e.target.value;opSave();pgOpNova()};
+    $("#opMaq").onchange=e=>{o.maquina=e.target.value;opSave();bar1()};
+    $("#opLote").oninput=e=>{o.lote=e.target.value;opSave();bar1()};
+    $("#opN").oninput=e=>{o.N=e.target.value.replace(/\D/g,"");if(e.target.value!==o.N)e.target.value=o.N;opSave();bar1()};
+    return}
+  if(!plan){o.step=1;pgOpNova();return}
+  if(o.step===2){const semDef=o.pecas.some(pc=>!pc.def.length);
+    setBar(`<button class="btn" id="opBack">← Voltar</button><div class="bar-info"><span class="bar-plan">${d} de ${plan.n} não conforme(s)</span><span class="bar-hint">${semDef?"Marque o defeito de cada peça":""}</span></div><button class="btn primary" id="opNext" ${semDef?"disabled":""}>Terminei de inspecionar →</button>`);
+    $("#opBack").onclick=()=>{o.step=1;opSave();pgOpNova()};$("#opNext").onclick=()=>{if(semDef)return;o.step=3;opSave();pgOpNova();window.scrollTo(0,0)};
+    $("#opAdd").onclick=()=>{o.pecas.forEach(pc=>{if(pc.def.length)pc.fechada=true});o.pecas.push({def:[]});opSave();pgOpNova();const c=$$(".opcard.pc");c[c.length-1]?.scrollIntoView({block:"center"})};
+    $$("[data-opabre]").forEach(b=>b.onclick=()=>{o.pecas.forEach((pc,j)=>{pc.fechada=j!==+b.dataset.opabre&&pc.def.length>0});opSave();const y=window.scrollY;pgOpNova();window.scrollTo(0,y)});
+    $$("[data-opfecha]").forEach(b=>b.onclick=()=>{o.pecas[+b.dataset.opfecha].fechada=true;opSave();const y=window.scrollY;pgOpNova();window.scrollTo(0,y)});
+    $$("[data-oprm]").forEach(b=>b.onclick=()=>{o.pecas.splice(+b.dataset.oprm,1);opSave();const y=window.scrollY;pgOpNova();window.scrollTo(0,y)});
+    $$("[data-oppc]").forEach(b=>b.onclick=()=>{const pc=o.pecas[+b.dataset.oppc],k=b.dataset.opdf;pc.def=pc.def.includes(k)?pc.def.filter(z=>z!==k):pc.def.concat(k);opSave();const y=window.scrollY;pgOpNova();window.scrollTo(0,y)});
+    return}
+  setBar(`<button class="btn" id="opBack">← Voltar</button><div class="bar-info"><span class="bar-hint">Confira e registre</span></div><button class="btn primary" id="opNext">${d?"Registrar e responder as perguntas →":"Registrar inspeção →"}</button>`);
+  $("#opBack").onclick=()=>{o.step=2;opSave();pgOpNova()};
+  $("#opNext").onclick=async e=>{e.target.disabled=true;await opRegistrar()};
+}
+async function opRegistrar(){
+  const o=OP,P=opPlan(o),plan=P.plan,p=prod(o.productId);if(!plan||!p)return;
+  const d=o.pecas.length,result=d<=plan.ac?"A":"R";
+  const rec={id:uid(),createdAt:Date.now(),productId:o.productId,produto:p.nome,ponto:o.ponto,data:today(),turno:o.turno,maquina:o.maquina,molde:"",op:"",lote:o.lote.trim(),inspetor:colab?.nome||user?.email||"Operador",N:+o.N,nivel:"II",nqa:P.nqa,regime:P.reg,letra0:plan.letter0,letra:plan.letter,n:plan.n,ac:plan.ac,re:plan.re,inspecao100:plan.full,
+    pecas:o.pecas.map((pc,i)=>({n:i+1,def:pc.def.slice(),cav:"",med:{}})),defeitos:{},d,result,obs:"",reap:false,refId:null,reacao:{},demo:false,origem:"operador",criadoPor:user?.email||""};
+  rec.pecas.forEach(pc=>pc.def.forEach(k=>rec.defeitos[k]=(rec.defeitos[k]||0)+1));
+  await persist("inspecoes",rec);await setMeta("lastN|"+rec.productId+"|"+rec.ponto,rec.N);
+  OP=null;clearTimeout(window._opt);await setMeta("opRascunho",null);
+  const tipos=Object.keys(rec.defeitos).sort((a,b)=>rec.defeitos[b]-rec.defeitos[a]),ids=[];
+  for(const k of tipos)ids.push((await createInvestigation(rec,k)).id);
+  if(ids.length){toast("Inspeção registrada. Agora, as perguntas sobre o defeito.");go("oparvore",ids[0])}
+  else{toast("Inspeção registrada.");go("oplote",rec.id)}
+}
+
+/* ---------- Perguntas da árvore de falha (uma por tipo de defeito) ---------- */
+function pgOpArvore(){
+  const v=S.investigacoes.find(i=>i.id===route.id);if(!v){go("operador");return}
+  const x=S.inspecoes.find(i=>i.id===v.inspecaoId),tr=x?lotTrees(x):[v],ix=tr.indexOf(v),d=DEF[v.defeito];
+  head("Tela do operador","Perguntas sobre o defeito",opTop());
+  v.presenca=v.presenca||{};v.respostas=v.respostas||{};
+  const qs=presenceQs(v).filter(q=>!(q.id==="est"&&v.presenca.fl==="N")),o=origin(v);
+  const causes=o?stagesFor(v).filter(s=>stageActive(v,s)).flatMap(s=>causesFor(v,s)):[];
+  const btn=(attr,id,val,lab,on,cls)=>`<button class="opans ${on?"on "+cls:""}" ${attr}="${id}" data-v="${val}" aria-pressed="${on}">${lab}</button>`;
+  let h=`<div class="opwrap"><div class="opcard"><span class="opkick">Árvore de falha ${ix+1} de ${tr.length} · Lote ${esc(x?.lote||"")}${v.de100?" · defeito novo na inspeção 100%":""}</span><h2 class="opt">${esc(d?.nome||v.defeito)}</h2><p class="ophint">Encontrado em ${v.pecas||x?.defeitos?.[v.defeito]||1} peça(s). Responda o que conseguir verificar agora.</p></div>`;
+  qs.forEach(q=>{const a=v.presenca[q.id];h+=`<div class="opcard"><b class="opq">${esc(q.t)}</b><span class="ophint">Onde ver: ${esc(q.ev)}</span><div class="opans3 two">${btn("data-oppres",q.id,"S","Sim",a==="S","info")}${btn("data-oppres",q.id,"N","Não",a==="N","info")}</div></div>`});
+  if(o){
+    h+=`<p class="opsec">Origem: ${esc(originLabel(v))}. Agora verifique as possíveis causas:</p>`;
+    h+=causes.length?causes.map((c,i)=>{const a=v.respostas[c.id]?.a,e=(c.evid||[])[0]||[];return `<div class="opcard"><span class="opkick">Possível causa ${i+1} de ${causes.length}</span><b class="opq">${esc(c.nome)}</b>${e[0]?`<span class="ophint">Verifique: ${esc(e[0])}${e[1]?` · Onde: ${esc(e[1])}`:""}</span>`:""}<div class="opans3">${btn("data-opca",c.id,"S","Sim, encontrei",a==="S","nc")}${btn("data-opca",c.id,"N","Não",a==="N","ok")}${btn("data-opca",c.id,"X","Não deu para ver",a==="X","mut")}</div></div>`}).join("")
+      :`<div class="opinst warn"><p>Nenhuma causa cadastrada na Biblioteca para esta origem. Avise a Qualidade.</p></div>`;
+  }
+  setPage(h+`</div>`);opBind();
+  const done=!!o&&causes.length>0&&causes.every(c=>v.respostas[c.id]?.a);
+  const next=tr.find(t=>t!==v&&!treeFilled(t));
+  const falta=!o?"Responda onde o defeito apareceu":!causes.length?"Sem causas cadastradas":causes.filter(c=>!v.respostas[c.id]?.a).length+" pergunta(s) sem resposta";
+  const lab=next?"Próximo defeito →":v.de100&&x?.c100?.status==="andamento"?"Voltar à inspeção 100% →":"Ver o que fazer →";
+  const podeSeguir=done||(!!o&&!causes.length);
+  setBar(`<button class="btn" id="opBack">Início</button><div class="bar-info"><span class="bar-hint">${podeSeguir?"Pronto":falta}</span></div><button class="btn primary" id="opNext" ${podeSeguir?"":"disabled"}>${lab}</button>`);
+  $("#opBack").onclick=()=>go("operador");
+  $("#opNext").onclick=()=>{if(!podeSeguir)return;if(next)go("oparvore",next.id);else if(v.de100&&x?.c100?.status==="andamento")go("opcem",x.id);else go("oplote",x?.id)};
+  const salvar=async()=>{v.updatedAt=Date.now();v.updatedBy=colab?.nome||user?.email||"";if(treeFilled(v)&&(v.conclusao?.status||"aberta")==="aberta")v.conclusao={...(v.conclusao||{}),status:"andamento"};const y=window.scrollY;pgOpArvore();window.scrollTo(0,y);await persist("investigacoes",v)};
+  $$("[data-oppres]").forEach(b=>b.onclick=()=>{v.presenca[b.dataset.oppres]=b.dataset.v;if(b.dataset.oppres==="fl"&&b.dataset.v==="N")delete v.presenca.est;salvar()});
+  $$("[data-opca]").forEach(b=>b.onclick=()=>{v.respostas[b.dataset.opca]={...(v.respostas[b.dataset.opca]||{}),a:b.dataset.v};salvar()});
+}
+
+/* ---------- Lote: situação e o que fazer ---------- */
+function pgOpLote(){
+  const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("operador");return}
+  head("Tela do operador","Lote "+(x.lote||"—"),opTop());
+  const tr=lotTrees(x),pr=[...new Map(tr.flatMap(v=>probable(v)).map(c=>[c.id,c])).values()],R=x.result==="R";
+  let h=`<div class="opwrap"><div class="opcard"><span class="opkick">${esc(x.produto||"")} · ${esc(POINTS[x.ponto]?.nome||"")} · ${fmtD(x.data)} · máquina ${esc(x.maquina||"—")}</span>
+    <div class="optri"><div><small>Amostra</small><b>${x.n} de ${x.N}</b></div><div><small>Não conformes</small><b style="color:${R?"var(--nc)":x.d?"var(--warn)":"var(--ok)"}">${x.d}</b></div><div><small>Amostragem</small><b style="color:${R?"var(--nc)":"var(--ok)"}">${R?"Reprovado":"Aprovado"}</b></div></div>
+    ${Object.keys(x.defeitos||{}).length?`<span class="ophint">${Object.entries(x.defeitos).map(([k,v])=>esc(DEF[k]?.nome||k)+" (em "+v+" peça"+(v>1?"s":"")+")").join(" · ")}</span>`:""}</div>`;
+  h+=`<h2 class="opsec">O que fazer com o lote</h2>`+opInstrCard(x,false);
+  if(pr.length)h+=`<h2 class="opsec">O que fazer com a causa</h2>`+pr.map(c=>`<div class="opcard"><span class="opkick" style="color:var(--nc)">Causa encontrada</span><b class="opq">${esc(c.nome)}</b><div class="oprec"><small>Faça agora (reação)</small><span>${esc(reactOf(c))}</span></div><div class="oprec"><small>Ação para corrigir</small><span>${esc(c.acao||"—")}</span></div>${c.resp?`<span class="ophint">Avisar: <b>${esc(c.resp)}</b></span>`:""}</div>`).join("");
+  else if(tr.length&&tr.every(treeFilled))h+=`<div class="opcard"><b>Nenhuma causa confirmada</b><span class="ophint">Avise o líder de produção. A Qualidade vai analisar a falha.</span></div>`;
+  setPage(h+`</div>`);opBind();
+  setBar(`<button class="btn" id="opBack">Início</button><div class="bar-info"><span class="bar-hint">${esc(lotStage(x).label)}</span></div><button class="btn primary" id="opNew2">Nova inspeção</button>`);
+  $("#opBack").onclick=()=>go("operador");$("#opNew2").onclick=()=>{OP=opNovo();setMeta("opRascunho",null);go("opnova")};
+}
+
+/* ---------- Inspeção 100% (operador) ---------- */
+function pgOpCem(){
+  const x=S.inspecoes.find(i=>i.id===route.id);
+  if(!x||x.disp?.tipo!=="segregar"||!x.c100||x.c100.status==="concluida"){go(x?"oplote":"operador",x?.id);return}
+  const c=x.c100;c.qtd=c.qtd||{};c.novos=c.novos||[];c.N=x.N;
+  const tr=lotTrees(x),known=tr.map(v=>v.defeito),pend=tr.filter(v=>!treeFilled(v)),nq=nqaPct(x);
+  const defs=DEFECTS.filter(dd=>dd.pts.includes(x.ponto)),livres=defs.filter(dd=>!known.includes(dd.id)&&!c.novos.includes(dd.id)),linhas=[...known,...c.novos.filter(d=>!known.includes(d))];
+  head("Tela do operador","Inspeção 100% · Lote "+(x.lote||""),opTop());
+  let h=`<div class="opwrap"><div class="opinst cem"><div class="opinst-t"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">${opIco.cem}</svg><span>Inspecione todas as ${x.N} peças do lote</span></div>
+    <ol class="opol"><li>Pegue o lote separado com a etiqueta vermelha.</li><li>Inspecione peça por peça.</li><li>Coloque cada peça não conforme na gaiola vermelha (FS 342).</li><li>No fim, informe abaixo quantas peças ficaram não conformes em cada defeito.</li></ol></div>`;
+  if(pend.length)h+=`<div class="opinst warn"><div class="opinst-t"><span>Responda as perguntas do defeito novo</span></div><p>${pend.map(v=>esc(DEF[v.defeito]?.nome)).join(", ")}. Os números que você informou ficam salvos.</p><div class="opinst-b"><button class="opbtn" data-goarv="${pend[0].id}">Responder agora</button></div></div>`;
+  h+=`<div class="opcard"><span class="oplab">Tamanho do lote</span><div class="fixval">${x.N} peças</div><span class="ophint">Mesmo lote da inspeção por amostragem.</span></div>
+    <div class="opcard"><span class="oplab">Peças não conformes em cada defeito</span><span class="ophint">Peça com mais de um defeito: conte só no defeito principal.</span>
+    ${linhas.map(d=>{const novo=!known.includes(d);return `<div class="opcount"><span>${esc(DEF[d]?.nome||d)}${novo?' <span class="pill info">defeito novo</span>':""}</span><input class="opin" inputmode="numeric" data-ocq="${d}" value="${c.qtd[d]??""}" placeholder="0" aria-label="Peças não conformes: ${esc(DEF[d]?.nome||d)}">${novo&&!tr.some(v=>v.defeito===d)?`<button class="btn sm" data-ocrm="${d}">Remover</button>`:""}</div>`}).join("")}
+    ${livres.length?`<label class="oplab" for="ocNew">Encontrou um defeito novo?</label><select id="ocNew" class="opin"><option value="">Escolha o defeito para incluir…</option>${livres.map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select><span class="ophint">Ao concluir, abrem as perguntas do defeito novo.</span>`:""}</div>
+    <div class="opcard"><div class="optri"><div><small>Inspecionadas</small><b>${x.N}</b></div><div><small>Aprovadas</small><b id="ocA" style="color:var(--ok)">—</b></div><div><small>Reprovadas</small><b id="ocR" style="color:var(--nc)">—</b></div></div><div id="ocMsg"></div></div></div>`;
+  setPage(h);opBind();
+  $$("[data-goarv]").forEach(b=>b.onclick=()=>go("oparvore",b.dataset.goarv));
+  const calc=()=>{const r=Object.values(c.qtd).reduce((a,v)=>a+(Math.floor(+v)||0),0);return {r,a:x.N-r,p:r/x.N*100}};
+  const novosQ=()=>c.novos.filter(d=>(Math.floor(+c.qtd[d])||0)>0&&!tr.some(v=>v.defeito===d));
+  const upd=()=>{const k=calc(),ok=k.r<=x.N,res=k.p<=nq?"A":"R",nv=novosQ();
+    $("#ocA").textContent=ok?k.a:"—";$("#ocR").textContent=k.r;
+    $("#ocMsg").innerHTML=!ok?'<div class="banner nc"><span>As peças não conformes passam do tamanho do lote.</span></div>':`<p class="ophint">Se concluir agora: <b>lote ${res==="A"?"aceito":"rejeitado"}</b> (${k.r} ÷ ${x.N} = ${pctFmt(k.p)}%, limite ${NQA[x.nqa]}%).${nv.length?" Antes, abrem as perguntas de: "+nv.map(d=>esc(DEF[d]?.nome)).join(", ")+".":""}</p>`;
+    const pode=ok&&!pend.length;
+    setBar(`<button class="btn" id="opBack">Início</button><div class="bar-info"><span class="bar-plan">${k.r} de ${x.N} não conformes</span><span class="bar-hint">${pend.length?"Responda as perguntas do defeito novo":!ok?"Confira as quantidades":""}</span></div><button class="btn primary" id="ocFim" ${pode?"":"disabled"}>${nv.length?"Concluir e responder as perguntas →":"Concluir inspeção 100% →"}</button>`);
+    $("#opBack").onclick=()=>go("operador");
+    $("#ocFim").onclick=async e=>{if(!pode)return;e.target.disabled=true;const r=await cemFinalizar(x);if(!r){e.target.disabled=false;return}if(r.tree){toast("Responda as perguntas do defeito novo. Depois volte para concluir.");go("oparvore",r.tree.id)}else{toast(r.res==="A"?"Inspeção 100% concluída: lote aceito.":"Inspeção 100% concluída: lote rejeitado.");go("oplote",x.id)}}};
+  $$("[data-ocq]").forEach(i=>i.oninput=()=>{i.value=i.value.replace(/\D/g,"");c.qtd[i.dataset.ocq]=i.value;c100Save(x);upd()});
+  $$("[data-ocrm]").forEach(b=>b.onclick=()=>{const d=b.dataset.ocrm;c.novos=c.novos.filter(z=>z!==d);delete c.qtd[d];c100Save(x);pgOpCem()});
+  if($("#ocNew"))$("#ocNew").onchange=e=>{const d=e.target.value;if(!d)return;c.novos.push(d);c.qtd[d]=c.qtd[d]||"1";c100Save(x);pgOpCem();const el=document.querySelector(`[data-ocq="${d}"]`);if(el){el.focus();el.select()}};
+  upd();
+}
+
 function pgCem(){
   const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("inspecoes");return}
   if(x.disp?.tipo!=="segregar"||!x.c100||x.c100.status==="concluida"){go("inspecao",x.id);return}
@@ -1382,14 +1696,9 @@ function pgCem(){
   $$("[data-rmnew]").forEach(b=>b.onclick=()=>{const d=b.dataset.rmnew;c.novos=c.novos.filter(z=>z!==d);delete c.qtd[d];c100Save(x);pgCem()});
   if($("#cNew"))$("#cNew").onchange=e=>{const d=e.target.value;if(!d)return;c.novos.push(d);c.qtd[d]=c.qtd[d]||"1";c100Save(x);pgCem();const el=document.querySelector(`[data-q="${d}"]`);if(el){el.focus();el.select()}};
   $$("[data-goinv]").forEach(b=>b.onclick=()=>go("arvore",b.dataset.goinv));
-  async function concluir(){const k=calc();if(!(k.N>0)||k.r>k.N||pend.length)return;
-    const nv=novosQ();
-    if(nv.length){await c100Flush();let first=null;for(const d of nv){const v=await createInvestigation(x,d);first=first||v}await persist("inspecoes",x);toast("Preencha a árvore do defeito novo. Depois volte para concluir a inspeção 100%.");go("arvore",first.id);return}
-    await c100Flush();const res=k.p<=nq?"A":"R",qtd=Object.fromEntries(Object.entries(c.qtd).map(([d,v])=>[d,Math.floor(+v)||0]).filter(([,v])=>v>0));
-    Object.assign(c,{status:"concluida",fim:new Date().toISOString(),porFim:decidedBy()||x.inspetor||"",N:k.N,qtd,novos:c.novos.filter(d=>qtd[d]),aprov:k.a,reprov:k.r,total:k.N,pct:k.p,nqa:nq,resultado:res,parcial:null,
-      criterio:`Peças reprovadas ÷ inspecionadas = ${k.r} ÷ ${k.N} = ${pctFmt(k.p)}%, ${res==="A"?"dentro do":"acima do"} NQA do plano (${NQA[x.nqa]}%)`});
-    if(res==="R"){x.reacao=x.reacao||{};x.reacao.cem=true;x.reacao.cem_em=Date.now()}
-    await persist("inspecoes",x);toast(res==="A"?"Inspeção 100% concluída: lote aceito.":"Inspeção 100% concluída: lote rejeitado.");go("inspecao",x.id)}
+  async function concluir(){const r=await cemFinalizar(x);if(!r)return;
+    if(r.tree){toast("Preencha a árvore do defeito novo. Depois volte para concluir a inspeção 100%.");go("arvore",r.tree.id);return}
+    toast(r.res==="A"?"Inspeção 100% concluída: lote aceito.":"Inspeção 100% concluída: lote rejeitado.");go("inspecao",x.id)}
   upd();
 }
 
@@ -1857,6 +2166,7 @@ function pgAjuda(){
    <div class="card"><h2>Dúvidas comuns</h2>
     ${q("Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica guardado no aparelho e é enviado sozinho quando a conexão voltar. O ponto colorido no menu mostra a situação do banco.")}
     ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
+    ${q("O que é a Tela do operador?","Uma tela simples, em passos, para quem inspeciona: escolhe ponto, produto, máquina e lote, informa o tamanho do lote e o sistema diz quantas peças inspecionar. Depois registra as peças não conformes (marcando os defeitos de cada uma), responde às perguntas da árvore de cada defeito e vê a ação e a reação recomendadas. Quem tem o papel Inspetor entra direto nela. Quando a Qualidade decide o destino de um lote reprovado, o aviso com o que fazer aparece no início da tela; se a decisão for inspeção 100%, o aviso traz o botão para fazê-la ali mesmo.")}
     ${q("Quem pode fazer o quê?","Há três papéis. Administrador: tudo, inclusive os cadastros de produtos, máquinas e usuários. Gestor: tudo, menos os cadastros (edita a Biblioteca e pode reabrir a decisão de um lote). Inspetor: registra inspeções, preenche as árvores de falha e segue o destino do lote. Só o administrador muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
     ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
     ${q("Como o sistema decide o lote depois da inspeção 100%?","Divide as peças reprovadas pelas inspecionadas e compara com o NQA do plano do lote. Até o NQA, o lote é aceito e só as peças aprovadas são liberadas; acima, é rejeitado. As reprovadas ficam segregadas nos dois casos.")}
@@ -1947,7 +2257,7 @@ $("#logout").onclick=signOut;
 (async function init(){
   await openDB();await loadAll();if(draftHasContent(S.meta.rascunho)){draft=S.meta.rascunho;draftRestored=true}await initCloud();
   if(cloudState!=="login"&&cloudState!=="negado")await ensureProducts();
-  const [p,id]=location.hash.slice(1).split("/");if(p&&(PAGES.some(x=>x.id===p)||DETAIL[p]))route={p,id:id||null};
+  const [p,id]=location.hash.slice(1).split("/");if(p&&(PAGES.some(x=>x.id===p)||DETAIL[p]||OPR[p]))route={p,id:id||null};
   render();
   const digitando=()=>{const a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))||!!$("#dlg")?.open};
   let _tick=0;
