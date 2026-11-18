@@ -529,6 +529,14 @@ const DEFECTS=[
  {id:"peso_seco",nome:"Peso seco fora da faixa",pts:["FL"],spec:"Pesar após a estufa e comparar com a faixa de peso seco da FTP. Caixa Toyota: 1,139 a 1,392 kg (nominal 1,265 kg).",src:"Plano de Controle op. 50 · FTP"}
 ];
 const DEF=Object.fromEntries(DEFECTS.map(d=>[d.id,d]));
+const BASE_DEFECTS=DEFECTS.map(d=>({...d}));
+// Junta as falhas da FS 070 com as incluídas/alteradas no cadastro. DEF guarda todas (histórico); DEFECTS só as ativas.
+function rebuildDefects(){
+  const F=S.falhas||[],ov=Object.fromEntries(F.map(f=>[f.id,f])),base=new Set(BASE_DEFECTS.map(d=>d.id));
+  const all=[...BASE_DEFECTS.map(d=>ov[d.id]?{...d,...ov[d.id],_base:true,_mod:true}:{...d,_base:true}),...F.filter(f=>!base.has(f.id)).map(f=>({...f,_custom:true}))];
+  Object.keys(DEF).forEach(k=>delete DEF[k]);all.forEach(d=>DEF[d.id]=d);
+  DEFECTS.length=0;all.filter(d=>d.ativo!==false).forEach(d=>DEFECTS.push(d));
+}
 // Agrupamento das falhas para facilitar a escolha pelo inspetor
 const DEF_GROUPS=[
  {nome:"Peso",ids:["peso_umido","peso_seco"]},
@@ -688,6 +696,7 @@ const BASE_CAUSES=[
 const BASE_CA=Object.fromEntries(BASE_CAUSES.map(c=>[c.id,c]));
 let CAUSES=BASE_CAUSES.map(c=>({...c,_base:true})),CA=Object.fromEntries(CAUSES.map(c=>[c.id,c]));
 function rebuildCauses(){
+  rebuildDefects();
   const ov=Object.fromEntries((S.causas||[]).map(c=>[c.id,c]));
   const all=[...BASE_CAUSES.map(c=>ov[c.id]?{...c,...ov[c.id],_base:true,_mod:true}:{...c,_base:true}),...(S.causas||[]).filter(c=>!BASE_CA[c.id]).map(c=>({...c,_custom:true}))]
     .map(c=>({...c,defs:(c.defs||[]).filter(k=>DEF[k]),evid:(c.evid||[]).filter(e=>e&&e[0]),st:ST[c.st]?c.st:"SETUP"}));
@@ -701,28 +710,28 @@ const reactOf=c=>(c&&c.reacao&&c.reacao.trim())||REACT[c?.st]||REACT.MOLD;
    ========================================================================= */
 // Endereço do banco da JSP. A TI pode alterar em "Dados e configuração" sem editar o arquivo.
 const CLOUD_CFG={url:"https://okcnwdoxxwslmpptlyhs.supabase.co",key:"sb_publishable_9UT4r3EM6HE2E-kkmxxz0w_RPtpKQAh"};
-const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","maquinas","causas","meta"],TABLES=["inspecoes","investigacoes","produtos","maquinas","causas"];
-const S={inspecoes:[],investigacoes:[],produtos:[],maquinas:[],causas:[],meta:{}};
+const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas","meta"],TABLES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas"];
+const S={inspecoes:[],investigacoes:[],produtos:[],maquinas:[],causas:[],falhas:[],meta:{}};
 let idb=null,sb=null,user=null,colab=null,colabStatus="",pendentes=[],cloudState="off",cloudMsg="";
 const localMode=()=>{try{return sessionStorage.getItem("jsp-modo-local")==="1"}catch(e){return false}};
-function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,3);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
+function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,4);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
 function tx(store,mode,fn){return new Promise((res,rej)=>{if(!idb){res(null);return}const t=idb.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);t.onerror=()=>rej(t.error)})}
-function saveLS(){if(!idb){try{localStorage.setItem(DBNAME,JSON.stringify({inspecoes:S.inspecoes,investigacoes:S.investigacoes,produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,meta:S.meta}))}catch(e){}}}
+function saveLS(){if(!idb){try{localStorage.setItem(DBNAME,JSON.stringify({inspecoes:S.inspecoes,investigacoes:S.investigacoes,produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,falhas:S.falhas,meta:S.meta}))}catch(e){}}}
 async function loadAll(){
   if(idb){for(const s of STORES){const all=await tx(s,"readonly",st=>st.getAll());if(s==="meta"){(all||[]).forEach(m=>S.meta[m.id]=m.v)}else S[s]=all||[]}}
   else{try{const j=JSON.parse(localStorage.getItem(DBNAME)||"null");if(j)Object.assign(S,j)}catch(e){}}
 }
 // Só cria os cadastros iniciais se a tabela nunca teve registros (assim um produto ou máquina excluído não volta sozinho)
 // Cadastros (produtos, máquinas, pré-definições) são alterados só por administradores; no modo local, por quem usa o aparelho
-// Papéis: admin = Administrador (tudo, inclusive cadastros); gestor = Gestor (tudo, menos cadastros);
+// Papéis: admin = Administrador (tudo, inclusive usuários); gestor = Gestor (tudo, menos o cadastro de usuários);
 // inspetor = Inspetor (inspeções, árvores e destino do lote)
 const PAPEL_NOME={admin:"Administrador",gestor:"Gestor",inspetor:"Inspetor"};
-const PAPEL_DESC={admin:"Tudo, inclusive cadastros de produtos, máquinas e usuários",gestor:"Tudo, menos os cadastros",inspetor:"Inspeções, árvores de falha e destino do lote"};
+const PAPEL_DESC={admin:"Tudo, inclusive o cadastro de usuários",gestor:"Tudo, menos o cadastro de usuários (pode alterar produtos, máquinas, falhas e a Biblioteca)",inspetor:"Tela do operador: inspeções, ocorrências e perguntas da árvore de falha"};
 const papelOpts=sel=>["inspetor","gestor","admin"].map(k=>`<option value="${k}" ${k===sel?"selected":""}>${PAPEL_NOME[k]}</option>`).join("");
 const isAdmin=()=>localMode()||cloudState==="off"||colab?.papel==="admin";
 const isGestor=()=>isAdmin()||colab?.papel==="gestor";
 async function canSeed(t){
-  if(!isAdmin())return false;
+  if(!isGestor())return false;
   if(S[t].length){if(!S.meta["seeded|"+t])await setMeta("seeded|"+t,1);return false}
   if(cloudState==="ok"&&sb){try{const {count,error}=await sb.from(t).select("id",{count:"exact",head:true});if(error)throw error;return !count}catch(e){return false}}
   if(cloudState==="offline")return false;
@@ -732,7 +741,7 @@ async function ensureProducts(){
   if(await canSeed("produtos")){for(const p of SEED_PRODUCTS)await persist("produtos",{...p,ftp:{rev:"",data:"",params:ftpTemplate(!!p.ref)}});await setMeta("seeded|produtos",1)}
   if(await canSeed("maquinas")){const cods=new Set(SEED_MACHINES.map(m=>m.codigo));for(const m of SEED_MACHINES)await persist("maquinas",{...m});
     for(const p of S.produtos)if(p.maquina&&!cods.has(p.maquina)){cods.add(p.maquina);await persist("maquinas",{id:uid(),codigo:p.maquina,tipo:"",descricao:""})}await setMeta("seeded|maquinas",1)}
-  if(!isAdmin())return;
+  if(!isGestor())return;
   for(const p of S.produtos){if(!p.ftp){p.ftp={rev:"",data:"",params:ftpTemplate(!!p.ref)};await persist("produtos",p)}}
   for(const p of S.produtos){if(!p.preset){p.preset={};for(const k of ["MOLD","EST","FL"])p.preset[k]={N:null,nivel:p.nivel||"II",nqa:p.nqa?.[k]??(p.ref?10:null),proposta:p.ref&&p.nqa?.[k]==null};await persist("produtos",p)}}
 }
@@ -750,7 +759,7 @@ async function remove(store,id,info){
 }
 async function setMeta(k,v){S.meta[k]=v;if(idb)await tx("meta","readwrite",st=>st.put({id:k,v}));else saveLS()}
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
-function snapshot(){return {sistema:"JSP Inspeção por Amostragem",versao:2,exportadoEm:new Date().toISOString(),inspecoes:S.inspecoes.filter(x=>!x.demo),investigacoes:S.investigacoes.filter(x=>!x.demo),produtos:S.produtos,maquinas:S.maquinas,causas:S.causas}}
+function snapshot(){return {sistema:"JSP Inspeção por Amostragem",versao:2,exportadoEm:new Date().toISOString(),inspecoes:S.inspecoes.filter(x=>!x.demo),investigacoes:S.investigacoes.filter(x=>!x.demo),produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,falhas:S.falhas}}
 async function mergeIn(data){let n=0;for(const st of TABLES){for(const r of (data[st]||[])){if(!r||!r.id)continue;const cur=S[st].find(x=>x.id===r.id);if(!cur||(r.updatedAt||0)>(cur.updatedAt||0)){const keep=r.updatedAt;await persist(st,r);n++}}}return n}
 // ---- nuvem ----
 function cfg(){return {url:(S.meta.cloudUrl||CLOUD_CFG.url||"").trim(),key:(S.meta.cloudKey||CLOUD_CFG.key||"").trim()}}
@@ -927,8 +936,7 @@ function askReason(o,done){
 }
 function pickFailures(pc,defs,num,done){
   const dlg=$("#dlg");const allowed=new Set(defs.map(x=>x.id));let sel=new Set(pc.def);let q="";const P=prod(draft?.productId);const med={...(pc.med||{})};
-  const groups=DEF_GROUPS.map(g=>({...g,ids:g.ids.filter(id=>allowed.has(id))})).filter(g=>g.ids.length);
-  const others=defs.filter(x=>!DEF_GROUPS.some(g=>g.ids.includes(x.id)));if(others.length)groups.push({nome:"Outras",ids:others.map(x=>x.id)});
+  const groups=GRUPOS_FALHA.map(nome=>({nome,ids:defs.filter(x=>defGrupo(x)===nome).map(x=>x.id)})).filter(g=>g.ids.length);
   const draw=()=>{const ql=q.toLowerCase();
     dlg.innerHTML=`<div class="sheet"><div class="sheet-h"><div><b>Falhas da peça ${num}</b><div class="muted small">Marque todas as falhas que esta peça apresenta (FS 070)</div></div><button class="iconbtn" id="pkX" aria-label="Fechar">✕</button></div>
       <div class="sheet-s"><input id="pkQ" placeholder="Buscar falha…" value="${esc(q)}" autocomplete="off"></div>
@@ -972,8 +980,8 @@ const PAGES=[
 ];
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
-const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1,disposicao:1,cem:1};
-const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",ocorrencias:"Ocorrências",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1,disposicao:1,cem:1,falha:1};
+const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",ocorrencias:"Ocorrências",falha:"Falha",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
@@ -988,7 +996,7 @@ function goBack(){const t=backTarget(false);route={p:t.p,id:t.id||null};location
 window.addEventListener("hashchange",()=>{const [p,id0]=location.hash.slice(1).split("/"),id=id0||null;if(p&&(p!==route.p||id!==route.id)){const top=navStack[navStack.length-1];let y=0;if(top&&top.p===p&&(top.id||null)===id){y=top.y||0;navStack.pop()}else navStack.push({p:route.p,id:route.id,y:window.scrollY});route={p,id};render();window.scrollTo(0,y)}});
 function renderNav(){
   let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
-    const act=route.p===p.id||(OPR[route.p]&&p.id==="operador")||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id===(S.investigacoes.find(v=>v.id===route.id)?.ocId?"ocorrencias":"investigacoes"))||(route.p==="produto"&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
+    const act=route.p===p.id||(OPR[route.p]&&p.id==="operador")||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id===(S.investigacoes.find(v=>v.id===route.id)?.ocId?"ocorrencias":"investigacoes"))||((route.p==="produto"||route.p==="falha")&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
     const badge=p.id==="ocorrencias"?ocGrupos(36500).filter(g=>!g.every(v=>(v.conclusao?.status||"aberta")==="concluida")).length:p.id==="investigacoes"?pendingTrees().length:p.id==="inspecoes"?pendingLots().length:p.id==="cadastros"?pendentes.length:0;
     h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":p.id==="ocorrencias"?"Ocorrências com análise em aberto":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
@@ -1003,7 +1011,7 @@ function render(){
   if(soOperador()&&!OPR[route.p]){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
   document.body.classList.toggle("opmode",!!OPR[route.p]);
   const demo=S.inspecoes.some(x=>x.demo);
-  ({ocorrencias:pgOcorrencias,operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
+  ({falha:pgFalha,ocorrencias:pgOcorrencias,operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO ficam só neste aparelho e servem para treinamento e apresentação. Remova-os em “Dados e configuração” quando terminar.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
@@ -1191,9 +1199,9 @@ function pgNova(){
     <div class="banner info" style="margin-bottom:12px"><span><b>Pré-definição de ${esc(p?.nome||"produto")} · ${POINTS[d.ponto].nome}:</b> lote ${ps.N!=null?"<b>"+ps.N+" peças</b>":lastN!=null?"<b>"+lastN+" peças</b> (último usado)":"<b>a definir</b>"}, nível <b>${ps.nivel}</b>, NQA <b>${ps.nqa!=null?NQA[ps.nqa]:"a definir"}</b>${ps.proposta?' <span class="pill warn">NQA proposto pelo grupo · validar com a Qualidade</span>':""}. O nível e o NQA são fixos; só o tamanho do lote pode ser ajustado se o lote real for diferente. O plano (n, Ac, Re) é calculado automaticamente, seguindo as setas da tabela.</span></div>
     <div class="grid g3">
     <label class="f">Tamanho do lote (N) <span class="req">*</span>${d.N!==""?tag(difN,ps.N):""}<input id="f_N" type="number" min="1" step="1" value="${esc(d.N)}" placeholder="Nº de peças do lote"><span class="hint">Lote homogêneo: mesmo produto, mesmas condições e período (4.4).</span></label>
-    <label class="f">NQA <span class="pill" style="margin-left:6px">do cadastro</span>${d.nqa!==""?`<div class="fixval">${NQA[d.nqa]}%</div><span class="hint">Definido no cadastro do produto (4.2). Não pode ser alterado na inspeção.</span>`:`<div class="fixval" style="color:var(--nc)">Não cadastrado</div><span class="hint">${isAdmin()?`Defina o NQA em <a href="#produto/${esc(p.id)}">Cadastros › ${esc(p.nome)}</a> para inspecionar este ponto.`:"Peça a um administrador para definir o NQA no cadastro do produto."}</span>`}</label>
+    <label class="f">NQA <span class="pill" style="margin-left:6px">do cadastro</span>${d.nqa!==""?`<div class="fixval">${NQA[d.nqa]}%</div><span class="hint">Definido no cadastro do produto (4.2). Não pode ser alterado na inspeção.</span>`:`<div class="fixval" style="color:var(--nc)">Não cadastrado</div><span class="hint">${isGestor()?`Defina o NQA em <a href="#produto/${esc(p.id)}">Cadastros › ${esc(p.nome)}</a> para inspecionar este ponto.`:"Peça a um administrador para definir o NQA no cadastro do produto."}</span>`}</label>
     <label class="f">Nível de inspeção <span class="pill" style="margin-left:6px">fixo</span><div class="fixval">II</div><span class="hint">Nível geral II, o padrão da norma (4.7.1).</span></label></div>
-    ${(difN||(ps.N==null&&d.N!==""))?`<div class="row" style="margin-top:10px">${isAdmin()?'<button class="btn sm" id="setDefault">Salvar este tamanho de lote como padrão do produto neste ponto</button>':""}<button class="btn sm" id="useDefault" ${ps.N==null?"hidden":""}>Voltar ao tamanho cadastrado</button></div>`:""}
+    ${(difN||(ps.N==null&&d.N!==""))?`<div class="row" style="margin-top:10px">${isGestor()?'<button class="btn sm" id="setDefault">Salvar este tamanho de lote como padrão do produto neste ponto</button>':""}<button class="btn sm" id="useDefault" ${ps.N==null?"hidden":""}>Voltar ao tamanho cadastrado</button></div>`:""}
     ${rs?`<div class="banner ${reg==="T"?"nc":reg==="R"?"ok":"info"}" style="margin:12px 0 0"><span><b>Regime: ${REG[reg]}.</b> ${esc(rs.reason)} ${rs.lots?`(${rs.lots} lote(s) desta série no banco)`:""}</span></div>`:""}
     ${rs?.interrupt?`<div class="banner nc" style="margin-top:8px"><span><b>10 lotes seguidos em inspeção severa.</b> A norma recomenda interromper a inspeção por amostragem até haver ação de melhoria da qualidade (5.4).</span></div>`:""}
     ${rs?.eligibleR?`<div class="banner ${rs.eligibleR.ok?"ok":"info"}" style="margin-top:8px"><span>${rs.eligibleR.ok?`<b>Elegível para inspeção atenuada (5.3.3):</b> 10 lotes aceitos em normal, ${rs.eligibleR.sumD} defeituosa(s) em ${rs.eligibleR.sumN} peças ≤ limite ${rs.eligibleR.lim} da Tabela 17. Requer produção regular e aprovação do responsável.<label style="display:flex;gap:8px;margin-top:6px;align-items:center"><input type="checkbox" id="f_applyR" style="width:auto;margin:0" ${d.applyR?"checked":""}> Aplicar regime atenuado neste lote (aprovado pelo responsável)</label>`:`10 lotes aceitos em normal, mas ${rs.eligibleR.lim==null?"a amostragem acumulada ainda não é suficiente para este NQA (Tabela 17, *)":`${rs.eligibleR.sumD} defeituosa(s) excede o limite ${rs.eligibleR.lim} da Tabela 17`}. Mantém normal.`}</span></div>`:""}
@@ -1787,6 +1795,50 @@ function pgOcorrencias(){
   $("#ocPt").onchange=e=>{ocFilt.ponto=e.target.value;pgOcorrencias()};$("#ocSt").onchange=e=>{ocFilt.st=e.target.value;pgOcorrencias()};
   $("#exO").onclick=()=>download("JSP_ocorrencias.csv",csv([["Registrada em","Ponto","Produto","Máquina","Molde","OP","Lote/rack","Turno","Defeito(s)","Peças com defeito","Observação","Registrada por","Origem localizada","Causa encontrada","Situação"],...all.map(g=>{const oc=g[0].oc||{};return [new Date(oc.em||g[0].createdAt).toLocaleString("pt-BR"),POINTS[oc.ponto]?.nome,oc.produto,oc.maquina,oc.molde,oc.op,oc.lote,oc.turno,g.map(v=>DEF[v.defeito]?.nome||v.defeito).join(" | "),oc.qtd,oc.obs,oc.por,g.map(originLabel).join(" | "),[...new Set(g.flatMap(v=>probable(v).map(c=>c.nome)))].join(" | "),{P:"Perguntas sem responder",A:"Em análise",C:"Concluída"}[ocSit(g)]]})]),"text/csv;charset=utf-8");
 }
+/* ---------- Cadastro de falhas (Gestor e Administrador) ----------
+   As falhas da FS 070 ficam no sistema; a tabela "falhas" guarda as incluídas pela JSP e as
+   alterações/desativações das originais. Falha já usada não é excluída: é desativada. */
+const defGrupo=d=>d.grupo||(DEF_GROUPS.find(g=>g.ids.includes(d.id))?.nome)||"Outras";
+const GRUPOS_FALHA=[...DEF_GROUPS.map(g=>g.nome),"Outras"];
+const falhaUso=id=>({insp:S.inspecoes.filter(x=>(x.defeitos||{})[id]).length,arv:S.investigacoes.filter(v=>v.defeito===id).length,causas:CAUSES.filter(c=>c.defs.includes(id)).length});
+let fdraft=null;
+function pgFalha(){
+  const isNew=route.id==="novo",orig=isNew?null:DEF[route.id];
+  if(!isNew&&!orig){go("cadastros");return}
+  const ed=isGestor();
+  if(isNew&&!ed){go("cadastros");return}
+  if(!fdraft||fdraft._for!==route.id)fdraft=isNew?{_for:"novo",nome:"",grupo:"Outras",pts:[],spec:"",src:"",ativo:true}:{_for:route.id,nome:orig.nome,grupo:defGrupo(orig),pts:[...(orig.pts||[])],spec:orig.spec||"",src:orig.src||"",ativo:orig.ativo!==false};
+  const f=fdraft,u=isNew?{insp:0,arv:0,causas:0}:falhaUso(route.id);
+  head("Cadastros · Falhas",isNew?"Nova falha":orig.nome,"");
+  let h=`<div class="grid g2"><div class="card"><h2>Dados da falha</h2>
+    <label class="f">Nome da falha <span class="req">*</span><input id="fl_nome" value="${esc(f.nome)}" ${ed?"":"disabled"} placeholder="Ex.: Mancha de óleo"></label>
+    <label class="f">Grupo<select id="fl_grupo" ${ed?"":"disabled"}>${GRUPOS_FALHA.map(g=>`<option ${g===f.grupo?"selected":""}>${esc(g)}</option>`).join("")}</select><span class="hint">Organiza a falha na lista de falhas da inspeção.</span></label>
+    <div class="f"><label class="f" style="margin:0">Onde é detectada <span class="req">*</span></label><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:4px">${Object.entries(POINTS).map(([k,pt])=>`<label class="chk"><input type="checkbox" data-flp="${k}" ${f.pts.includes(k)?"checked":""} ${ed?"":"disabled"}> <span>${esc(pt.nome)}</span></label>`).join("")}</div><span class="hint">A falha só aparece na inspeção e nas ocorrências dos pontos marcados.</span></div>
+    <label class="f">Critério / especificação<textarea id="fl_spec" ${ed?"":"disabled"} placeholder="Ex.: Peça isenta de manchas visíveis a 1 m.">${esc(f.spec)}</textarea></label>
+    <label class="f">Fonte<input id="fl_src" value="${esc(f.src)}" ${ed?"":"disabled"} placeholder="Ex.: FS 070, Plano de Controle, exigência do cliente"></label>
+    <label class="chk" style="margin-top:6px"><input type="checkbox" id="fl_ativo" ${f.ativo?"checked":""} ${ed?"":"disabled"}> <span><b>Falha ativa</b>: aparece nas listas de inspeção, ocorrência e Biblioteca. Desative em vez de excluir quando a falha já foi usada.</span></label></div>
+    <div class="card"><h2>Uso no sistema</h2><dl class="list-kv"><dt>Origem</dt><dd>${isNew?"Nova falha cadastrada":orig._custom?"Cadastrada pela JSP":orig._mod?"FS 070 · alterada pela JSP":"FS 070 (original do sistema)"}</dd><dt>Inspeções</dt><dd>${u.insp}</dd><dt>Árvores de falha</dt><dd>${u.arv}</dd><dt>Causas na Biblioteca</dt><dd>${u.causas}${!isNew&&ed?` · <a href="#biblioteca">ir para a Biblioteca</a>`:""}</dd></dl>
+    ${!isNew&&!u.causas?`<div class="banner warn" style="margin-top:10px"><span>Ainda não há causas para esta falha. Inclua na Biblioteca causa/efeito para a árvore de falha ter perguntas.</span></div>`:""}</div></div>`;
+  setPage(h);
+  const valid=()=>f.nome.trim().length>=3&&f.pts.length>0;
+  const bar=()=>{setBar(ed?`<div class="bar-info"><span class="bar-hint">${valid()?"":"Informe o nome e pelo menos um ponto de detecção"}</span></div>${!isNew&&orig._mod?`<button class="btn" id="flRest">Restaurar original da FS 070</button>`:""}${!isNew&&orig._custom&&!u.insp&&!u.arv?`<button class="btn danger" id="flDel">Excluir</button>`:""}<button class="btn primary" id="flSave" ${valid()?"":"disabled"}>Salvar falha</button>`:"");
+    if($("#flSave"))$("#flSave").onclick=salvar;
+    if($("#flRest"))$("#flRest").onclick=async()=>{if(!confirm("Voltar esta falha ao texto original da FS 070?"))return;await remove("falhas",route.id,{excluidoMotivo:"Restaurada ao original"});fdraft=null;toast("Falha restaurada.");go("cadastros")};
+    if($("#flDel"))$("#flDel").onclick=async()=>{if(!confirm("Excluir a falha "+orig.nome+"?"))return;await remove("falhas",route.id,{excluidoMotivo:"Excluída no cadastro"});fdraft=null;toast("Falha excluída.");go("cadastros")}};
+  async function salvar(){if(!valid())return;const id=isNew?"f_"+uid().replace(/-/g,"").slice(0,10):route.id;
+    await persist("falhas",{id,nome:f.nome.trim(),grupo:f.grupo,pts:f.pts.slice(),spec:f.spec.trim(),src:f.src.trim(),ativo:!!f.ativo});
+    fdraft=null;toast(isNew?"Falha cadastrada.":"Falha atualizada.");cadTab="falhas";go("cadastros")}
+  bar();if(!ed)return;
+  $("#fl_nome").oninput=e=>{f.nome=e.target.value;bar()};$("#fl_grupo").onchange=e=>{f.grupo=e.target.value};
+  $("#fl_spec").oninput=e=>{f.spec=e.target.value};$("#fl_src").oninput=e=>{f.src=e.target.value};$("#fl_ativo").onchange=e=>{f.ativo=e.target.checked};
+  $$("[data-flp]").forEach(c=>c.onchange=()=>{const k=c.dataset.flp;f.pts=c.checked?[...new Set(f.pts.concat(k))]:f.pts.filter(z=>z!==k);bar()});
+}
+function falhasTab(ed){
+  const L=Object.values(DEF).sort((a,b)=>(a.ativo===false)-(b.ativo===false)||GRUPOS_FALHA.indexOf(defGrupo(a))-GRUPOS_FALHA.indexOf(defGrupo(b))||a.nome.localeCompare(b.nome,"pt-BR"));
+  return `<div class="banner info"><span>Lista de falhas usada na inspeção, na tela do operador, nas ocorrências, na árvore de falha e na Biblioteca. As falhas da FS 070 já vêm no sistema; aqui dá para incluir novas, ajustar textos e desativar as que não se aplicam.</span></div>
+    <div class="tw"><table class="t"><thead><tr><th>Falha</th><th>Grupo</th><th>Detectada em</th><th>Fonte</th><th>Causas</th><th>Situação</th><th></th></tr></thead><tbody>${L.map(d=>{const nc=CAUSES.filter(c=>c.defs.includes(d.id)).length;
+      return `<tr class="click" data-edf="${esc(d.id)}"><td><b>${esc(d.nome)}</b>${d._custom?' <span class="pill brand">nova</span>':d._mod?' <span class="pill">alterada</span>':""}</td><td class="small">${esc(defGrupo(d))}</td><td class="small">${(d.pts||[]).map(k=>esc(POINTS[k]?.nome||k)).join(", ")}</td><td class="small">${esc(d.src||"—")}</td><td>${nc||'<span class="pill warn">0</span>'}</td><td>${d.ativo===false?'<span class="pill">Inativa</span>':'<span class="pill ok">Ativa</span>'}</td><td><button class="btn sm" data-edf="${esc(d.id)}">${ed?"Editar":"Ver"}</button></td></tr>`}).join("")}</tbody></table></div>`;
+}
 function pgCem(){
   // A inspeção 100% é registrada na tela do operador (peça por peça, com os defeitos de cada uma)
   go("opcem",route.id);
@@ -2118,14 +2170,16 @@ let cadTab="produtos",maqEdit=null,pdraft=null;
 let cbEdit=null;
 function pgCadastros(){
   const adm=colab?.papel==="admin"&&cloudState==="ok";if(cadTab==="usuarios"&&!adm)cadTab="produtos";
-  const ed=isAdmin();
-  head("Referência","Cadastros",cadTab==="produtos"&&ed?`<button class="btn primary" id="newP">+ Novo produto</button>`:"");
-  let h=`<div class="tabs" style="margin-bottom:14px"><button data-ct="produtos" aria-selected="${cadTab==="produtos"}">Produtos <span class="muted">(${S.produtos.length})</span></button><button data-ct="maquinas" aria-selected="${cadTab==="maquinas"}">Máquinas <span class="muted">(${S.maquinas.length})</span></button>${adm?`<button data-ct="usuarios" aria-selected="${cadTab==="usuarios"}">Usuários${pendentes.length?` <span class="nbadge" style="position:static;margin-left:4px">${pendentes.length}</span>`:""}</button>`:""}</div>`;
-  if(!ed)h+=`<div class="banner info"><span>Você pode consultar os cadastros. Somente administradores incluem, alteram ou excluem produtos e máquinas.</span></div>`;
+  const ed=isGestor();
+  head("Referência","Cadastros",cadTab==="produtos"&&ed?`<button class="btn primary" id="newP">+ Novo produto</button>`:cadTab==="falhas"&&ed?`<button class="btn primary" id="newF">+ Nova falha</button>`:"");
+  let h=`<div class="tabs" style="margin-bottom:14px"><button data-ct="produtos" aria-selected="${cadTab==="produtos"}">Produtos <span class="muted">(${S.produtos.length})</span></button><button data-ct="maquinas" aria-selected="${cadTab==="maquinas"}">Máquinas <span class="muted">(${S.maquinas.length})</span></button><button data-ct="falhas" aria-selected="${cadTab==="falhas"}">Falhas <span class="muted">(${DEFECTS.length})</span></button>${adm?`<button data-ct="usuarios" aria-selected="${cadTab==="usuarios"}">Usuários${pendentes.length?` <span class="nbadge" style="position:static;margin-left:4px">${pendentes.length}</span>`:""}</button>`:""}</div>`;
+  if(!ed)h+=`<div class="banner info"><span>Você pode consultar os cadastros. Somente gestores e administradores incluem, alteram ou excluem produtos, máquinas e falhas.</span></div>`;
   if(cadTab==="produtos"){
     h+=S.produtos.length?`<div class="cadlist">${[...S.produtos].sort((a,b)=>(b.ref?1:0)-(a.ref?1:0)||a.id.localeCompare(b.id)).map(p=>{const ps=p.ftp?.params||[],fill=ps.filter(q=>q.nom||q.min||q.max).length,ninsp=S.inspecoes.filter(x=>x.productId===p.id).length;
       return `<div class="caditem"><div class="cadmain"><b>${esc(p.id)} · ${esc(p.nome)}</b>${p.ref?' <span class="pill brand">Referência</span>':""}<div class="small muted">${esc([p.cliente,p.codCliente].filter(Boolean).join(" · ")||"Cliente não informado")} · Máquina: ${esc(p.maquina||"—")}</div><div class="small" style="margin-top:4px"><span class="pill ${fill?"":"warn"}">FTP: ${fill} de ${ps.length} parâmetros preenchidos</span> <span class="pill">${ninsp} inspeção(ões)</span></div></div>
         <div class="cadact"><button class="btn sm" data-edp="${esc(p.id)}">${ed?"Editar":"Ver FTP e pré-definições"}</button>${ed?`<button class="btn sm danger" data-delp="${esc(p.id)}">Excluir</button>`:""}</div></div>`}).join("")}</div>`:`<div class="card"><p class="muted">Nenhum produto cadastrado.</p></div>`;
+  }else if(cadTab==="falhas"){
+    h+=falhasTab(ed);
   }else if(cadTab==="maquinas"){
     const m=maqEdit?S.maquinas.find(x=>x.id===maqEdit):null;
     if(ed)h+=`<div class="card"><h2>${m?"Editar máquina":"Cadastrar máquina"}</h2><div class="grid g3" style="margin-top:8px"><label class="f">Identificação <span class="req">*</span><input id="mq_cod" value="${esc(m?.codigo||"")}" placeholder="Ex.: K1014 10"></label><label class="f">Tipo / modelo<input id="mq_tipo" value="${esc(m?.tipo||"")}" placeholder="Ex.: Moldadora K1014"></label><label class="f">Descrição / observação<input id="mq_desc" value="${esc(m?.descricao||"")}"></label></div>
@@ -2141,7 +2195,7 @@ function pgCadastros(){
   }
   setPage(h);
   $$("[data-ct]").forEach(b=>b.onclick=()=>{cadTab=b.dataset.ct;maqEdit=null;pgCadastros()});
-  if($("#newP"))$("#newP").onclick=()=>{pdraft=null;go("produto","novo")};
+  if($("#newP"))$("#newP").onclick=()=>{pdraft=null;go("produto","novo")};if($("#newF"))$("#newF").onclick=()=>{fdraft=null;go("falha","novo")};$$("[data-edf]").forEach(b=>b.onclick=e=>{e.stopPropagation();fdraft=null;go("falha",b.dataset.edf)});
   $$("[data-edp]").forEach(b=>b.onclick=()=>{pdraft=null;go("produto",b.dataset.edp)});
   $$("[data-delp]").forEach(b=>b.onclick=()=>delProduto(b.dataset.delp));
   $$("[data-edm]").forEach(b=>b.onclick=()=>{maqEdit=b.dataset.edm;pgCadastros();window.scrollTo(0,0)});
@@ -2181,8 +2235,8 @@ async function delProduto(id){const p=prod(id);if(!p)return;const ni=S.inspecoes
   if(!confirm(`Excluir o produto ${p.id} · ${p.nome}?`+(ni?`\n\nAs ${ni} inspeção(ões) já registradas deste produto continuam guardadas no histórico.`:"")+"\n\nA FTP e as pré-definições deste produto serão apagadas."))return;
   await remove("produtos",id);if(draft?.productId===id)draft=null;toast("Produto excluído.");cadTab="produtos";go("cadastros")}
 function pgProduto(){
-  const isNew=route.id==="novo",orig=isNew?null:prod(route.id);if((!isNew&&!orig)||(isNew&&!isAdmin())){go("cadastros");return}
-  const ed=isAdmin();
+  const isNew=route.id==="novo",orig=isNew?null:prod(route.id);if((!isNew&&!orig)||(isNew&&!isGestor())){go("cadastros");return}
+  const ed=isGestor();
   if(!pdraft||pdraft._for!==route.id){pdraft=isNew?{_for:"novo",_new:true,id:"",nome:"",cliente:"",codCliente:"",maquina:"",preset:{MOLD:{N:null,nivel:"II",nqa:null},EST:{N:null,nivel:"II",nqa:null},FL:{N:null,nivel:"II",nqa:null}},ftp:{rev:"",data:"",params:ftpTemplate(false)}}:{...JSON.parse(JSON.stringify(orig)),_for:route.id};
     if(!pdraft.ftp)pdraft.ftp={rev:"",data:"",params:ftpTemplate(!!pdraft.ref)}}
   const P=pdraft;
@@ -2259,7 +2313,7 @@ function pgAjuda(){
     ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
     ${q("O que é a Tela do operador?","Uma tela simples, em passos, para quem inspeciona: escolhe ponto, produto, máquina e lote, informa o tamanho do lote e o sistema diz quantas peças inspecionar. Depois registra as peças não conformes (marcando os defeitos de cada uma), responde às perguntas da árvore de cada defeito e vê a ação e a reação recomendadas. Quem tem o papel Inspetor entra direto nela. Quando a Qualidade decide o destino de um lote reprovado, o aviso com o que fazer aparece no início da tela; se a decisão for inspeção 100%, o aviso traz o botão para fazê-la ali mesmo.")}
     ${q("O que é uma ocorrência no processo?","É quando o operador vê uma peça com defeito fora da inspeção por amostragem, durante o trabalho. Ele registra na Tela do operador (onde viu, produto, máquina, lote, defeito e quantas peças) e responde às perguntas da árvore de cada defeito. A ocorrência aparece no painel e na lista de árvores de falha, mas não conta como inspeção: não entra no plano de amostragem, na troca de regime nem nas taxas de aprovação.")}
-    ${q("Quem pode fazer o quê?","Há três papéis. Administrador: tudo, inclusive os cadastros de produtos, máquinas e usuários. Gestor: tudo, menos os cadastros (edita a Biblioteca e pode reabrir a decisão de um lote). Inspetor: registra inspeções, preenche as árvores de falha e segue o destino do lote. Só o administrador muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
+    ${q("Quem pode fazer o quê?","Há três papéis. Administrador: tudo, inclusive o cadastro de usuários. Gestor: tudo, menos o cadastro de usuários (altera produtos, máquinas, falhas e a Biblioteca, e decide o destino dos lotes). Inspetor: usa a Tela do operador (inspeções, ocorrências e perguntas da árvore de falha). Só o administrador muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
     ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
     ${q("Como o sistema decide o lote depois da inspeção 100%?","Divide as peças reprovadas pelas inspecionadas e compara com o NQA do plano do lote. Até o NQA, o lote é aceito e só as peças aprovadas são liberadas; acima, é rejeitado. As reprovadas ficam segregadas nos dois casos.")}
     ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
