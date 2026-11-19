@@ -338,9 +338,28 @@ body.opmode .top{padding:12px 16px}
 .opdet{margin-top:6px}.opdet summary{color:var(--brand);font-weight:600;cursor:pointer;min-height:40px;display:flex;align-items:center}
 .opconf{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:14px 16px;font-size:15px;line-height:1.45;cursor:pointer}
 .opconf.on{border-color:var(--ok);background:var(--ok-soft)}.opconf input{width:24px;height:24px;flex:none;margin:0;accent-color:var(--ok)}
+.opbig.ghost.peso{color:var(--brand);border-color:var(--brand);background:var(--surface);flex-wrap:wrap;gap:4px 10px;min-height:64px}.opbig.peso small{flex-basis:100%;text-align:center;font-size:13px;font-weight:500;color:var(--muted)}
 .opbig.ghost.oc{color:var(--warn);border-color:#E8A33D;background:#FFF8EC;flex-wrap:wrap;gap:4px 10px;min-height:64px}.opbig.oc small{flex-basis:100%;text-align:center;font-size:13px;font-weight:500;color:#7A4A06}
 .optags{display:flex;flex-wrap:wrap;gap:6px}
 .fgrp{margin-top:8px}.fgrp-t{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:6px 0 6px}
+.pstabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pstab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;font:inherit;color:inherit;text-align:left}
+.pstab b{font-size:15px}.pstab small{color:var(--muted);font-size:12px}.pstab.on{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand);background:color-mix(in srgb,var(--brand) 6%,var(--surface))}
+.pskpi{margin-bottom:12px}.psst{margin-bottom:12px}
+.pscharts{overflow:hidden}.cepth{font-size:13.5px;margin:14px 0 4px}.cepsvg{display:block;max-width:100%}
+.cep-grid{stroke:var(--line);stroke-width:1}.cep-ax{font-size:10.5px;fill:var(--muted)}.cep-lab{font-size:11px;font-weight:700}
+.cep-lim{stroke:var(--nc);stroke-width:1.6;stroke-dasharray:6 4;fill:var(--nc)}.cep-lim.prov{stroke-dasharray:2 4}text.cep-lim{stroke:none}
+.cep-lc{stroke:var(--ok);stroke-width:1.6;fill:var(--ok)}text.cep-lc{stroke:none}
+.cep-line{fill:none;stroke:var(--brand);stroke-width:1.4;opacity:.55}.cep-pt{fill:var(--brand);stroke:var(--surface);stroke-width:1.2}
+.cep-pt.sinal{fill:var(--nc);stroke:var(--nc);stroke-width:2;fill-opacity:.9}.cep-pt.fora{fill:var(--surface);stroke:var(--muted);stroke-width:1.6}
+.cepleg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin:8px 0 2px}.cepleg span{display:flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:18px;height:0;border-top:2px solid}.lg.lim{border-color:var(--nc);border-top-style:dashed}.lg.lim.prov{border-top-style:dotted}.lg.lc{border-color:var(--ok)}
+.lg.pt,.lg.sinal,.lg.fora{width:9px;height:9px;border-radius:50%;border:0;background:var(--brand)}.lg.sinal{background:var(--nc)}.lg.fora{background:var(--surface);border:1.6px solid var(--muted)}
+.psvals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:4px}.psvals input{text-align:center;font-weight:600}
+.psvals input.bad{border-color:var(--nc);background:color-mix(in srgb,var(--nc) 8%,var(--surface))}.psvals input.warnv{border-color:var(--warn)}
+.psprev{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline;margin-top:6px}
+.pstab td.bad{color:var(--nc);text-decoration:line-through}.pstab td.foraesp{color:var(--warn);font-weight:700}.pstab tr.sinalrow td:first-child{box-shadow:inset 3px 0 0 var(--nc)}.nowrap{white-space:nowrap}
+@media (max-width:600px){.psvals{grid-template-columns:repeat(3,minmax(0,1fr))}.pstab small{font-size:11px}}
 .nsbox{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);border-radius:10px;background:var(--bg)}.nsbox .ncrow{margin-top:6px}
 .ncrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px}
 .ncrow .stepper button{width:40px;height:40px;font-size:20px}.ncrow .stepper input{width:64px;font-size:18px;font-weight:700}
@@ -725,13 +744,13 @@ const reactOf=c=>(c&&c.reacao&&c.reacao.trim())||REACT[c?.st]||REACT.MOLD;
    ========================================================================= */
 // Endereço do banco da JSP. A TI pode alterar em "Dados e configuração" sem editar o arquivo.
 const CLOUD_CFG={url:"https://okcnwdoxxwslmpptlyhs.supabase.co",key:"sb_publishable_9UT4r3EM6HE2E-kkmxxz0w_RPtpKQAh"};
-const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas","meta"],TABLES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas"];
-const S={inspecoes:[],investigacoes:[],produtos:[],maquinas:[],causas:[],falhas:[],meta:{}};
+const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas","pesagens","meta"],TABLES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas","pesagens"];
+const S={inspecoes:[],investigacoes:[],produtos:[],maquinas:[],causas:[],falhas:[],pesagens:[],meta:{}};
 let idb=null,sb=null,user=null,colab=null,colabStatus="",pendentes=[],cloudState="off",cloudMsg="";
 const localMode=()=>{try{return sessionStorage.getItem("jsp-modo-local")==="1"}catch(e){return false}};
-function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,4);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
+function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,5);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
 function tx(store,mode,fn){return new Promise((res,rej)=>{if(!idb){res(null);return}const t=idb.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);t.onerror=()=>rej(t.error)})}
-function saveLS(){if(!idb){try{localStorage.setItem(DBNAME,JSON.stringify({inspecoes:S.inspecoes,investigacoes:S.investigacoes,produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,falhas:S.falhas,meta:S.meta}))}catch(e){}}}
+function saveLS(){if(!idb){try{localStorage.setItem(DBNAME,JSON.stringify({inspecoes:S.inspecoes,investigacoes:S.investigacoes,produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,falhas:S.falhas,pesagens:S.pesagens,meta:S.meta}))}catch(e){}}}
 async function loadAll(){
   if(idb){for(const s of STORES){const all=await tx(s,"readonly",st=>st.getAll());if(s==="meta"){(all||[]).forEach(m=>S.meta[m.id]=m.v)}else S[s]=all||[]}}
   else{try{const j=JSON.parse(localStorage.getItem(DBNAME)||"null");if(j)Object.assign(S,j)}catch(e){}}
@@ -774,7 +793,7 @@ async function remove(store,id,info){
 }
 async function setMeta(k,v){S.meta[k]=v;if(idb)await tx("meta","readwrite",st=>st.put({id:k,v}));else saveLS()}
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
-function snapshot(){return {sistema:"JSP Inspeção por Amostragem",versao:2,exportadoEm:new Date().toISOString(),inspecoes:S.inspecoes.filter(x=>!x.demo),investigacoes:S.investigacoes.filter(x=>!x.demo),produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,falhas:S.falhas}}
+function snapshot(){return {sistema:"JSP Inspeção por Amostragem",versao:2,exportadoEm:new Date().toISOString(),inspecoes:S.inspecoes.filter(x=>!x.demo),investigacoes:S.investigacoes.filter(x=>!x.demo),produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,falhas:S.falhas,pesagens:S.pesagens.filter(x=>!x.demo)}}
 async function mergeIn(data){let n=0;for(const st of TABLES){for(const r of (data[st]||[])){if(!r||!r.id)continue;const cur=S[st].find(x=>x.id===r.id);if(!cur||(r.updatedAt||0)>(cur.updatedAt||0)){const keep=r.updatedAt;await persist(st,r);n++}}}return n}
 // ---- nuvem ----
 function cfg(){return {url:(S.meta.cloudUrl||CLOUD_CFG.url||"").trim(),key:(S.meta.cloudKey||CLOUD_CFG.key||"").trim()}}
@@ -978,6 +997,7 @@ const ICON={
  table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>',
  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></svg>',
  cad:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg>',
+ peso:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20l2.5-9h9L19 20"/><circle cx="12" cy="7" r="3"/><path d="M12 15v2"/></svg>',
  db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'
 };
 const PAGES=[
@@ -986,6 +1006,7 @@ const PAGES=[
  {id:"operador",t:"Tela do operador",ic:"op",grp:"Operação"},
  {id:"inspecoes",t:"Inspeções",ic:"list",grp:"Operação"},
  {id:"ocorrencias",t:"Ocorrências",ic:"oc",grp:"Operação"},
+ {id:"pesagem",t:"Pesagem",ic:"peso",grp:"Operação"},
  {id:"investigacoes",t:"Árvores de falha",ic:"tree",grp:"Análise"},
  {id:"biblioteca",t:"Biblioteca causa/efeito",ic:"book",grp:"Análise"},
  {id:"cadastros",t:"Cadastros",ic:"cad",grp:"Referência"},
@@ -996,7 +1017,7 @@ const PAGES=[
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
 const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1,disposicao:1,cem:1,falha:1};
-const PNAME={painel:"Painel",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",ocorrencias:"Ocorrências",falha:"Falha",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+const PNAME={painel:"Painel",pesagem:"Pesagem",oppeso:"Pesagem",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",ocorrencias:"Ocorrências",falha:"Falha",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
@@ -1025,8 +1046,8 @@ function render(){
   // Inspetor usa só a tela do operador
   if(soOperador()&&!OPR[route.p]){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
   document.body.classList.toggle("opmode",!!OPR[route.p]);
-  const demo=S.inspecoes.some(x=>x.demo);
-  ({falha:pgFalha,ocorrencias:pgOcorrencias,operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
+  const demo=S.inspecoes.some(x=>x.demo)||S.pesagens.some(x=>x.demo)||S.investigacoes.some(x=>x.demo);
+  ({pesagem:pgPesagem,oppeso:pgOpPeso,falha:pgFalha,ocorrencias:pgOcorrencias,operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="demoBanner"><b>Dados de demonstração carregados.</b> Registros marcados como DEMO ficam só neste aparelho e servem para treinamento e apresentação. Remova-os em “Dados e configuração” quando terminar.</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
@@ -1118,7 +1139,7 @@ function pgPainel(){
   let h="";
   if(pendentes.length&&colab?.papel==="admin")h+=`<div class="banner info"><span><b>${pendentes.length} pedido(s) de acesso aguardando aprovação.</b> ${pendentes.slice(0,3).map(p=>esc(p.email)).join(", ")}${pendentes.length>3?"…":""}</span><button class="btn sm primary" id="verPed">Ver pedidos</button></div>`;
   const pend=pendingTrees(),pl=pendingLots();
-  const ocs=ocGrupos(7).filter(g=>!g[0].demo);
+  const ocs=ocGrupos(7);
   if(ocs.length)h+=`<div class="banner info"><span><b>${ocs.length} ocorrência(s) registrada(s) pelo operador nos últimos 7 dias.</b> ${ocs.slice(0,3).map(g=>esc(g.map(v=>DEF[v.defeito]?.nome||v.defeito).join(" + "))+" · lote "+esc(g[0].oc?.lote||"—")+" ("+(g[0].oc?.qtd||0)+" pç)").join("; ")}${ocs.length>3?"…":""}</span><button class="btn sm" id="goOcs">Ver ocorrências</button></div>`;
   if(pl.length)h+=`<div class="banner warn"><span><b>${pl.length} lote(s) aguardando decisão ou em inspeção 100%.</b> ${pl.slice(0,3).map(x=>"Lote "+esc(x.lote||"")+" ("+lotStage(x).label.toLowerCase()+")").join(", ")}${pl.length>3?"…":""}</span><button class="btn sm primary" id="goLots">Ver lotes</button></div>`;
   if(pend.length)h+=`<div class="banner warn"><span><b>${pend.length} árvore(s) de falha ainda não preenchida(s).</b> Preencha logo após a inspeção, enquanto as evidências estão no posto.</span><button class="btn sm primary" id="goPend">Preencher agora</button></div>`;
@@ -1520,7 +1541,7 @@ async function cemFinalizar(x){
    O operador registra a inspeção e responde às árvores; a Qualidade decide
    o destino do lote no painel; o operador recebe o que fazer com o lote.
    ========================================================================= */
-const OPR={operador:1,opnova:1,oparvore:1,oplote:1,opcem:1,opocorr:1,opoc:1};
+const OPR={operador:1,opnova:1,oparvore:1,oplote:1,opcem:1,opocorr:1,opoc:1,oppeso:1};
 const soOperador=()=>!localMode()&&cloudState==="ok"&&colab?.papel==="inspetor";
 let OP=null;
 const opTurno=()=>{const h=new Date().getHours();return h>=6&&h<14?"1º":h>=14&&h<22?"2º":"3º"};
@@ -1580,6 +1601,7 @@ function pgOperador(){
   if(opTem(OP))h+=`<div class="opinst info"><div class="opinst-t"><span>Inspeção em andamento${OP.lote?" · lote "+esc(OP.lote):""}</span></div><p>Você começou uma inspeção e não terminou. Os dados ficaram guardados.</p><div class="opinst-b"><button class="opbtn" id="opCont">Continuar</button><button class="opbtn ghost" id="opDesc">Descartar</button></div></div>`;
   h+=`<button class="opbig" id="opNew"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nova inspeção</button>`;
   h+=`<button class="opbig ghost oc" id="opOcorr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>Registrar ocorrência<small>Viu um defeito fora da inspeção?</small></button>`;
+  h+=`<button class="opbig ghost peso" id="opPeso"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M5 20l2.5-9h9L19 20"/><circle cx="12" cy="7" r="3"/></svg>Registrar pesagem<small>Peso seco ou úmido · 5 peças</small></button>`;
   h+=`<h2 class="opsec">Avisos da Qualidade${av.length?` <span class="nbadge">${av.length}</span>`:""}</h2>`;
   h+=av.length?av.map(x=>opInstrCard(x,true)).join(""):`<p class="muted">Nenhum aviso. Quando a Qualidade decidir um lote, o que fazer aparece aqui.</p>`;
   h+=`<h2 class="opsec">Inspeções recentes</h2>`;
@@ -1587,7 +1609,7 @@ function pgOperador(){
   const ocs=ocGrupos(14);
   if(ocs.length)h+=`<h2 class="opsec">Ocorrências recentes</h2><div class="oplist">${ocs.slice(0,10).map(g=>{const oc=g[0].oc||{},ok=g.every(treeFilled);return `<button class="oprow" data-opoc="${g[0].ocId}"><span><b>${esc(g.map(v=>DEF[v.defeito]?.nome||v.defeito).join(" · "))}</b><small>Lote ${esc(oc.lote||"—")} · ${esc(POINTS[oc.ponto]?.nome||"")} · ${fmtD(oc.data)} · ${oc.qtd} peça(s)</small></span><span class="pill ${ok?"ok":"warn"}">${ok?"Enviada":"Faltam perguntas"}</span></button>`}).join("")}</div>`;
   setPage(h+`</div>`);opBind();
-  $("#opOcorr").onclick=()=>{OC=ocNovo();go("opocorr")};
+  $("#opOcorr").onclick=()=>{OC=ocNovo();go("opocorr")};$("#opPeso").onclick=()=>go("oppeso","seco");
   $("#opNew").onclick=()=>{if(opTem(OP)&&!confirm("Descartar a inspeção em andamento e começar outra?"))return;OP=opNovo();setMeta("opRascunho",null);go("opnova")};
   if($("#opCont"))$("#opCont").onclick=()=>go("opnova");
   if($("#opDesc"))$("#opDesc").onclick=()=>{OP=null;setMeta("opRascunho",null);render()};
@@ -2195,7 +2217,7 @@ function pgDados(){
    <div class="row" style="margin-top:10px"><button class="btn" data-x="I">CSV inspeções</button><button class="btn" data-x="V">CSV árvores de falha</button><button class="btn" data-x="B">CSV biblioteca</button></div></div></div>`;
   if(adm&&cloudState==="ok")h+=`<div class="card"><h2>Inspeções excluídas</h2><p class="muted small" style="margin-bottom:10px">Toda exclusão fica guardada no banco com o motivo e o usuário. Se uma inspeção foi excluída por engano, restaure aqui: ela volta para todos, junto com as árvores de falha.</p><div id="lixo"><button class="btn sm" id="lixoLoad">Ver inspeções excluídas</button></div></div>`;
   h+=`<div class="card"><h2>Produtos, máquinas e usuários</h2><p class="muted small" style="margin-bottom:10px">Cadastro de produtos (com a FTP e as pré-definições de amostragem), máquinas e, para administradores, usuários e pedidos de acesso.</p><button class="btn" id="toCad2">Abrir Cadastros</button></div>`;
-  h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes e árvores de falha fictícios, sorteados a partir dos produtos, das pré-definições e das máquinas cadastradas. Cada clique acrescenta cerca de um mês de histórico, anterior ao que já existe, como se o sistema estivesse em uso há mais tempo.</p><p class="small" style="margin-bottom:10px"><span class="pill ok">Só neste aparelho</span> Os dados DEMO não são enviados ao banco e não entram na contagem de regime das inspeções reais. Ao remover, somem por completo.${S.inspecoes.some(x=>x.demo)?` <b>${S.inspecoes.filter(x=>x.demo).length} lotes e ${S.investigacoes.filter(x=>x.demo).length} árvores DEMO carregados.</b>`:""}</p><div class="row"><button class="btn" id="demoOn">${S.inspecoes.some(x=>x.demo)?"Gerar mais um mês de demonstração":"Carregar demonstração"}</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
+  h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes, árvores de falha, decisões de lote, inspeções 100%, ocorrências no processo e pesagens (peso seco e úmido) fictícios, sorteados a partir dos produtos, das pré-definições e das máquinas cadastradas. Cada clique acrescenta cerca de um mês de histórico, anterior ao que já existe, como se o sistema estivesse em uso há mais tempo.</p><p class="small" style="margin-bottom:10px"><span class="pill ok">Só neste aparelho</span> Os dados DEMO não são enviados ao banco e não entram na contagem de regime das inspeções reais. Ao remover, somem por completo.${S.inspecoes.some(x=>x.demo)?` <b>${S.inspecoes.filter(x=>x.demo).length} lotes, ${S.investigacoes.filter(x=>x.demo).length} árvores (${new Set(S.investigacoes.filter(x=>x.demo&&x.ocId).map(v=>v.ocId)).size} ocorrências) e ${S.pesagens.filter(x=>x.demo).length} pesagens DEMO carregados.</b>`:""}</p><div class="row"><button class="btn" id="demoOn">${S.inspecoes.some(x=>x.demo)?"Gerar mais um mês de demonstração":"Carregar demonstração"}</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
    <div class="card"><h2>Zona de risco</h2><p class="muted small" style="margin-bottom:12px">${cloudState==="ok"?"Apaga apenas a cópia guardada neste aparelho; o banco compartilhado não é alterado e é baixado de novo.":"Apaga todas as inspeções e árvores deste aparelho. Baixe um backup antes."}</p><button class="btn danger" id="wipe">Limpar dados deste aparelho</button></div></div>
    <div class="card"><h2>Sobre o sistema</h2><p class="small muted">Desenvolvido pelo Grupo 2 (Gestão de Processos e Qualidade) para a JSP Brasil. Amostragem simples por atributos conforme NBR 5426 (Tabelas 1 a 4 e 17; regras de comutação 5.3). Defeitos conforme FS 070 rev. 06/07 e Plano de Controle 64993-BZ100; reação conforme FS 342 / PR 8.7. As relações de causa e efeito marcadas como hipótese devem ser validadas pela Engenharia de Processos antes do uso como padrão. Arquivo único; o banco compartilhado é o Supabase da JSP e cada aparelho mantém uma cópia para uso sem internet.</p></div>`;
   setPage(h);
@@ -2221,7 +2243,8 @@ function pgDados(){
   $("#impF").onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(!j.inspecoes)throw 0;const n=await mergeIn(j);toast(n+" registro(s) importado(s).");render()}catch(err){alert("Arquivo inválido: use um backup exportado por este sistema.")}};
   $$("[data-x]").forEach(b=>b.onclick=()=>{const k=b.dataset.x;if(k==="I"){go("inspecoes");setTimeout(()=>$("#exI").click(),50)}else if(k==="V"){go("investigacoes");setTimeout(()=>$("#exV").click(),50)}else{go("biblioteca");setTimeout(()=>$("#exB").click(),50)}});
   $("#demoOn").onclick=loadDemo;
-  $("#demoOff").onclick=async()=>{const n=S.inspecoes.filter(x=>x.demo).length;if(!confirm(`Remover os ${n} lotes DEMO e as árvores deles? Eles somem por completo.`))return;
+  $("#demoOff").onclick=async()=>{const n=S.inspecoes.filter(x=>x.demo).length;if(!confirm(`Remover os ${n} lotes DEMO, as árvores, as ocorrências e as pesagens DEMO? Eles somem por completo.`))return;
+    for(const r of S.pesagens.filter(r=>r.demo))await delLocal("pesagens",r.id);
     for(const v of S.investigacoes.filter(v=>v.demo))await delLocal("investigacoes",v.id);for(const x of S.inspecoes.filter(x=>x.demo))await delLocal("inspecoes",x.id);
     const f=(S.meta.fila||[]).filter(q=>S[q.store]?.some(r=>r.id===q.id)||q.del);if(f.length!==(S.meta.fila||[]).length)await setMeta("fila",f);
     if(draft?.demo)draft=null;toast("Dados DEMO removidos.");render()};
@@ -2379,6 +2402,7 @@ function pgAjuda(){
     ${q("O que é uma ocorrência no processo?","É quando o operador vê uma peça com defeito fora da inspeção por amostragem, durante o trabalho. Ele registra na Tela do operador (onde viu, produto, máquina, lote, defeito e quantas peças) e responde às perguntas da árvore de cada defeito. A ocorrência aparece no painel e na lista de árvores de falha, mas não conta como inspeção: não entra no plano de amostragem, na troca de regime nem nas taxas de aprovação.")}
     ${q("Quem pode fazer o quê?","Há três papéis. Administrador: tudo, inclusive o cadastro de usuários. Gestor: tudo, menos o cadastro de usuários (altera produtos, máquinas, falhas e a Biblioteca, e decide o destino dos lotes). Inspetor: usa a Tela do operador (inspeções, ocorrências e perguntas da árvore de falha). Só o administrador muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
     ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
+    ${q("Como funciona a Pesagem (carta X̄-R)?","Em Pesagem, escolha Peso seco (final de linha) ou Peso úmido (moldagem) e digite os pesos de 5 peças pesadas no mesmo horário. Cada registro é um subgrupo: o sistema calcula a média (X̄) e a amplitude (R) e desenha as duas cartas. Com 10 subgrupos aparecem limites provisórios; com 20, os limites ficam estabelecidos e fixos (LSC = X̄̄ + A₂·R̄, LIC = X̄̄ − A₂·R̄; carta R: D₄·R̄ e D₃·R̄, com as constantes de n = 5). Pontos fora dos limites e sequências (regras da ISO 8258) aparecem em vermelho. Limite de controle não é especificação: um sinal pede investigação do processo, não reprova a peça.")}
     ${q("O que acontece depois da inspeção 100%?","O operador inspeciona todas as peças, troca cada peça não conforme por uma peça boa e informa só quantas trocou. O lote segue completo. Com essa contagem o sistema calcula o PPM (peças não conformes ÷ inspecionadas × 1.000.000) e o nível sigma do lote, do produto e do mês, no painel.")}
     ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
     ${q("O tamanho do lote ou o NQA não vieram preenchidos.","Eles vêm do cadastro do produto. Um administrador define em Cadastros › Produtos › Pré-definições de amostragem. Sem NQA cadastrado, a inspeção daquele ponto não pode ser registrada.")}
@@ -2432,11 +2456,12 @@ async function loadDemo(){
     Object.assign(x,{regime:rs.reg,letra0:pl.letter0,letra:pl.letter,n:pl.n,ac:pl.ac,re:pl.re,inspecao100:pl.full,d,defeitos,result:d<=pl.ac?"A":d>=pl.re?"R":"AR"});
     if(mudou)await persist("inspecoes",x);
   }
+  for(const x of novos)if(x.ponto==="MOLD"&&defsNS("MOLD").length&&chance(.35)){x.naoSeg={[defsNS("MOLD")[0].id]:1+rnd(3)};await persist("inspecoes",x)}
   // árvores de falha: como no registro real, uma por tipo de falha. Lotes com mais de 3 dias ficam com tudo preenchido;
   // só os mais recentes podem ficar pendentes, para mostrar o fluxo em andamento.
   const recente=x=>Date.now()-x.createdAt<3*864e5;
   const presCands=pt=>pt==="FL"?[{fl:"S",est:"S"},{fl:"S",est:"N"},{fl:"N"}]:pt==="EST"?[{est:"S"},{est:"N"}]:[{}];
-  for(const x of novos){const tipos=Object.keys(x.defeitos||{});if(!tipos.length)continue;
+  for(const x of novos){const tipos=[...Object.keys(x.defeitos||{}),...nsKeys(x).filter(k=>!(x.defeitos||{})[k])];if(!tipos.length)continue;
     for(const k of tipos){const v=await createInvestigation(x,k);v.createdAt=x.createdAt+1;
       const est=recente(x)?wpick([["concluida",3],["andamento",2],["aberta",2]]):Date.now()-x.createdAt<10*864e5?wpick([["concluida",4],["andamento",1]]):"concluida";
       if(est!=="aberta"){let cs=[];for(const pr of presCands(x.ponto)){v.presenca=pr;cs=CAUSES.filter(c=>c.defs.includes(k)&&stageActive(v,c.st));if(cs.length)break}
@@ -2457,7 +2482,225 @@ async function loadDemo(){
       x.c100.modo="qtd";x.c100.r=tipo==="andamento"?"":String(r);x.c100.qtd={};
       if(tipo!=="andamento"){const p2=r/tot*100,ppm=ppmDe(r,tot),sg=sigmaDe(ppm);Object.assign(x.c100,{status:"concluida",fim:new Date(Date.parse(em)+2*3600e3).toISOString(),porFim:por,aprov:tot-r,reprov:r,total:tot,pct:p2,nqa:nqaPct(x),resultado:"A",subst:r,ppm,sigma:sg===Infinity?null:sg,criterio:`${r} peça(s) não conforme(s) em ${tot} separada(s) e substituída(s) por peças boas; lote liberado completo. PPM = ${ppmFmt(ppm)} · nível sigma ${sigFmt(sg)}`})}}
     await persist("inspecoes",x)}
-  toast(`${novos.length} lotes fictícios gerados${demos.length?" (histórico acumulado: "+(demos.length+novos.length)+")":""}.`);go("painel");
+  const nOc=await demoOcorrencias(),nPs=await demoPesagens();
+  toast(`${novos.length} lotes fictícios gerados${nOc?`, ${nOc} ocorrência(s)`:""}${nPs?`, ${nPs} subgrupos de pesagem`:""}${demos.length?" (histórico acumulado: "+(demos.length+novos.length)+")":""}.`);go("painel");
+}
+
+/* =========================================================================
+   PESAGEM · Controle Estatístico de Processo (carta X̄-R)
+   Protótipo: só a Caixa de ferramentas Toyota (1500130050). Peso seco (final de linha) e peso úmido
+   (moldagem) são características separadas: registros, subgrupos, limites e gráficos próprios.
+   Cada registro é um subgrupo racional de n = 5 peças pesadas no mesmo horário (folha "Liberação de
+   produto acabado" da JSP: Peça 1 a Peça 5). Teoria: Montgomery / material da disciplina (ISO 8258).
+   ========================================================================= */
+const PESO_PROD="1500130050",PESO_N=5,CEP_KMIN=10,CEP_KBASE=20,CEP_RECENTES=10;
+const PESO_T={seco:{nome:"Peso seco",ponto:"Final de linha · após a estufa",ftp:"peso_seco"},umido:{nome:"Peso úmido",ponto:"Moldagem · antes da estufa",ftp:"peso_umido"}};
+// Constantes da carta X̄-R por tamanho do subgrupo n (tabela "Parâmetros de ajuste" da disciplina)
+const CEP_K={2:{A2:1.880,D3:0,D4:3.267,d2:1.128},3:{A2:1.023,D3:0,D4:2.574,d2:1.693},4:{A2:.729,D3:0,D4:2.282,d2:2.059},5:{A2:.577,D3:0,D4:2.115,d2:2.326},6:{A2:.483,D3:0,D4:2.004,d2:2.534},7:{A2:.419,D3:.076,D4:1.924,d2:2.704},8:{A2:.373,D3:.136,D4:1.864,d2:2.847},9:{A2:.337,D3:.184,D4:1.816,d2:2.970},10:{A2:.308,D3:.223,D4:1.777,d2:3.078}};
+// Regras de causa especial (ISO 8258, como no material da disciplina)
+const CEP_REGRAS={1:"Ponto fora dos limites de controle",2:"9 pontos seguidos do mesmo lado da linha central",3:"6 pontos seguidos subindo ou descendo",5:"2 de 3 pontos seguidos na zona A (além de 2σ), do mesmo lado",6:"4 de 5 pontos seguidos na zona B ou A (além de 1σ), do mesmo lado"};
+const kgFmt=(v,d=3)=>v==null||!isFinite(v)?"—":v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pesoSpec=tipo=>{const q=ftpParam(prod(PESO_PROD),PESO_T[tipo].ftp)||{};return {min:numIn(q.min),max:numIn(q.max),nom:numIn(q.nom)}};
+const pesoValido=(v,sp)=>v!=null&&isFinite(v)&&v>0&&(sp.min==null||v>=sp.min*.5)&&(sp.max==null||v<=sp.max*1.5)&&v<20;
+const media=a=>a.reduce((s,x)=>s+x,0)/a.length;
+// Subgrupos em ordem cronológica, X̄ e R de cada um, fase dos limites e sinais de causa especial
+function cepDados(tipo){
+  const n=PESO_N,K=CEP_K[n],sp=pesoSpec(tipo);
+  const regs=S.pesagens.filter(r=>r.kind==="sg"&&r.tipo===tipo&&r.productId===PESO_PROD).sort((a,b)=>a.em<b.em?-1:a.em>b.em?1:(a.createdAt||0)-(b.createdAt||0));
+  const sgs=regs.map((r,i)=>{const vals=(r.valores||[]).map(Number);const ok=vals.filter(v=>pesoValido(v,sp));
+    const comp=(r.valores||[]).length===n&&ok.length===n;
+    return {r,seq:i+1,vals,comp,inval:(r.valores||[]).length-ok.length,xb:comp?media(ok):null,R:comp?Math.max(...ok)-Math.min(...ok):null}});
+  const comp=sgs.filter(s=>s.comp),base=S.pesagens.find(r=>r.id==="base_"+tipo&&r.kind==="base");
+  const elig=comp.filter(s=>!s.r.foraBase&&(!base?.inicioEm||s.r.em>=base.inicioEm));
+  const fase=elig.length>=CEP_KBASE?"estab":elig.length>=CEP_KMIN?"prov":"form";
+  const usados=fase==="estab"?elig.slice(0,CEP_KBASE):fase==="prov"?elig:[];
+  let L=null;
+  if(usados.length){const xbb=media(usados.map(s=>s.xb)),rb=media(usados.map(s=>s.R));
+    L={lc:xbb,lsc:xbb+K.A2*rb,lic:xbb-K.A2*rb,rlc:rb,rlsc:K.D4*rb,rlic:K.D3*rb,sig:rb/K.d2,k:usados.length,de:usados[0].seq,ate:usados[usados.length-1].seq,ids:new Set(usados.map(s=>s.r.id))}}
+  // sinais: carta X̄ (regras 1,2,3,5,6) e carta R (regras 1,2,3); avaliados nos subgrupos completos a partir do início da base
+  const aval=comp.filter(s=>!base?.inicioEm||s.r.em>=base.inicioEm);
+  const sinais=[];comp.forEach(s=>{s.sx=[];s.sr=[]});
+  if(L){const sx=(L.lsc-L.lc)/3;
+    const lado=(v,c)=>v>c?1:v<c?-1:0;
+    const regras=(arr,val,lc,lsc,lic,zonas,alvo)=>arr.forEach((s,i)=>{const v=val(s),add=r=>{if(!s[alvo].includes(r))s[alvo].push(r)};
+      if(v>lsc||(lic>0||alvo==="sx")&&v<lic)add(1);
+      if(i>=8){const l=arr.slice(i-8,i+1).map(o=>lado(val(o),lc));if(l.every(x=>x===1)||l.every(x=>x===-1))add(2)}
+      if(i>=5){const w=arr.slice(i-5,i+1).map(val);let up=true,dn=true;for(let j=1;j<6;j++){if(!(w[j]>w[j-1]))up=false;if(!(w[j]<w[j-1]))dn=false}if(up||dn)add(3)}
+      if(zonas){if(i>=2){const w=arr.slice(i-2,i+1).map(val);if(w.filter(x=>x>lc+2*sx).length>=2&&v>lc+2*sx||w.filter(x=>x<lc-2*sx).length>=2&&v<lc-2*sx)add(5)}
+        if(i>=4){const w=arr.slice(i-4,i+1).map(val);if(w.filter(x=>x>lc+sx).length>=4&&v>lc+sx||w.filter(x=>x<lc-sx).length>=4&&v<lc-sx)add(6)}}});
+    regras(aval,s=>s.xb,L.lc,L.lsc,L.lic,true,"sx");regras(aval,s=>s.R,L.rlc,L.rlsc,L.rlic,false,"sr");
+    aval.forEach(s=>{s.sx.forEach(r=>sinais.push({s,carta:"X̄",r}));s.sr.forEach(r=>sinais.push({s,carta:"R",r}))})}
+  const recentes=aval.slice(-CEP_RECENTES),instavel=!!L&&recentes.some(s=>s.sx.length||s.sr.length);
+  const todosV=sgs.flatMap(s=>s.vals.filter(v=>pesoValido(v,sp)));
+  return {tipo,n,K,sp,sgs,comp,base,elig,fase,L,sinais,instavel,recentes,
+    kpi:{med:todosV.length,sg:comp.length,inc:sgs.length-comp.length,xbb:comp.length?media(comp.map(s=>s.xb)):null,rb:comp.length?media(comp.map(s=>s.R)):null,max:todosV.length?Math.max(...todosV):null,min:todosV.length?Math.min(...todosV):null}};
+}
+// Gráfico de controle em SVG (desenhado com os dados registrados; sem biblioteca externa)
+function cepSvg(o){
+  const W=Math.max(300,Math.min(1100,($("#page")?.clientWidth||900)-(innerWidth<700?36:72))),H=innerWidth<700?210:240,ml=innerWidth<700?44:56,mr=innerWidth<700?44:62,mt=12,mb=30;
+  const P=o.pts;if(!P.length)return `<div class="empty small">Sem subgrupos completos ainda.</div>`;
+  const ys=P.map(p=>p.y).concat(o.L?[o.lsc,o.lic,o.lc]:[]),lo0=Math.min(...ys),hi0=Math.max(...ys),pad=(hi0-lo0||Math.abs(hi0)*.01||.001)*.12,lo=o.carta==="R"?Math.max(0,lo0-pad):lo0-pad,hi=hi0+pad;
+  const X=i=>ml+(P.length===1?(W-ml-mr)/2:i*(W-ml-mr)/(P.length-1)),Y=v=>mt+(hi-v)*(H-mt-mb)/(hi-lo);
+  let s=`<svg class="cepsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria)}">`;
+  for(let t=0;t<=4;t++){const v=lo+(hi-lo)*t/4;s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="cep-grid"/><text x="${ml-6}" y="${Y(v)+4}" class="cep-ax" text-anchor="end">${o.fmt(v)}</text>`}
+  if(o.L){const ln=(v,cls,lab)=>`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}${o.prov?" prov":""}"/><text x="${W-mr+4}" y="${Y(v)+4}" class="cep-lab ${cls}">${lab}</text>`;
+    s+=ln(o.lsc,"cep-lim","LSC")+ln(o.lc,"cep-lc","LC")+(o.lic>0||o.carta==="X̄"?ln(o.lic,"cep-lim","LIC"):`<text x="${W-mr+4}" y="${Y(Math.max(lo,0))}" class="cep-lab cep-lim">LIC 0</text>`)}
+  s+=`<polyline class="cep-line" points="${P.map((p,i)=>X(i)+","+Y(p.y)).join(" ")}"/>`;
+  const passo=Math.max(1,Math.ceil(P.length/(innerWidth<700?8:16)));
+  P.forEach((p,i)=>{s+=`<g><title>${esc(p.tip)}</title><circle cx="${X(i)}" cy="${Y(p.y)}" r="${p.sinal?5.5:3.8}" class="cep-pt${p.sinal?" sinal":""}${p.fora?" fora":""}"/></g>`;
+    if(i%passo===0||i===P.length-1)s+=`<text x="${X(i)}" y="${H-10}" class="cep-ax" text-anchor="middle">${p.lab}</text>`});
+  return s+`</svg>`;
+}
+let psVer=40,psForm=null,psEdit=null;
+function psNovoForm(tipo){const d=new Date(),l=new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);return {tipo,em:l,lote:"",turno:opTurno(),por:colab?.nome||"",v:Array(PESO_N).fill("")}}
+function pgPesagem(){pesagemPage(false)}
+function pgOpPeso(){pesagemPage(true)}
+function pesagemPage(op){
+  const tipo=route.id==="umido"?"umido":"seco",T=PESO_T[tipo],D=cepDados(tipo),p=prod(PESO_PROD),ed=!op&&isGestor(),L=D.L,K=D.K;
+  if(!psForm||psForm.tipo!==tipo){psForm=psNovoForm(tipo);psEdit=null}
+  const f=psForm,sp=D.sp;
+  head(op?"Tela do operador":"Operação",op?"Pesagem":"Pesagem · controle estatístico (X̄-R)",op?opTop():"");
+  const demo=D.sgs.some(s=>s.r.demo);
+  let h=`<div class="${op?"opwrap":""}">`;
+  if(!op)h+=`<div class="banner info"><span><b>Protótipo:</b> a Pesagem acompanha só a <b>Caixa de ferramentas Toyota</b> (${esc(PESO_PROD)} · ${esc(p?.codCliente||"64993-BZ100")}). Não há escolha nem cadastro de produto nesta etapa.${demo?" Os subgrupos marcados como <b>DEMO</b> são fictícios, gerados para demonstração.":""}</span></div>`;
+  h+=`<div class="pstabs" role="tablist">${Object.entries(PESO_T).map(([k,t])=>`<button role="tab" class="pstab ${k===tipo?"on":""}" aria-selected="${k===tipo}" data-pst="${k}"><b>${t.nome}</b><small>${t.ponto}</small></button>`).join("")}</div>`;
+  // situação
+  const st=!L?{c:"info",t:"Gráfico em formação",x:`${D.elig.length} de ${CEP_KMIN} subgrupos completos para calcular limites provisórios (${CEP_KBASE} para estabelecer os limites).`}
+    :D.instavel?{c:"nc",t:"Sinais de causa especial",x:`Há sinais nos últimos ${CEP_RECENTES} subgrupos. Investigue a causa no processo. Isto não reprova o produto: a conformidade é dada pela especificação da FTP.`}
+    :{c:"ok",t:"Processo sob controle",x:`Nenhum sinal nos últimos ${CEP_RECENTES} subgrupos: só variação de causas comuns.`};
+  const fs=D.fase==="estab"?`Limites <b>estabelecidos</b> com ${L.k} subgrupos (SG-${L.de} a SG-${L.ate})${D.base?` · base redefinida em ${new Date(D.base.em).toLocaleDateString("pt-BR")} por ${esc(D.base.por||"—")}${D.base.motivo?" ("+esc(D.base.motivo)+")":""}`:""}. Ficam fixos e não mudam a cada registro.`
+    :D.fase==="prov"?`Limites <b>provisórios</b> com ${L.k} subgrupos: são recalculados a cada registro até chegar a ${CEP_KBASE}, quando ficam estabelecidos.`
+    :`Sem limites ainda: com menos de ${CEP_KMIN} subgrupos a estimativa de R̄ não é confiável.`;
+  h+=`<div class="banner ${st.c} psst"><span><b>${st.t}.</b> ${st.x}<br><span class="small">${fs}</span></span></div>`;
+  if(op)h+="%%PSFORM%%";
+  // indicadores
+  const k=D.kpi,kp=(l,v,s,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v" ${c?`style="color:${c}"`:""}>${v}</div><div class="s">${s}</div></div>`;
+  h+=`<div class="grid g4 kpis pskpi">${kp("Medições",k.med.toLocaleString("pt-BR"),"pesos válidos registrados")}${kp("Subgrupos",k.sg,`completos (n = ${D.n})${k.inc?` · ${k.inc} incompleto(s)`:""}`)}${kp("Média geral (X̄̄)",kgFmt(k.xbb)+" kg","todos os subgrupos completos")}${kp("Amplitude média (R̄)",kgFmt(k.rb)+" kg","todos os subgrupos completos")}
+    ${kp("Maior valor",kgFmt(k.max)+" kg",sp.max!=null&&k.max>sp.max?"acima da especificação":"",sp.max!=null&&k.max>sp.max?"var(--nc)":"")}${kp("Menor valor",kgFmt(k.min)+" kg",sp.min!=null&&k.min<sp.min?"abaixo da especificação":"",sp.min!=null&&k.min<sp.min?"var(--nc)":"")}
+    ${kp("Situação",!L?"Em formação":D.instavel?"Instável":"Sob controle",!L?`${D.elig.length}/${CEP_KMIN} subgrupos`:D.fase==="estab"?"limites estabelecidos":"limites provisórios",!L?"":D.instavel?"var(--nc)":"var(--ok)")}
+    ${kp("Especificação (FTP)",sp.min!=null?`${kgFmt(sp.min)} a ${kgFmt(sp.max)}`:"—",sp.nom!=null?`nominal ${kgFmt(sp.nom)} kg · não é limite de controle`:"cadastre na FTP do produto")}</div>`;
+  // gráficos
+  const vis=D.comp.slice(psVer?-psVer:0),tip=(s,v,c)=>`SG-${s.seq} · ${new Date(s.r.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}${s.r.lote?" · lote "+s.r.lote:""} · ${c} = ${kgFmt(v,4)} kg${(c==="X̄"?s.sx:s.sr).length?" · sinal: regra "+(c==="X̄"?s.sx:s.sr).join(", "):""}${s.r.foraBase?" · fora da base":""}${s.r.demo?" · DEMO":""}`;
+  const ptsX=vis.map(s=>({y:s.xb,lab:s.seq,sinal:s.sx.length>0,fora:!!s.r.foraBase,tip:tip(s,s.xb,"X̄")})),ptsR=vis.map(s=>({y:s.R,lab:s.seq,sinal:s.sr.length>0,fora:!!s.r.foraBase,tip:tip(s,s.R,"R")}));
+  h+=`<div class="card pscharts"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">Carta X̄-R · ${T.nome}</h2>${D.comp.length>25?`<label class="row small" style="gap:6px">Mostrar <select id="psVer" style="width:auto;margin:0"><option value="25" ${psVer===25?"selected":""}>últimos 25</option><option value="40" ${psVer===40?"selected":""}>últimos 40</option><option value="0" ${!psVer?"selected":""}>todos (${D.comp.length})</option></select></label>`:""}</div>
+    <div class="cepleg"><span><i class="lg lim${D.fase==="prov"?" prov":""}"></i>LSC / LIC · limites de controle${D.fase==="prov"?" (provisórios)":""}</span><span><i class="lg lc"></i>LC · linha central</span><span><i class="lg pt"></i>subgrupo</span><span><i class="lg sinal"></i>sinal de causa especial</span>${D.comp.some(s=>s.r.foraBase)?`<span><i class="lg fora"></i>fora da base dos limites</span>`:""}</div>
+    <h3 class="cepth">Gráfico 1 · Controle das médias (X̄) · kg</h3>${cepSvg({pts:ptsX,L,lsc:L?.lsc,lc:L?.lc,lic:L?.lic,prov:D.fase==="prov",carta:"X̄",fmt:v=>kgFmt(v),aria:"Carta das médias do "+T.nome})}
+    <h3 class="cepth">Gráfico 2 · Controle das amplitudes (R) · kg</h3>${cepSvg({pts:ptsR,L,lsc:L?.rlsc,lc:L?.rlc,lic:L?.rlic,prov:D.fase==="prov",carta:"R",fmt:v=>kgFmt(v),aria:"Carta das amplitudes do "+T.nome})}
+    <p class="small muted" style="margin-top:6px">Eixo horizontal: número do subgrupo (SG). Passe o dedo ou o mouse sobre um ponto para ver data, lote e valor.</p></div>`;
+  // linhas de controle e premissas
+  if(!op){const f4=v=>kgFmt(v,4);
+    h+=`<div class="grid g2"><div class="card"><h2>Linhas de controle</h2>${L?`<div class="tw"><table class="t"><thead><tr><th>Carta</th><th>LSC</th><th>LC</th><th>LIC</th></tr></thead><tbody><tr><td>X̄ (média)</td><td>${f4(L.lsc)}</td><td>${f4(L.lc)}</td><td>${f4(L.lic)}</td></tr><tr><td>R (amplitude)</td><td>${f4(L.rlsc)}</td><td>${f4(L.rlc)}</td><td>${f4(L.rlic)}</td></tr></tbody></table></div>
+      <p class="small" style="margin-top:8px">LSC = X̄̄ + A₂·R̄ = ${f4(L.lc)} + ${String(K.A2).replace(".",",")} × ${f4(L.rlc)} · LSC<sub>R</sub> = D₄·R̄ = ${String(K.D4).replace(".",",")} × ${f4(L.rlc)} · σ̂ = R̄ ÷ d₂ = ${f4(L.sig)} kg</p>`:`<div class="empty small">Os limites aparecem com ${CEP_KMIN} subgrupos completos (faltam ${CEP_KMIN-D.elig.length}).</div>`}
+      <p class="small muted" style="margin-top:8px">Os limites de controle mostram a variação natural do processo. Eles não são a especificação: um ponto fora do limite pede investigação, não reprova o produto.</p></div>
+      <div class="card"><h2>Premissas</h2><dl class="list-kv"><dt>Subgrupo</dt><dd>n = ${D.n} peças pesadas no mesmo horário (como na folha de liberação da JSP)</dd><dt>Constantes (n = ${D.n})</dt><dd>A₂ = ${String(K.A2).replace(".",",")} · D₃ = ${String(K.D3).replace(".",",")} · D₄ = ${String(K.D4).replace(".",",")} · d₂ = ${String(K.d2).replace(".",",")}</dd><dt>Limites</dt><dd>provisórios de ${CEP_KMIN} a ${CEP_KBASE-1} subgrupos; estabelecidos com os ${CEP_KBASE} primeiros subgrupos completos da base e depois fixos</dd><dt>Regras</dt><dd>ISO 8258: ${Object.keys(CEP_REGRAS).join(", ")} na carta X̄; 1, 2 e 3 na carta R</dd><dt>Fora dos cálculos</dt><dd>subgrupos incompletos ou com valor inválido; subgrupos tirados da base pelo Gestor (só na base)</dd></dl>
+      ${ed?`<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn sm" id="psRebase">Redefinir a base dos limites</button>${D.base?`<button class="btn sm" id="psBasePad">Voltar à base inicial</button>`:""}</div>`:""}</div></div>`}
+  // sinais
+  if(D.sinais.length){const ult=D.sinais.slice().reverse().slice(0,op?5:12);
+    h+=`<div class="card"><h2>Sinais de causa especial</h2><div class="tw"><table class="t"><thead><tr><th>Subgrupo</th><th>Data e hora</th><th>Carta</th><th>Regra</th></tr></thead><tbody>${ult.map(g=>`<tr><td>SG-${g.s.seq}${g.s.r.demo?' <span class="pill">DEMO</span>':""}</td><td>${new Date(g.s.r.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</td><td>${g.carta}</td><td class="small">${g.r} · ${CEP_REGRAS[g.r]}</td></tr>`).join("")}</tbody></table></div>${D.sinais.length>ult.length?`<p class="small muted" style="margin-top:6px">Mostrando os ${ult.length} mais recentes de ${D.sinais.length}.</p>`:""}</div>`}
+  // registro
+  const vals=f.v.map(numIn),fil=vals.filter(v=>v!=null).length,inval=vals.map((v,i)=>f.v[i].trim()!==""&&!pesoValido(v,sp)),okv=vals.filter((v,i)=>v!=null&&!inval[i]);
+  const prev=okv.length===PESO_N?{xb:media(okv),R:Math.max(...okv)-Math.min(...okv)}:null;
+  let fh=`<div class="card" id="psFormCard"><h2>${psEdit?"Completar subgrupo SG-"+(D.sgs.find(s=>s.r.id===psEdit)?.seq||""):"Registrar subgrupo"} · ${T.nome}</h2>
+    <p class="small muted" style="margin-bottom:10px">Pese ${PESO_N} peças seguidas no mesmo horário e digite os pesos em kg (ex.: 1,215). ${T.ponto}.</p>
+    <div class="grid g4"><label class="f">Data e hora<input type="datetime-local" id="psEm" value="${esc(f.em)}"></label><label class="f">Lote<input id="psLote" value="${esc(f.lote)}" placeholder="Ex.: 125" autocomplete="off"></label>
+    <label class="f">Turno<select id="psTurno">${["1º","2º","3º","ADM"].map(t=>`<option ${t===f.turno?"selected":""}>${t}</option>`).join("")}</select></label><label class="f">Responsável<input id="psPor" value="${esc(f.por)}" placeholder="Seu nome" autocomplete="off"></label></div>
+    <div class="psvals">${f.v.map((v,i)=>`<label class="f">Peça ${i+1}<input data-psv="${i}" inputmode="decimal" value="${esc(v)}" placeholder="0,000" class="${inval[i]?"bad":vals[i]!=null&&sp.min!=null&&(vals[i]<sp.min||vals[i]>sp.max)?"warnv":""}" autocomplete="off"></label>`).join("")}</div>
+    <div class="psprev"><span>X̄ = <b id="psPxb">${prev?kgFmt(prev.xb,4):"—"}</b> kg</span><span>R = <b id="psPr">${prev?kgFmt(prev.R,4):"—"}</b> kg</span><span class="small muted" id="psPn">${fil}/${PESO_N} pesos</span></div>
+    ${inval.some(Boolean)?`<p class="small" style="color:var(--nc)">Valor inválido: confira a vírgula e a unidade (kg). Aceita de ${kgFmt(sp.min!=null?sp.min*.5:0)} a ${kgFmt(sp.max!=null?sp.max*1.5:20)} kg.</p>`:""}
+    ${okv.some(v=>sp.min!=null&&(v<sp.min||v>sp.max))?`<p class="small" style="color:var(--warn)">Há peso fora da especificação da FTP (${kgFmt(sp.min)} a ${kgFmt(sp.max)} kg). O subgrupo é registrado normalmente; a peça segue o fluxo de não conforme.</p>`:""}</div>`;
+  h=op?h.replace("%%PSFORM%%",fh):h+fh;
+  // tabela de subgrupos
+  const lista=D.sgs.slice().reverse(),mostra=lista.slice(0,op?8:30);
+  h+=`<div class="card"><h2>Subgrupos registrados · ${T.nome}</h2>${lista.length?`<div class="tw"><table class="t pstab"><thead><tr><th>SG</th><th>Data e hora</th><th>Lote</th><th>Turno</th>${Array.from({length:PESO_N},(_,i)=>`<th>P${i+1}</th>`).join("")}<th>X̄</th><th>R</th><th>Responsável</th><th>Situação</th>${ed||op?"<th></th>":""}</tr></thead><tbody>${mostra.map(s=>{const r=s.r,sx=[...(s.sx||[]),...(s.sr||[]).map(x=>"R"+x)];
+      return `<tr class="${sx.length?"sinalrow":""}"><td><b>SG-${s.seq}</b>${r.demo?' <span class="pill">DEMO</span>':""}</td><td class="small">${new Date(r.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"})}</td><td>${esc(r.lote||"—")}</td><td>${esc(r.turno||"—")}</td>
+      ${Array.from({length:PESO_N},(_,i)=>{const v=s.vals[i];return `<td class="${v!=null&&!pesoValido(v,sp)?"bad":v!=null&&sp.min!=null&&(v<sp.min||v>sp.max)?"foraesp":""}">${v==null||isNaN(v)?"—":kgFmt(v)}</td>`}).join("")}
+      <td><b>${s.comp?kgFmt(s.xb,4):"—"}</b></td><td>${s.comp?kgFmt(s.R,4):"—"}</td><td class="small">${esc(r.por||"—")}</td>
+      <td class="small">${!s.comp?`<span class="pill warn">${s.inval?"valor inválido":"incompleto"}</span>`:sx.length?`<span class="pill nc">sinal ${sx.join(", ")}</span>`:L&&L.ids.has(r.id)?'<span class="pill">base dos limites</span>':'<span class="pill ok">ok</span>'}${r.foraBase?` <span class="pill">fora da base</span>`:""}</td>
+      ${ed||op?`<td class="nowrap">${!s.comp?`<button class="btn sm" data-psfix="${r.id}">Completar</button>`:""}${ed&&s.comp?`<button class="btn sm" data-psbase="${r.id}">${r.foraBase?"Devolver à base":"Tirar da base"}</button>`:""}${ed?`<button class="btn sm danger" data-psdel="${r.id}">Excluir</button>`:""}</td>`:""}</tr>`}).join("")}</tbody></table></div>${lista.length>mostra.length?`<p class="small muted" style="margin-top:6px">Mostrando os ${mostra.length} mais recentes de ${lista.length}.</p>`:""}`
+    :`<div class="empty">Nenhum subgrupo de ${T.nome.toLowerCase()} registrado ainda.</div>`}</div>`;
+  setPage(h+`</div>`);if(op)opBind();
+  // barra de ações
+  const falta=!f.em?"Informe a data e a hora":new Date(f.em).getTime()>Date.now()+5*6e4?"A data e hora não podem estar no futuro":inval.some(Boolean)?"Corrija o valor inválido":!fil?"Digite os pesos":"";
+  const completo=okv.length===PESO_N&&!falta;
+  setBar(`${op?`<button class="btn" id="opBack">Início</button>`:""}<div class="bar-info"><span class="bar-plan">${T.nome} · ${fil}/${PESO_N} pesos</span><span class="bar-hint">${falta||(completo?"Pronto para registrar":`Faltam ${PESO_N-fil} peso(s) para completar o subgrupo`)}</span></div>${!falta&&!completo?`<button class="btn" id="psInc">Guardar incompleto</button>`:""}${psEdit?`<button class="btn" id="psCancel">Cancelar</button>`:""}<button class="btn primary" id="psSave" ${completo?"":"disabled"}>${psEdit?"Salvar subgrupo":"Registrar subgrupo"} →</button>`);
+  if($("#opBack"))$("#opBack").onclick=()=>go("operador");
+  const re=()=>{if(!["pesagem","oppeso"].includes(route.p))return;const y=window.scrollY,a=document.activeElement?.dataset?.psv;pesagemPage(op);window.scrollTo(0,y);if(a!=null){const el=$(`[data-psv="${a}"]`);if(el){el.focus();const v=el.value;el.value="";el.value=v}}};
+  $$("[data-pst]").forEach(b=>b.onclick=()=>{psForm=null;go(op?"oppeso":"pesagem",b.dataset.pst)});
+  if($("#psVer"))$("#psVer").onchange=e=>{psVer=+e.target.value;re()};
+  $("#psEm").onchange=e=>{f.em=e.target.value;re()};$("#psLote").oninput=e=>{f.lote=e.target.value};$("#psTurno").onchange=e=>{f.turno=e.target.value};$("#psPor").oninput=e=>{f.por=e.target.value};
+  // enquanto digita: só a prévia de X̄ e R e o botão; a página é redesenhada ao sair do campo
+  const prevUpd=()=>{const vs=f.v.map(numIn),ok=vs.filter(v=>v!=null&&pesoValido(v,sp)),bad=vs.some((v,i)=>f.v[i].trim()!==""&&!pesoValido(v,sp)),pr=ok.length===PESO_N?{xb:media(ok),R:Math.max(...ok)-Math.min(...ok)}:null;
+    $("#psPxb").textContent=pr?kgFmt(pr.xb,4):"—";$("#psPr").textContent=pr?kgFmt(pr.R,4):"—";$("#psPn").textContent=vs.filter(v=>v!=null).length+"/"+PESO_N+" pesos";
+    const sv=$("#psSave");if(sv)sv.disabled=!(ok.length===PESO_N&&!bad&&f.em)};
+  $$("[data-psv]").forEach(i=>{i.oninput=e=>{e.target.value=e.target.value.replace(/[^\d.,]/g,"");f.v[+i.dataset.psv]=e.target.value;prevUpd()};i.onchange=()=>setTimeout(re,0);
+    i.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();const nx=$(`[data-psv="${+i.dataset.psv+1}"]`);if(nx)nx.focus();else $("#psSave")?.click()}}});
+  const salvar=async inc=>{
+    const vv=f.v.map(numIn).filter(v=>v!=null);if(!vv.length||vv.some(v=>!pesoValido(v,sp)))return;
+    const em=new Date(f.em).toISOString();
+    const dup=S.pesagens.find(r=>r.kind==="sg"&&r.tipo===tipo&&r.id!==psEdit&&Math.abs(new Date(r.em)-new Date(em))<30*6e4&&(r.valores||[]).length===vv.length&&(r.valores||[]).every((x,i)=>Math.abs(x-vv[i])<1e-9));
+    if(dup){toast("Este subgrupo já foi registrado (mesmos pesos no mesmo horário).");return}
+    const old=psEdit?S.pesagens.find(r=>r.id===psEdit):null;
+    const rec={...(old||{id:uid(),createdAt:Date.now(),kind:"sg",tipo,productId:PESO_PROD,n:PESO_N,demo:false}),em,lote:f.lote.trim(),turno:f.turno,por:f.por.trim()||colab?.nome||user?.email||"",valores:vv,incompleto:!!inc};
+    await persist("pesagens",rec);psForm=psNovoForm(tipo);psEdit=null;
+    const D2=cepDados(tipo),s2=D2.sgs.find(s=>s.r.id===rec.id);
+    toast(inc?`Subgrupo guardado incompleto (${vv.length} de ${PESO_N}). Ele não entra nos cálculos até ser completado.`:s2&&(s2.sx?.length||s2.sr?.length)?`SG-${s2.seq} registrado: sinal de causa especial (regra ${[...(s2.sx||[]),...(s2.sr||[])].join(", ")}).`:`SG-${s2?.seq||""} registrado. X̄ = ${kgFmt(s2?.xb,4)} kg · R = ${kgFmt(s2?.R,4)} kg.`);
+    re()};
+  $("#psSave").onclick=()=>salvar(false);if($("#psInc"))$("#psInc").onclick=()=>salvar(true);
+  if($("#psCancel"))$("#psCancel").onclick=()=>{psForm=psNovoForm(tipo);psEdit=null;re()};
+  $$("[data-psfix]").forEach(b=>b.onclick=()=>{const r=S.pesagens.find(x=>x.id===b.dataset.psfix);if(!r)return;const l=new Date(new Date(r.em).getTime()-new Date(r.em).getTimezoneOffset()*6e4).toISOString().slice(0,16);
+    psForm={tipo,em:l,lote:r.lote||"",turno:r.turno||opTurno(),por:r.por||"",v:Array.from({length:PESO_N},(_,i)=>r.valores?.[i]!=null?String(r.valores[i]).replace(".",","):"")};psEdit=r.id;re();$("#psFormCard")?.scrollIntoView({block:"start"})});
+  $$("[data-psbase]").forEach(b=>b.onclick=async()=>{const r=S.pesagens.find(x=>x.id===b.dataset.psbase);if(!r)return;
+    if(r.foraBase){r.foraBase=null}else{const m=prompt("Por que tirar este subgrupo da base dos limites? (causa especial identificada)","");if(m==null)return;r.foraBase={motivo:m.trim(),por:colab?.nome||user?.email||"",em:new Date().toISOString()}}
+    await persist("pesagens",r);toast(r.foraBase?"Subgrupo tirado da base: os limites foram recalculados sem ele.":"Subgrupo devolvido à base.");re()});
+  $$("[data-psdel]").forEach(b=>b.onclick=async()=>{const r=S.pesagens.find(x=>x.id===b.dataset.psdel);if(!r||!confirm("Excluir este subgrupo? Use só para registro feito por engano."))return;
+    if(r.demo)await delLocal("pesagens",r.id);else await remove("pesagens",r.id,{excluidoMotivo:"Excluído na Pesagem"});toast("Subgrupo excluído.");re()});
+  if($("#psRebase"))$("#psRebase").onclick=async()=>{const ops=D.comp.filter(s=>!s.r.foraBase);if(!ops.length)return;
+    const v=prompt(`A partir de qual subgrupo a nova base começa? Use quando o processo mudou de forma conhecida (manutenção do molde, nova matéria-prima). Os ${CEP_KBASE} subgrupos completos a partir dele formam a nova base.\n\nNúmero do subgrupo (SG):`,String(ops[Math.max(0,ops.length-CEP_KBASE)].seq));if(v==null)return;
+    const s=D.sgs.find(x=>x.seq===+String(v).replace(/\D/g,""));if(!s){toast("Subgrupo não encontrado.");return}
+    const m=prompt("Motivo da nova base:","")??"";
+    await persist("pesagens",{id:"base_"+tipo,kind:"base",tipo,productId:PESO_PROD,inicioEm:s.r.em,inicioSeq:s.seq,motivo:m.trim(),em:new Date().toISOString(),por:colab?.nome||user?.email||"",demo:false});toast("Nova base definida a partir do SG-"+s.seq+".");re()};
+  if($("#psBasePad"))$("#psBasePad").onclick=async()=>{if(!confirm("Voltar a base dos limites para os primeiros subgrupos registrados?"))return;await remove("pesagens","base_"+tipo,{excluidoMotivo:"Base padrão"});toast("Base inicial restaurada.");re()};
+}
+
+// Demonstração da Pesagem: subgrupos fictícios do peso seco e do peso úmido da Caixa Toyota (só neste aparelho, marcados DEMO).
+// Os primeiros 20 subgrupos formam uma base estável; depois entram causas especiais de propósito, para mostrar os alertas.
+const DEMO_PESO_SEED=24;
+async function demoPesagens(seed=DEMO_PESO_SEED){
+  if(S.pesagens.some(r=>r.demo&&r.kind==="sg"))return 0;
+  // gerador com semente: a demonstração sai sempre igual (base estável e sinais nos mesmos subgrupos)
+  let t=seed>>>0;const rnd=()=>{t+=0x6D2B79F5;let x=t;x=Math.imul(x^x>>>15,x|1);x^=x+Math.imul(x^x>>>7,x|61);return((x^x>>>14)>>>0)/4294967296};
+  const g=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+  const cfg={seco:{mu:1.208,sw:.016,sb:.004},umido:{mu:1.392,sw:.019,sb:.005}},nomes=["Ana (DEMO)","Bruno (DEMO)","Carla (DEMO)","Diego (DEMO)"];
+  const turno=d=>{const h=d.getHours();return h>=6&&h<14?"1º":h>=14&&h<22?"2º":"3º"};let n=0;
+  for(const tipo of ["seco","umido"]){const c=cfg[tipo],K=34,ini=Date.now()-9*864e5,passo=(9*864e5-4*3600e3)/K;
+    for(let i=0;i<K;i++){const em=new Date(ini+i*passo+rnd()*1800e3);let sh=c.sb*g(),sw=c.sw;
+      if(tipo==="seco"&&i===26)sh+=.075;          // horário com peças bem mais pesadas (ponto acima do LSC)
+      if(tipo==="seco"&&i===30)sw*=3.4;           // pesos muito espalhados no subgrupo (amplitude acima do LSC da carta R)
+      if(tipo==="umido"&&i>=22)sh+=.0075;         // média deslocada um pouco para cima (sequência do mesmo lado da LC)
+      const valores=Array.from({length:PESO_N},()=>+(c.mu+sh+sw*g()).toFixed(3));
+      await persist("pesagens",{id:uid(),createdAt:em.getTime(),kind:"sg",tipo,productId:PESO_PROD,n:PESO_N,em:em.toISOString(),lote:String(118+Math.floor(i/4)),turno:turno(em),por:nomes[i%4],valores,incompleto:false,demo:true});n++}}
+  const em=new Date(Date.now()-25*6e4);
+  await persist("pesagens",{id:uid(),createdAt:em.getTime(),kind:"sg",tipo:"seco",productId:PESO_PROD,n:PESO_N,em:em.toISOString(),lote:"127",turno:turno(em),por:"Ana (DEMO)",valores:[1.214,1.198,1.221],incompleto:true,demo:true});
+  return n+1;
+}
+// Demonstração das ocorrências no processo: o operador viu defeito fora da inspeção. As antigas já têm a árvore respondida;
+// uma recente fica pendente, para aparecer na tela do operador e no aviso do painel.
+async function demoOcorrencias(){
+  if(S.investigacoes.some(v=>v.demo&&v.ocId)||!S.produtos.length)return 0;
+  const pick=a=>a[Math.floor(Math.random()*a.length)],nomes=["Ana (DEMO)","Bruno (DEMO)","Carla (DEMO)","Diego (DEMO)"],turnos=["1º","2º","3º"];
+  const presCands=pt=>pt==="FL"?[{fl:"S",est:"S"},{fl:"S",est:"N"},{fl:"N"}]:pt==="EST"?[{est:"S"},{est:"N"}]:[{}];
+  const casos=[[22,"MOLD",["rebarba"],4,"Rebarba grossa saindo da cavidade 2 desde o começo do turno."],[17,"FL",["corte"],2,"Peças cortadas na mesa de rebarbação."],[12,"MOLD",["falha_injecao","bico_baixo"],5,"Falha de injeção perto do bico 3; bico parece baixo."],
+    [8,"EST",["inchaco"],3,"Peças inchadas na saída da estufa, carrinho da porta."],[4,"FL",["esfarelamento"],2,"Canto esfarelando ao manusear."],[1,"MOLD",["murcha"],3,"Peças murchas logo após a troca de matéria-prima."],[0,"FL",["deformada"],1,"Peça fechada no encaixe da ferramenta."]];
+  let n=0;
+  for(const [dias,ponto,defs0,qtd,obs] of casos){const defs=defs0.filter(k=>DEF[k]&&DEF[k].pts.includes(ponto));if(!defs.length)continue;
+    const p=S.produtos.find(x=>x.id===PESO_PROD)||pick(S.produtos),em0=Date.now()-dias*864e5-(dias?3600e3*(2+Math.random()*6):40*6e4),em=new Date(em0).toISOString();
+    const ocId=uid(),oc={id:ocId,em,data:em.slice(0,10),productId:p.id,produto:p.nome,ponto,maquina:p.maquina||S.maquinas[0]?.codigo||"",lote:"RACK-"+(10+Math.floor(Math.random()*40)),turno:pick(turnos),op:"",molde:"",qtd,obs:obs+" (fictício)",defs,por:pick(nomes)};
+    for(const k of defs){const v={id:uid(),createdAt:em0,inspecaoId:null,ocId,oc,origem:"ocorrencia",defeito:k,ponto,pecas:qtd,presenca:{},respostas:{},conclusao:{status:"aberta"},demo:true};
+      if(dias>=3||(dias>=1&&Math.random()<.5)){let cs=[];for(const pr of presCands(ponto)){v.presenca=pr;cs=CAUSES.filter(c=>c.defs.includes(k)&&stageActive(v,c.st));if(cs.length)break}
+        if(cs.length){const c=pick(cs);v.respostas={[c.id]:{a:"S",note:"Desvio fictício para demonstração."}};cs.filter(o=>o!==c).slice(0,2).forEach(o=>v.respostas[o.id]={a:"N"});
+          v.conclusao=dias>=3?{status:"concluida",classif:"confirmada",sintese:c.nome+" observado(a) no posto (fictício)."}:{status:"andamento",classif:"provavel"}}else v.presenca={}}
+      await persist("investigacoes",v);n++}}
+  return n;
 }
 
 /* =========================================================================
