@@ -341,6 +341,7 @@ body.opmode .top{padding:12px 16px}
 .opbig.ghost.oc{color:var(--warn);border-color:#E8A33D;background:#FFF8EC;flex-wrap:wrap;gap:4px 10px;min-height:64px}.opbig.oc small{flex-basis:100%;text-align:center;font-size:13px;font-weight:500;color:#7A4A06}
 .optags{display:flex;flex-wrap:wrap;gap:6px}
 .fgrp{margin-top:8px}.fgrp-t{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:6px 0 6px}
+.nsbox{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);border-radius:10px;background:var(--bg)}.nsbox .ncrow{margin-top:6px}
 .ncrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px}
 .ncrow .stepper button{width:40px;height:40px;font-size:20px}.ncrow .stepper input{width:64px;font-size:18px;font-weight:700}
 .opstep{display:grid;grid-template-columns:64px minmax(0,1fr) 64px;gap:8px;align-items:stretch}
@@ -516,7 +517,7 @@ function applyPreset(d){const p=prod(d.productId),ps=presetOf(p,d.ponto);const l
   d.N=ps.N!=null?String(ps.N):(last!=null?String(last):"");d.nivel="II";d.nqa=ps.nqa!=null?String(ps.nqa):"";return d}
 // Defeitos: nomes da FS 070 (Moldagem e Final de Linha) + características do Plano de Controle
 const DEFECTS=[
- {id:"rebarba",nome:"Rebarba acima do especificado",pts:["MOLD","FL"],spec:"Até 3 mm, conforme desenho; calibrador P/NP (OK/NOK). Remover sem prejudicar geometria e aparência.",src:"Plano de Controle op. 30/50 · FS 070"},
+ {id:"rebarba",nome:"Rebarba acima do especificado",pts:["MOLD","FL"],naoSeg:["MOLD"],spec:"Até 3 mm, conforme desenho; calibrador P/NP (OK/NOK). Remover sem prejudicar geometria e aparência.",src:"Plano de Controle op. 30/50 · FS 070"},
  {id:"esfarelamento",nome:"Esfarelamento",pts:["MOLD","FL"],spec:"Peça isenta de esfarelamento.",src:"FS 070"},
  {id:"bico_esfarelando",nome:"Bicos injetores esfarelando",pts:["MOLD","FL"],spec:"Bicos injetores conformes.",src:"FS 070"},
  {id:"falha_injecao",nome:"Falha de injeção",pts:["MOLD","FL"],spec:"Isento de falha de injeção.",src:"FS 070"},
@@ -1136,7 +1137,7 @@ function pgPainel(){
    <div class="kpi"><div class="l">Peças não conformes nas amostras</div><div class="v">${sumN?(sumD/sumN*100).toFixed(2).replace(".",",")+"%":"—"}</div><div class="s">${sumD} de ${sumN} peças inspecionadas</div></div>
    <div class="kpi"><div class="l">Árvores de falha em aberto</div><div class="v">${open}</div><div class="s">${V.length} registradas</div></div></div>`;
   // Pareto
-  const cnt={};I.forEach(x=>Object.keys(x.defeitos||{}).forEach(k=>{cnt[k]=(cnt[k]||0)+1}));
+  const cnt={};I.forEach(x=>[...new Set([...Object.keys(x.defeitos||{}),...Object.keys(x.naoSeg||{})])].forEach(k=>{cnt[k]=(cnt[k]||0)+1}));
   const par=Object.entries(cnt).sort((a,b)=>b[1]-a[1]),max=par.length?par[0][1]:1,totD=par.reduce((a,b)=>a+b[1],0);let cum=0;
   h+=`<div class="grid g2"><div class="card"><h2>Pareto de falhas (lotes em que apareceram)</h2>${par.length?par.slice(0,10).map(([k,v])=>{cum+=v;return `<div class="barrow"><span title="${esc(DEF[k]?.nome||k)}">${esc(DEF[k]?.nome||k)}</span><div class="track"><div class="bar" style="width:${v/max*100}%"></div></div><b>${v}</b></div>`}).join("")+`<p class="hint">Os ${Math.min(3,par.length)} primeiros somam ${Math.round(par.slice(0,3).reduce((a,b)=>a+b[1],0)/totD*100)}% das vezes em que uma falha apareceu num lote.</p>`:'<p class="empty">Sem defeitos registrados.</p>'}</div>`;
   // por ponto
@@ -1176,10 +1177,11 @@ function pgNova(){
   const rs=d.productId&&d.ponto&&nqaVal!==""?regimeState(d.productId,d.ponto,nqaVal,d.editOf,localMode()):null;
   let reg=rs?rs.reg:"N";if(rs&&reg==="N"&&rs.eligibleR?.ok&&d.applyR)reg="R";
   const plan=samplingPlan(d.N,d.nivel,nqaVal===""?null:nqaVal,reg);
-  const defs=DEFECTS.filter(x=>x.pts.includes(d.ponto));
+  const defs=defsSeg(d.ponto),nsDefs=defsNS(d.ponto);d.ns=d.ns||{};
+  Object.keys(d.ns).forEach(k=>{if(!nsDefs.some(x=>x.id===k))delete d.ns[k]});
   d.pecas=d.pecas||[];d.defs=(d.defs||[]).filter(k=>defs.some(x=>x.id===k));
   if(d.pecas.length&&d.nc==null){d.nc=String(d.pecas.length);d.defs=[...new Set(d.pecas.flatMap(pc=>pc.def))].filter(k=>defs.some(x=>x.id===k));d.pecas=[]}
-  const dd=Math.floor(+d.nc)||0,semFalha=(dd>0&&!d.defs.length)?1:0,semPeca=d.defs.length>0&&dd===0,acima=plan&&dd>plan.n;
+  const dd=Math.floor(+d.nc)||0,semFalha=(dd>0&&!d.defs.length)?1:0,semPeca=d.defs.length>0&&dd===0,acima=plan&&(dd>plan.n||Object.values(d.ns).some(v=>+v>plan.n));
   const pend=pendingTrees();
   let verdict='<div class="verdict wait">Informe o lote e o NQA para gerar o plano.</div>',result=null;
   if(plan){
@@ -1226,6 +1228,7 @@ function pgNova(){
     <div class="pcsum"><div><span>Inspecionadas</span><b>${plan?plan.n:"—"}</b></div><div><span>Conformes</span><b style="color:var(--ok)">${plan?Math.max(0,plan.n-dd):"—"}</b></div><div><span>Não conformes (d)</span><b style="color:var(--nc)">${dd}</b></div></div>
     <div class="ncrow"><span class="f" style="margin:0">Peças não conformes encontradas (d)</span><div class="stepper"><button type="button" class="btn" id="ncMenos" aria-label="Uma peça a menos" ${dd>0?"":"disabled"}>−</button><input id="f_nc" inputmode="numeric" value="${esc(String(d.nc??""))}" placeholder="0" aria-label="Peças não conformes"><button type="button" class="btn" id="ncMais" aria-label="Uma peça a mais" ${plan&&dd<plan.n?"":"disabled"}>+</button></div></div>
     ${dd>0||d.defs.length?`<div class="f" style="margin-top:12px"><span>Falhas encontradas nessas peças <span class="req">*</span></span><span class="hint" style="margin:2px 0 8px">Marque todas as falhas que apareceram. Uma peça com várias falhas conta uma vez em d; cada falha marcada gera sua árvore.</span>${chipsFalhas(defs,d.defs,"data-fdef")}</div>`:`<div class="pcempty" style="margin-top:12px">${plan?"Se todas as peças da amostra estiverem conformes, deixe 0 e registre a inspeção.":"Informe o lote e o NQA para começar."}</div>`}
+    ${plan&&nsDefs.length?`<div class="nsbox"><b>Não segrega ${POINTS[d.ponto]?.nome==="Moldagem"?"na moldagem":"neste ponto"} · só registrar</b><span class="hint" style="margin:2px 0 8px">FS 070: estas peças continuam no lote e não entram em d. Se a peça tiver também outro defeito, conte-a em d por esse outro defeito.</span>${nsDefs.map(df=>`<div class="ncrow"><span>${esc(df.nome)} · peças</span><div class="stepper"><button type="button" class="btn" data-nsm="${df.id}" aria-label="Uma a menos">−</button><input data-ns="${df.id}" inputmode="numeric" value="${esc(String(d.ns[df.id]??""))}" placeholder="0" aria-label="${esc(df.nome)}: peças"><button type="button" class="btn" data-nsp="${df.id}" aria-label="Uma a mais">+</button></div></div>`).join("")}</div>`:""}
     <label class="f" style="margin-top:12px">Observações<textarea id="f_obs" placeholder="Condições do lote, fotos registradas…">${esc(d.obs)}</textarea></label></div>`;
   h+=`</div><div class="sticky"><div class="plan"><div class="ph"><b>Plano de amostragem</b><span class="pill" style="background:#fff;color:var(--nav)">${REG[reg]} · ${REG_T[reg]}</span></div><div class="pb">`;
   if(plan){h+=`<div class="bigs"><div><div class="l">Letra</div><div class="v">${plan.letter}</div></div><div><div class="l">Amostra (<span class="sym">n</span>)</div><div class="v">${plan.n}</div></div><div><div class="l">Ac</div><div class="v" style="color:var(--ok)">${plan.ac}</div></div><div><div class="l">Re</div><div class="v" style="color:var(--nc)">${plan.re}</div></div></div>
@@ -1261,6 +1264,9 @@ function pgNova(){
   const setNc=v=>keepY(()=>{d.nc=String(Math.max(0,Math.min(plan?plan.n:9999,v)));if(!(+d.nc))d.defs=d.defs.filter(()=>true)});
   if($("#ncMenos"))$("#ncMenos").onclick=()=>setNc(dd-1);if($("#ncMais"))$("#ncMais").onclick=()=>setNc(dd+1);
   if($("#f_nc")){$("#f_nc").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"");d.nc=e.target.value;saveDraftSoon()};$("#f_nc").onchange=e=>setNc(Math.floor(+e.target.value)||0)}
+  const setNs=(k,v)=>keepY(()=>{d.ns[k]=String(Math.max(0,Math.min(plan?plan.n:9999,v)))});
+  $$("[data-nsm]").forEach(b=>b.onclick=()=>setNs(b.dataset.nsm,(+d.ns[b.dataset.nsm]||0)-1));$$("[data-nsp]").forEach(b=>b.onclick=()=>setNs(b.dataset.nsp,(+d.ns[b.dataset.nsp]||0)+1));
+  $$("[data-ns]").forEach(i=>{i.oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"");d.ns[i.dataset.ns]=e.target.value;saveDraftSoon()};i.onchange=e=>setNs(i.dataset.ns,Math.floor(+e.target.value)||0)});
   $$("[data-fdef]").forEach(b=>b.onclick=()=>keepY(()=>{const k=b.dataset.fdef;d.defs=d.defs.includes(k)?d.defs.filter(z=>z!==k):d.defs.concat(k)}));
   $$("[data-edpc]").forEach(b=>b.onclick=()=>{const pc=d.pecas.find(x=>x.id===b.dataset.edpc);pickFailures(pc,defs,d.pecas.indexOf(pc)+1,()=>keepY(()=>{}))});
   $$("[data-rmpc]").forEach(b=>b.onclick=()=>{if(confirm("Remover esta peça não conforme?"))keepY(()=>{d.pecas=d.pecas.filter(x=>x.id!==b.dataset.rmpc)})});
@@ -1271,7 +1277,7 @@ function pgNova(){
     if(d.editOf&&!d._motivo){askReason({titulo:"Motivo da correção",texto:"Explique o que foi corrigido nesta inspeção.",botao:"Salvar correção"},m=>{d._motivo=m;$("#save").click()});return}
     const old=d.editOf?S.inspecoes.find(i=>i.id===d.editOf):null;
     const rec={id:d.id,createdAt:old?old.createdAt:Date.now(),productId:d.productId,produto:p?.nome,ponto:d.ponto,data:d.data,turno:d.turno,maquina:d.maquina,molde:d.molde,op:d.op,lote:d.lote,inspetor:d.inspetor,N:+d.N,nivel:d.nivel,nqa:nqaVal,regime:reg,letra0:plan.letter0,letra:plan.letter,n:plan.n,ac:plan.ac,re:plan.re,inspecao100:plan.full,
-      pecas:[],defeitos:Object.fromEntries(d.defs.map(k=>[k,1])),modo:"qtd",d:dd,result,obs:d.obs,reap:d.reap,refId:d.refId,reacao:{},demo:false};
+      pecas:[],defeitos:Object.fromEntries(d.defs.map(k=>[k,1])),naoSeg:Object.fromEntries(Object.entries(d.ns).filter(([,v])=>+v>0).map(([k,v])=>[k,+v])),modo:"qtd",d:dd,result,obs:d.obs,reap:d.reap,refId:d.refId,reacao:{},demo:false};
     if(old){rec.reacao=old.reacao||{};["disp","dispHist","c100","c100Hist"].forEach(k=>{if(old[k]!==undefined)rec[k]=old[k]});rec.correcoes=[...(old.correcoes||[]),{em:new Date().toISOString(),por:user?.email||d.inspetor,motivo:d._motivo,antes:{N:old.N,nqa:old.nqa,d:old.d,result:old.result,lote:old.lote,defeitos:old.defeitos}}]}
     await persist("inspecoes",rec);await setMeta("lastInspector",d.inspetor);await setMeta("lastN|"+d.productId+"|"+d.ponto,+d.N);draft=null;draftRestored=false;clearTimeout(window._dt);await setMeta("rascunho",null);
     const tipos=d.defs.slice();
@@ -1302,7 +1308,7 @@ function pgInspecoes(){
   if($("#fclr"))$("#fclr").onclick=()=>{filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""};pgInspecoes()};
   $$("[data-id]").forEach(r=>r.onclick=()=>go("inspecao",r.dataset.id));
   $("#newI").onclick=()=>{draft=null;go("nova")};
-  $("#exI").onclick=()=>download("JSP_inspecoes.csv",csv([["ID","Data","Produto","Código","Ponto","Turno","Máquina","Molde","OP","Lote","Inspetor","N","Nível","NQA","Regime","Letra","n","Ac","Re","d","Resultado da amostragem","Situação do lote","Decisão de disposição","Motivo","Justificativa","Decidido por","Decidido em","100%: inspecionadas","100%: aprovadas","100%: reprovadas","100%: critério","Reapresentação","Defeitos","Observações","Demo"],...S.inspecoes.sort(byTime).map(x=>[x.id,x.data,x.produto,x.productId,POINTS[x.ponto]?.nome,x.turno,x.maquina,x.molde,x.op,x.lote,x.inspetor,x.N,x.nivel,NQA[x.nqa],REG[x.regime],x.letra,x.n,x.ac,x.re,x.d,{A:"Aceito",AR:"Aceito (volta ao normal)",R:"Rejeitado"}[x.result],lotStage(x).label,x.disp?DISP[x.disp.tipo]:"",x.disp?.motivo?motLabel(x.disp.motivo):"",x.disp?.just||"",x.disp?.por||"",x.disp?.em?new Date(x.disp.em).toLocaleString("pt-BR"):"",...(x.c100?(c=>{const k=c.status==="concluida"?{a:c.aprov,r:c.reprov,t:c.total}:c100Count(c);return [k.t,k.a,k.r,c.criterio||"em andamento"]})(x.c100):["","","",""]),x.reap?"Sim":"Não",Object.keys(x.defeitos||{}).map(k=>(DEF[k]?.nome||k)+(defN(x,k)!=null?": "+defN(x,k):"")).join(" | "),x.obs,x.demo?"Sim":""])]),"text/csv;charset=utf-8");
+  $("#exI").onclick=()=>download("JSP_inspecoes.csv",csv([["ID","Data","Produto","Código","Ponto","Turno","Máquina","Molde","OP","Lote","Inspetor","N","Nível","NQA","Regime","Letra","n","Ac","Re","d","Resultado da amostragem","Situação do lote","Decisão de disposição","Motivo","Justificativa","Decidido por","Decidido em","100%: inspecionadas","100%: aprovadas","100%: reprovadas","100%: critério","Reapresentação","Defeitos","Não segrega (registrado)","Observações","Demo"],...S.inspecoes.sort(byTime).map(x=>[x.id,x.data,x.produto,x.productId,POINTS[x.ponto]?.nome,x.turno,x.maquina,x.molde,x.op,x.lote,x.inspetor,x.N,x.nivel,NQA[x.nqa],REG[x.regime],x.letra,x.n,x.ac,x.re,x.d,{A:"Aceito",AR:"Aceito (volta ao normal)",R:"Rejeitado"}[x.result],lotStage(x).label,x.disp?DISP[x.disp.tipo]:"",x.disp?.motivo?motLabel(x.disp.motivo):"",x.disp?.just||"",x.disp?.por||"",x.disp?.em?new Date(x.disp.em).toLocaleString("pt-BR"):"",...(x.c100?(c=>{const k=c.status==="concluida"?{a:c.aprov,r:c.reprov,t:c.total}:c100Count(c);return [k.t,k.a,k.r,c.criterio||"em andamento"]})(x.c100):["","","",""]),x.reap?"Sim":"Não",Object.keys(x.defeitos||{}).map(k=>(DEF[k]?.nome||k)+(defN(x,k)!=null?": "+defN(x,k):"")).join(" | "),nsTxt(x),x.obs,x.demo?"Sim":""])]),"text/csv;charset=utf-8");
 }
 const REACTION_STEPS=[["segregar","Lote segregado e identificado (FS 342 – Fluxo de produto não conforme / PR 8.7)"],["lider","Líder / Qualidade comunicado(s)"],["cem","Inspeção 100% do lote: todas as unidades reexaminadas"],["retirar","Peças defeituosas retiradas ou reparadas (retrabalho conforme FS 046, quando aplicável)"],["arvore","Árvore de falha aberta para os defeitos encontrados"],["reap","Lote reapresentado para nova inspeção (4.12.4)"]];
 function destinoCard(x,ls){
@@ -1332,6 +1338,7 @@ function pgInspecao(){
   if((x.correcoes||[]).length)h+=`<div class="card"><h2>Histórico de correções</h2><div class="tw"><table class="t"><thead><tr><th>Quando</th><th>Por</th><th>Motivo</th><th>Antes da correção</th></tr></thead><tbody>${x.correcoes.map(c=>`<tr><td>${new Date(c.em).toLocaleString("pt-BR")}</td><td>${esc(c.por||"")}</td><td>${esc(c.motivo||"")}</td><td class="small">Lote ${esc(c.antes?.lote||"")} · N ${c.antes?.N} · NQA ${NQA[c.antes?.nqa]??""} · d ${c.antes?.d} · ${c.antes?.result==="R"?"rejeitado":"aceito"}</td></tr>`).join("")}</tbody></table></div></div>`;
   h+=`<div class="card"><h2>Falhas encontradas na amostra</h2>${found.length?`<div class="tw"><table class="t"><thead><tr><th>Falha (FS 070 / Plano de Controle)</th>${x.modo==="qtd"?"":"<th>Peças com a falha</th>"}<th>Especificação</th><th>Árvore de falha</th></tr></thead><tbody>${found.map(([k,v])=>{const iv=invs.find(i=>i.defeito===k);return `<tr><td>${esc(DEF[k]?.nome||k)}</td>${v==null?"":`<td><b>${v}</b></td>`}<td class="small">${esc(defSpec(k,prod(x.productId)))}${(()=>{const m=(x.pecas||[]).map(pc=>pc.med?.[k]).filter(Boolean);return m.length?`<div><b>Medido:</b> ${m.map(esc).join("; ")} kg</div>`:""})()}</td><td>${iv?`<a href="#arvore/${iv.id}">${invPill(iv.conclusao?.status)} abrir</a>`:`<button class="btn sm noprint" data-open="${k}">Abrir árvore</button>`}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">Nenhum defeito na amostra.</p>'}
    ${x.pecas?.length?`<h3 style="margin:14px 0 6px">Peças não conformes da amostra (d = ${x.d})</h3><div class="tw"><table class="t"><thead><tr><th>Peça</th><th>Cavidade / posição</th><th>Falhas</th></tr></thead><tbody>${x.pecas.map(pc=>`<tr><td>${pc.n}</td><td>${esc(pc.cav||"—")}</td><td>${pc.def.map(k=>esc(DEF[k]?.nome||k)).join("; ")}</td></tr>`).join("")}</tbody></table></div>`:""}
+   ${nsTxt(x)?`<p class="small" style="margin-top:10px"><b>Registrado sem segregar (FS 070):</b> ${esc(nsTxt(x))}. Não entra em d.</p>`:""}
    <div class="row noprint" style="margin-top:12px"><select id="anyDef" style="width:auto;margin:0"><option value="">Abrir árvore para outro defeito…</option>${DEFECTS.filter(dd=>dd.pts.includes(x.ponto)).map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select></div></div>`;
   if(ls.k==="final"&&ls.st==="R"){const r=x.reacao||{};h+=`<div class="card"><h2>Plano de reação ao lote rejeitado</h2><p class="muted" style="margin-bottom:8px">${esc(REACT[x.ponto]||"")} ${x.disp?"":"Lotes rejeitados só podem ser reapresentados após o reexame de todas as unidades (NBR 5426, 4.12.4)."}</p>${REACTION_STEPS.filter(([k])=>!x.disp||!["cem","arvore","reap"].includes(k)).map(([k,t])=>`<label class="chk"><input type="checkbox" data-rx="${k}" ${r[k]?"checked":""}> <span>${t}${r[k+"_em"]?` <span class="muted small">· ${new Date(r[k+"_em"]).toLocaleString("pt-BR")}</span>`:""}</span></label>`).join("")}
     <div class="row noprint" style="margin-top:12px">${reaps.length?`<span class="muted small">Reapresentações: ${reaps.map(i=>`<a href="#inspecao/${i.id}">${fmtD(i.data)} ${i.result==="R"?"(rejeitado)":"(aceito)"}</a>`).join(", ")}</span>`:""}</div></div>`}
@@ -1352,7 +1359,7 @@ function pgInspecao(){
   $$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
   $$("[data-rx]").forEach(c=>c.onchange=async()=>{x.reacao=x.reacao||{};x.reacao[c.dataset.rx]=c.checked;x.reacao[c.dataset.rx+"_em"]=c.checked?Date.now():null;await persist("inspecoes",x);pgInspecao()});
   $("#delI").onclick=()=>askReason({titulo:"Excluir inspeção do lote "+(x.lote||""),texto:`A inspeção e ${invs.length?invs.length+" árvore(s) de falha ligada(s) a ela":"seus registros"} deixam de aparecer para todos. O registro fica guardado no banco com o motivo, para rastreabilidade.`,botao:"Excluir inspeção",perigo:true},async motivo=>{for(const v of invs)await remove("investigacoes",v.id,{excluidoMotivo:motivo});await remove("inspecoes",x.id,{excluidoMotivo:motivo});toast("Inspeção excluída.");go("inspecoes")});
-  $("#editI").onclick=()=>{draft=newDraft({id:x.id,editOf:x.id,createdAt:x.createdAt,productId:x.productId,ponto:x.ponto,data:x.data,turno:x.turno||"",maquina:x.maquina||"",molde:x.molde||"",op:x.op||"",lote:x.lote||"",inspetor:x.inspetor||"",N:String(x.N),nivel:x.nivel,nqa:String(x.nqa),applyR:x.regime==="R",pecas:[],nc:String(x.d||0),defs:Object.keys(x.defeitos||{}),obs:x.obs||"",reap:!!x.reap,refId:x.refId||null});go("nova")};
+  $("#editI").onclick=()=>{draft=newDraft({id:x.id,editOf:x.id,createdAt:x.createdAt,productId:x.productId,ponto:x.ponto,data:x.data,turno:x.turno||"",maquina:x.maquina||"",molde:x.molde||"",op:x.op||"",lote:x.lote||"",inspetor:x.inspetor||"",N:String(x.N),nivel:x.nivel,nqa:String(x.nqa),applyR:x.regime==="R",pecas:[],nc:String(x.d||0),defs:Object.keys(x.defeitos||{}),ns:Object.fromEntries(Object.entries(x.naoSeg||{}).map(([k,v])=>[k,String(v)])),obs:x.obs||"",reap:!!x.reap,refId:x.refId||null});go("nova")};
 }
 /* =========================================================================
    8b. DESTINO DO LOTE: decisão de disposição, inspeção 100% e resultado final
@@ -1363,6 +1370,11 @@ const nqaPct=x=>parseFloat(String(NQA[x.nqa]).replace(",","."));
 const pctFmt=v=>(Math.round(v*100)/100).toLocaleString("pt-BR",{maximumFractionDigits:2});
 const lotTrees=x=>S.investigacoes.filter(v=>v.inspecaoId===x.id);
 // Registro rápido (modo "qtd"): guarda d e quais falhas apareceram, sem contagem por falha
+// Falha que não segrega em um ponto (FS 070: coluna "Não segregar"): só é registrada, não conta em d
+const naoSegEm=(d,pt)=>!!d&&(d.naoSeg||[]).includes(pt);
+const defsSeg=pt=>DEFECTS.filter(x=>x.pts.includes(pt)&&!naoSegEm(x,pt));
+const defsNS=pt=>DEFECTS.filter(x=>x.pts.includes(pt)&&naoSegEm(x,pt));
+const nsTxt=x=>Object.entries(x?.naoSeg||{}).filter(([,v])=>+v>0).map(([k,v])=>`${DEF[k]?.nome||k} em ${v} peça${v>1?"s":""}`).join(" · ");
 const defN=(x,k)=>x?.modo==="qtd"?null:((x?.defeitos||{})[k]||0);
 const defPc=(x,k)=>{const n=defN(x,k);return n==null?"":` (em ${n} peça${n>1?"s":""})`};
 const chipsFalhas=(defs,sel,attr)=>GRUPOS_FALHA.map(g=>{const L=defs.filter(x=>defGrupo(x)===g);return L.length?`<div class="fgrp"><span class="fgrp-t">${esc(g)}</span><div class="opchips">${L.map(df=>`<button type="button" class="opchip ${sel.includes(df.id)?"on":""}" ${attr}="${df.id}" aria-pressed="${sel.includes(df.id)}">${esc(df.nome)}</button>`).join("")}</div></div>`:""}).join("");
@@ -1566,7 +1578,7 @@ function pgOpNova(){
   head("Tela do operador","Nova inspeção",opTop());
   if(!S.produtos.length){setPage(`<div class="opwrap"><div class="opinst warn"><div class="opinst-t"><span>Nenhum produto cadastrado</span></div><p>Peça à Qualidade para cadastrar os produtos.</p></div></div>`);opBind();return}
   o.defs=(o.defs||[]).filter(k=>DEF[k]);if(o.pecas?.length&&!o.nc){o.nc=String(o.pecas.length);o.defs=[...new Set(o.pecas.flatMap(pc=>pc.def))];o.pecas=[]}
-  const P=opPlan(o),plan=P.plan,defs=DEFECTS.filter(x=>x.pts.includes(o.ponto)),d=Math.floor(+o.nc)||0;
+  const P=opPlan(o),plan=P.plan,defs=defsSeg(o.ponto),nsDefs=defsNS(o.ponto),d=Math.floor(+o.nc)||0;o.ns=o.ns||{};
   const STP=["Dados do lote","Peças não conformes","Resultado"];
   let h=`<div class="opwrap"><ol class="opsteps">${STP.map((t,i)=>`<li class="${i+1===o.step?"on":i+1<o.step?"ok":""}">${i+1<o.step?"✓":i+1} · ${t}</li>`).join("")}</ol>`;
   if(o.step===1){
@@ -1586,6 +1598,7 @@ function pgOpNova(){
       <p class="ophint">Inspecione as ${plan.n} peças. Depois informe quantas peças são não conformes e marque quais defeitos apareceram nelas.</p></div>`;
     h+=`<div class="opcard"><label class="oplab" for="opNc">Quantas peças não conformes?</label><div class="opstep"><button class="opstepb" id="opNcM" aria-label="Uma peça a menos" ${d>0?"":"disabled"}>−</button><input id="opNc" class="opin big" inputmode="numeric" value="${esc(String(o.nc||""))}" placeholder="0"><button class="opstepb" id="opNcP" aria-label="Uma peça a mais" ${d<plan.n?"":"disabled"}>+</button></div><span class="ophint">Uma peça com vários defeitos conta uma vez.</span></div>`;
     if(d>0||o.defs.length)h+=`<div class="opcard"><span class="oplab">Quais defeitos apareceram nessas peças?</span><span class="ophint">Marque todos. Cada defeito marcado abre as perguntas dele.</span>${chipsFalhas(defs,o.defs,"data-opdf")}</div>`;
+    if(nsDefs.length)h+=`<div class="opcard nscard"><span class="oplab">Não separa ${o.ponto==="MOLD"?"na moldagem":"neste ponto"}</span><span class="ophint">Estas peças continuam no lote e não contam acima. Só informe quantas viu.</span>${nsDefs.map(df=>`<label class="oplab" for="opNs_${df.id}" style="margin-top:8px">${esc(df.nome)}</label><div class="opstep"><button class="opstepb" data-opnsm="${df.id}" aria-label="Uma a menos">−</button><input id="opNs_${df.id}" class="opin big" data-opns="${df.id}" inputmode="numeric" value="${esc(String(o.ns[df.id]||""))}" placeholder="0"><button class="opstepb" data-opnsp="${df.id}" aria-label="Uma a mais">+</button></div>`).join("")}</div>`;
     h+=`<label class="opconf ${o.confirmado?"on":""}"><input type="checkbox" id="opConf" ${o.confirmado?"checked":""}><span>Confirmo que inspecionei as <b>${plan.n} peças</b> da amostra, retiradas de forma aleatória do lote.</span></label>`;
   }
   if(o.step===3&&plan){
@@ -1619,6 +1632,9 @@ function pgOpNova(){
     const setNc=v=>{o.nc=String(Math.max(0,Math.min(plan.n,v)));re()};
     $("#opNcM").onclick=()=>setNc(d-1);$("#opNcP").onclick=()=>setNc(d+1);
     $("#opNc").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"");o.nc=e.target.value;opSave()};$("#opNc").onchange=e=>setNc(Math.floor(+e.target.value)||0);
+    const setNs=(k,v)=>{o.ns[k]=String(Math.max(0,Math.min(plan.n,v)));re()};
+    $$("[data-opnsm]").forEach(b=>b.onclick=()=>setNs(b.dataset.opnsm,(+o.ns[b.dataset.opnsm]||0)-1));$$("[data-opnsp]").forEach(b=>b.onclick=()=>setNs(b.dataset.opnsp,(+o.ns[b.dataset.opnsp]||0)+1));
+    $$("[data-opns]").forEach(i=>{i.oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"");o.ns[i.dataset.opns]=e.target.value;opSave()};i.onchange=e=>setNs(i.dataset.opns,Math.floor(+e.target.value)||0)});
     $$("[data-opdf]").forEach(b=>b.onclick=()=>{const k=b.dataset.opdf;o.defs=o.defs.includes(k)?o.defs.filter(z=>z!==k):o.defs.concat(k);re()});
     return}
   setBar(`<button class="btn" id="opBack">← Voltar</button><div class="bar-info"><span class="bar-hint">Confira e registre</span></div><button class="btn primary" id="opNext">${d?"Registrar e responder as perguntas →":"Registrar inspeção →"}</button>`);
@@ -1630,7 +1646,7 @@ async function opRegistrar(){
   const o=OP,P=opPlan(o),plan=P.plan,p=prod(o.productId);if(!plan||!p)return;
   const d=Math.floor(+o.nc)||0,result=d<=plan.ac?"A":"R";
   const rec={id:uid(),createdAt:Date.now(),productId:o.productId,produto:p.nome,ponto:o.ponto,data:today(),turno:o.turno,maquina:o.maquina,molde:(o.molde||"").trim(),op:(o.op||"").trim(),lote:o.lote.trim(),inspetor:colab?.nome||user?.email||"Operador",N:+o.N,nivel:"II",nqa:P.nqa,regime:P.reg,letra0:plan.letter0,letra:plan.letter,n:plan.n,ac:plan.ac,re:plan.re,inspecao100:plan.full,
-    pecas:[],defeitos:Object.fromEntries(o.defs.map(k=>[k,1])),modo:"qtd",d,result,obs:(o.obs||"").trim(),amostraConfirmada:!!o.confirmado,reap:false,refId:null,reacao:{},demo:false,origem:"operador",criadoPor:user?.email||""};
+    pecas:[],defeitos:Object.fromEntries(o.defs.map(k=>[k,1])),naoSeg:Object.fromEntries(Object.entries(o.ns||{}).filter(([,v])=>+v>0).map(([k,v])=>[k,+v])),modo:"qtd",d,result,obs:(o.obs||"").trim(),amostraConfirmada:!!o.confirmado,reap:false,refId:null,reacao:{},demo:false,origem:"operador",criadoPor:user?.email||""};
   await persist("inspecoes",rec);await setMeta("lastN|"+rec.productId+"|"+rec.ponto,rec.N);
   OP=null;clearTimeout(window._opt);await setMeta("opRascunho",null);
   const tipos=o.defs.slice(),ids=[];
@@ -1694,7 +1710,7 @@ function pgOpCem(){
   if(c.modo!=="qtd"){c.modo="qtd";const P=c.pecas||[];c.r=c.r??(P.length?String(P.length):"");c.defs=c.defs||[...new Set(P.flatMap(pc=>pc.def))];c.pecas=null}
   c.defs=(c.defs||[]).filter(k=>DEF[k]);
   const tr=lotTrees(x),known=tr.map(v=>v.defeito),pend=tr.filter(v=>!treeFilled(v)),nq=nqaPct(x);
-  const defs=DEFECTS.filter(dd=>dd.pts.includes(x.ponto)),kDefs=defs.filter(dd=>known.includes(dd.id)),outros=defs.filter(dd=>!known.includes(dd.id)&&!c.defs.includes(dd.id));
+  const defs=defsSeg(x.ponto),kDefs=defs.filter(dd=>known.includes(dd.id)),outros=defs.filter(dd=>!known.includes(dd.id)&&!c.defs.includes(dd.id));
   const N=+x.N,r=Math.floor(+c.r)||0,semDef=r>0&&!c.defs.length,semNc=c.defs.length>0&&r===0,acima=r>N;
   const novos=c.defs.filter(d=>!known.includes(d));
   head("Tela do operador","Inspeção 100% · Lote "+(x.lote||""),opTop());
@@ -1823,13 +1839,14 @@ function pgFalha(){
   if(!isNew&&!orig){go("cadastros");return}
   const ed=isGestor();
   if(isNew&&!ed){go("cadastros");return}
-  if(!fdraft||fdraft._for!==route.id)fdraft=isNew?{_for:"novo",nome:"",grupo:"Outras",pts:[],spec:"",src:"",ativo:true}:{_for:route.id,nome:orig.nome,grupo:defGrupo(orig),pts:[...(orig.pts||[])],spec:orig.spec||"",src:orig.src||"",ativo:orig.ativo!==false};
+  if(!fdraft||fdraft._for!==route.id)fdraft=isNew?{_for:"novo",nome:"",grupo:"Outras",pts:[],naoSeg:[],spec:"",src:"",ativo:true}:{_for:route.id,nome:orig.nome,grupo:defGrupo(orig),pts:[...(orig.pts||[])],naoSeg:[...(orig.naoSeg||[])],spec:orig.spec||"",src:orig.src||"",ativo:orig.ativo!==false};
   const f=fdraft,u=isNew?{insp:0,arv:0,causas:0}:falhaUso(route.id);
   head("Cadastros · Falhas",isNew?"Nova falha":orig.nome,"");
   let h=`<div class="grid g2"><div class="card"><h2>Dados da falha</h2>
     <label class="f">Nome da falha <span class="req">*</span><input id="fl_nome" value="${esc(f.nome)}" ${ed?"":"disabled"} placeholder="Ex.: Mancha de óleo"></label>
     <label class="f">Grupo<select id="fl_grupo" ${ed?"":"disabled"}>${GRUPOS_FALHA.map(g=>`<option ${g===f.grupo?"selected":""}>${esc(g)}</option>`).join("")}</select><span class="hint">Organiza a falha na lista de falhas da inspeção.</span></label>
     <div class="f"><label class="f" style="margin:0">Onde é detectada <span class="req">*</span></label><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:4px">${Object.entries(POINTS).map(([k,pt])=>`<label class="chk"><input type="checkbox" data-flp="${k}" ${f.pts.includes(k)?"checked":""} ${ed?"":"disabled"}> <span>${esc(pt.nome)}</span></label>`).join("")}</div><span class="hint">A falha só aparece na inspeção e nas ocorrências dos pontos marcados.</span></div>
+    <div class="f" id="flNsBox"><span>Não segrega em</span><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:4px">${Object.entries(POINTS).map(([k,pt])=>`<label class="chk"><input type="checkbox" data-flns="${k}" ${f.naoSeg.includes(k)?"checked":""} ${ed&&f.pts.includes(k)?"":"disabled"}> <span>${esc(pt.nome)}</span></label>`).join("")}</div><span class="hint">Coluna “Não segregar” da FS 070: nesse ponto a falha só é registrada e não conta como peça não conforme (d). Ex.: rebarba na moldagem, retirada no final de linha.</span></div>
     <label class="f">Critério / especificação<textarea id="fl_spec" ${ed?"":"disabled"} placeholder="Ex.: Peça isenta de manchas visíveis a 1 m.">${esc(f.spec)}</textarea></label>
     <label class="f">Fonte<input id="fl_src" value="${esc(f.src)}" ${ed?"":"disabled"} placeholder="Ex.: FS 070, Plano de Controle, exigência do cliente"></label>
     <label class="chk" style="margin-top:6px"><input type="checkbox" id="fl_ativo" ${f.ativo?"checked":""} ${ed?"":"disabled"}> <span><b>Falha ativa</b>: aparece nas listas de inspeção, ocorrência e Biblioteca. Desative em vez de excluir quando a falha já foi usada.</span></label></div>
@@ -1842,18 +1859,19 @@ function pgFalha(){
     if($("#flRest"))$("#flRest").onclick=async()=>{if(!confirm("Voltar esta falha ao texto original da FS 070?"))return;await remove("falhas",route.id,{excluidoMotivo:"Restaurada ao original"});fdraft=null;toast("Falha restaurada.");go("cadastros")};
     if($("#flDel"))$("#flDel").onclick=async()=>{if(!confirm("Excluir a falha "+orig.nome+"?"))return;await remove("falhas",route.id,{excluidoMotivo:"Excluída no cadastro"});fdraft=null;toast("Falha excluída.");go("cadastros")}};
   async function salvar(){if(!valid())return;const id=isNew?"f_"+uid().replace(/-/g,"").slice(0,10):route.id;
-    await persist("falhas",{id,nome:f.nome.trim(),grupo:f.grupo,pts:f.pts.slice(),spec:f.spec.trim(),src:f.src.trim(),ativo:!!f.ativo});
+    await persist("falhas",{id,nome:f.nome.trim(),grupo:f.grupo,pts:f.pts.slice(),naoSeg:f.naoSeg.filter(k=>f.pts.includes(k)),spec:f.spec.trim(),src:f.src.trim(),ativo:!!f.ativo});
     fdraft=null;toast(isNew?"Falha cadastrada.":"Falha atualizada.");cadTab="falhas";go("cadastros")}
   bar();if(!ed)return;
   $("#fl_nome").oninput=e=>{f.nome=e.target.value;bar()};$("#fl_grupo").onchange=e=>{f.grupo=e.target.value};
   $("#fl_spec").oninput=e=>{f.spec=e.target.value};$("#fl_src").oninput=e=>{f.src=e.target.value};$("#fl_ativo").onchange=e=>{f.ativo=e.target.checked};
-  $$("[data-flp]").forEach(c=>c.onchange=()=>{const k=c.dataset.flp;f.pts=c.checked?[...new Set(f.pts.concat(k))]:f.pts.filter(z=>z!==k);bar()});
+  $$("[data-flp]").forEach(c=>c.onchange=()=>{const k=c.dataset.flp;f.pts=c.checked?[...new Set(f.pts.concat(k))]:f.pts.filter(z=>z!==k);if(!c.checked)f.naoSeg=f.naoSeg.filter(z=>z!==k);const n=$(`[data-flns="${k}"]`);if(n){n.disabled=!c.checked;if(!c.checked)n.checked=false}bar()});
+  $$("[data-flns]").forEach(c=>c.onchange=()=>{const k=c.dataset.flns;f.naoSeg=c.checked?[...new Set(f.naoSeg.concat(k))]:f.naoSeg.filter(z=>z!==k)});
 }
 function falhasTab(ed){
   const L=Object.values(DEF).sort((a,b)=>(a.ativo===false)-(b.ativo===false)||GRUPOS_FALHA.indexOf(defGrupo(a))-GRUPOS_FALHA.indexOf(defGrupo(b))||a.nome.localeCompare(b.nome,"pt-BR"));
   return `<div class="banner info"><span>Lista de falhas usada na inspeção, na tela do operador, nas ocorrências, na árvore de falha e na Biblioteca. As falhas da FS 070 já vêm no sistema; aqui dá para incluir novas, ajustar textos e desativar as que não se aplicam.</span></div>
     <div class="tw"><table class="t"><thead><tr><th>Falha</th><th>Grupo</th><th>Detectada em</th><th>Fonte</th><th>Causas</th><th>Situação</th><th></th></tr></thead><tbody>${L.map(d=>{const nc=CAUSES.filter(c=>c.defs.includes(d.id)).length;
-      return `<tr class="click" data-edf="${esc(d.id)}"><td><b>${esc(d.nome)}</b>${d._custom?' <span class="pill brand">nova</span>':d._mod?' <span class="pill">alterada</span>':""}</td><td class="small">${esc(defGrupo(d))}</td><td class="small">${(d.pts||[]).map(k=>esc(POINTS[k]?.nome||k)).join(", ")}</td><td class="small">${esc(d.src||"—")}</td><td>${nc||'<span class="pill warn">0</span>'}</td><td>${d.ativo===false?'<span class="pill">Inativa</span>':'<span class="pill ok">Ativa</span>'}</td><td><button class="btn sm" data-edf="${esc(d.id)}">${ed?"Editar":"Ver"}</button></td></tr>`}).join("")}</tbody></table></div>`;
+      return `<tr class="click" data-edf="${esc(d.id)}"><td><b>${esc(d.nome)}</b>${d._custom?' <span class="pill brand">nova</span>':d._mod?' <span class="pill">alterada</span>':""}</td><td class="small">${esc(defGrupo(d))}</td><td class="small">${(d.pts||[]).map(k=>esc(POINTS[k]?.nome||k)+(naoSegEm(d,k)?" (não segrega)":"")).join(", ")}</td><td class="small">${esc(d.src||"—")}</td><td>${nc||'<span class="pill warn">0</span>'}</td><td>${d.ativo===false?'<span class="pill">Inativa</span>':'<span class="pill ok">Ativa</span>'}</td><td><button class="btn sm" data-edf="${esc(d.id)}">${ed?"Editar":"Ver"}</button></td></tr>`}).join("")}</tbody></table></div>`;
 }
 function pgCem(){
   // A inspeção 100% é registrada na tela do operador (peça por peça, com os defeitos de cada uma)
@@ -2397,7 +2415,7 @@ async function loadDemo(){
   for(const x of todos){
     const p=prod(x.productId),rs=regimeState(x.productId,x.ponto,x.nqa,x.id,true,x),pl=samplingPlan(x.N,x.nivel,x.nqa,rs.reg);if(!pl){x.result="A";continue}
     const novo=novos.includes(x);
-    if(novo){const defs=DEFECTS.filter(d=>d.pts.includes(x.ponto)).map(d=>[d.id,pesoDef[d.id]||1]);const d=Math.min(pl.n,binom(pl.n,x._frac));x.pecas=[];
+    if(novo){const defs=defsSeg(x.ponto).map(d=>[d.id,pesoDef[d.id]||1]);const d=Math.min(pl.n,binom(pl.n,x._frac));x.pecas=[];
       for(let i=0;i<d;i++){const k=wpick(defs),pc={n:i+1,def:[k],cav:""};if(chance(.15)){const k2=wpick(defs);if(k2!==k)pc.def.push(k2)}
         pc.def.forEach(k=>{if(WEIGHT_DEFS.includes(k)){const f=ftpParam(p,k),mx=numIn(f?.max),mn=numIn(f?.min);if(mx!=null&&mn!=null){const v=chance(.5)?mx*(1.01+Math.random()*.04):mn*(.95+Math.random()*.04);(pc.med=pc.med||{})[k]=v.toFixed(3).replace(".",",")}}});x.pecas.push(pc)}
       delete x._frac}
