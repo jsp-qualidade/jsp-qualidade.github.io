@@ -343,6 +343,8 @@ body.opmode .top{padding:12px 16px}
 .optags{display:flex;flex-wrap:wrap;gap:6px}
 .fgrp{margin-top:8px}.fgrp-t{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:6px 0 6px}
 .pstabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pstabs.sm{margin:0;min-width:min(420px,100%)}.pstabs.sm .pstab{padding:6px 12px}.pstabs.sm .pstab b{font-size:14px}
+.cepsum{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--muted);margin:10px 0 2px}button.filarow{width:100%;text-align:left;font:inherit;color:inherit;background:var(--surface);cursor:pointer}button.filarow:hover{border-color:var(--brand)}.kpi.click{cursor:pointer}.kpi.click:hover{border-color:var(--brand)}
 .pstab{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;font:inherit;color:inherit;text-align:left}
 .pstab b{font-size:15px}.pstab small{color:var(--muted);font-size:12px}.pstab.on{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand);background:color-mix(in srgb,var(--brand) 6%,var(--surface))}
 .pskpi{margin-bottom:12px}.psst{margin-bottom:12px}
@@ -1003,7 +1005,7 @@ const ICON={
 const PAGES=[
  {id:"painel",t:"Painel",ic:"dash",grp:"Operação"},
  {id:"nova",t:"Nova inspeção",ic:"new",grp:"Operação"},
- {id:"operador",t:"Tela do operador",ic:"op",grp:"Operação"},
+ {id:"operador",t:"Tela do operador (simulação)",ic:"op",grp:"Operação"},
  {id:"inspecoes",t:"Inspeções",ic:"list",grp:"Operação"},
  {id:"ocorrencias",t:"Ocorrências",ic:"oc",grp:"Operação"},
  {id:"pesagem",t:"Pesagem",ic:"peso",grp:"Operação"},
@@ -1031,7 +1033,7 @@ function backTarget(peek){
 function goBack(){const t=backTarget(false);route={p:t.p,id:t.id||null};location.hash=t.p+(t.id?"/"+t.id:"");render();window.scrollTo(0,t.y||0)}
 window.addEventListener("hashchange",()=>{const [p,id0]=location.hash.slice(1).split("/"),id=id0||null;if(p&&(p!==route.p||id!==route.id)){const top=navStack[navStack.length-1];let y=0;if(top&&top.p===p&&(top.id||null)===id){y=top.y||0;navStack.pop()}else navStack.push({p:route.p,id:route.id,y:window.scrollY});route={p,id};render();window.scrollTo(0,y)}});
 function renderNav(){
-  let g="",h="";PAGES.forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
+  let g="",h="";PAGES.filter(p=>p.id!=="nova"&&(p.id!=="operador"||simulaOp())).forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
     const act=route.p===p.id||(OPR[route.p]&&p.id==="operador")||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id===(S.investigacoes.find(v=>v.id===route.id)?.ocId?"ocorrencias":"investigacoes"))||((route.p==="produto"||route.p==="falha")&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
     const badge=p.id==="ocorrencias"?ocGrupos(36500).filter(g=>!g.every(v=>(v.conclusao?.status||"aberta")==="concluida")).length:p.id==="investigacoes"?pendingTrees().length:p.id==="inspecoes"?pendingLots().length:p.id==="cadastros"?pendentes.length:0;
     h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":p.id==="ocorrencias"?"Ocorrências com análise em aberto":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
@@ -1045,6 +1047,7 @@ function render(){
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
   // Inspetor usa só a tela do operador
   if(soOperador()&&!OPR[route.p]){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
+  else if(!soOperador()&&(route.p==="nova"||route.p==="cem"||(OPR[route.p]&&!simulaOp()))){route={p:"painel",id:null};history.replaceState(null,"","#painel")}
   document.body.classList.toggle("opmode",!!OPR[route.p]);
   const demo=S.inspecoes.some(x=>x.demo)||S.pesagens.some(x=>x.demo)||S.investigacoes.some(x=>x.demo);
   ({pesagem:pgPesagem,oppeso:pgOpPeso,falha:pgFalha,ocorrencias:pgOcorrencias,operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
@@ -1130,7 +1133,7 @@ function pgAuthLanding(){
    ========================================================================= */
 let pf={dias:"",prod:""};
 function pgPainel(){
-  head("Visão geral","Painel da qualidade",`<button class="btn primary" data-go2="nova">${ICON.new.replace('<svg','<svg width="15" height="15"')} Nova inspeção</button>`);
+  head("Visão geral","Painel da qualidade");
   const lim=pf.dias?new Date(Date.now()-(+pf.dias)*864e5).toISOString().slice(0,10):"";
   const I=S.inspecoes.filter(x=>(!lim||x.data>=lim)&&(!pf.prod||x.productId===pf.prod)),tot=I.length,orig=I.filter(x=>!x.reap),acc=orig.filter(x=>x.result!=="R").length,rej=orig.filter(x=>x.result==="R").length;
   const ids=new Set(I.map(x=>x.id)),V=S.investigacoes.filter(v=>ids.has(v.inspecaoId));
@@ -1147,7 +1150,7 @@ function pgPainel(){
     const semLote=S.produtos.some(p=>Object.keys(POINTS).some(k=>presetOf(p,k).N==null));
     h+=`<div class="card start"><h2>Como começar</h2><p class="muted" style="margin:4px 0 14px">Três passos para a primeira inspeção. O sistema calcula a amostra e a decisão do lote pela NBR 5426.</p>
      <div class="steps"><div class="step"><span class="stepn">1</span><div><b>Confira os cadastros</b><p>Produtos (com FTP e tamanho de lote), máquinas e usuários.${semLote?" Há produto sem tamanho de lote padrão.":""}</p><button class="btn sm" data-go2="cadastros">Abrir Cadastros</button></div></div>
-     <div class="step"><span class="stepn">2</span><div><b>Registre a inspeção</b><p>Escolha produto e ponto, informe o lote e marque as peças não conformes da amostra.</p><button class="btn sm primary" data-go2="nova">Nova inspeção</button></div></div>
+     <div class="step"><span class="stepn">2</span><div><b>O operador registra</b><p>Inspeções, ocorrências e pesagens são feitas na Tela do operador. Aqui aparecem os dados e os lotes para decidir.</p>${simulaOp()?`<button class="btn sm primary" data-go2="operador">Simular a Tela do operador</button>`:""}</div></div>
      <div class="step"><span class="stepn">3</span><div><b>Preencha a árvore de falha</b><p>Ela abre sozinha quando há falha: localize a origem, verifique as causas e registre a ação.</p><button class="btn sm" data-go2="ajuda">Ver o passo a passo</button></div></div></div></div>`;
   }else{
     h+=`<div class="pfilt"><label>Período<select id="pfD"><option value="">Todo o histórico</option>${[["7","Últimos 7 dias"],["30","Últimos 30 dias"],["90","Últimos 90 dias"]].map(([v,l])=>`<option value="${v}" ${pf.dias===v?"selected":""}>${l}</option>`).join("")}</select></label><label>Produto<select id="pfP"><option value="">Todos os produtos</option>${S.produtos.map(p=>`<option value="${esc(p.id)}" ${pf.prod===p.id?"selected":""}>${esc(p.id+" · "+p.nome)}</option>`).join("")}</select></label>${pf.dias||pf.prod?`<button class="lnk" id="pfX" type="button">Limpar filtros</button>`:""}</div>`;
@@ -1157,6 +1160,22 @@ function pgPainel(){
    <div class="kpi"><div class="l">Taxa de aceitação</div><div class="v">${orig.length?Math.round(acc/orig.length*100)+"%":"—"}</div><div class="s">${acc} aceitos · ${rej} rejeitados</div></div>
    <div class="kpi"><div class="l">Peças não conformes nas amostras</div><div class="v">${sumN?(sumD/sumN*100).toFixed(2).replace(".",",")+"%":"—"}</div><div class="s">${sumD} de ${sumN} peças inspecionadas</div></div>
    <div class="kpi"><div class="l">Árvores de falha em aberto</div><div class="v">${open}</div><div class="s">${V.length} registradas</div></div></div>`;
+  // decisões pendentes, ocorrências e situação da pesagem
+  const PL=pendingLots().filter(x=>(!lim||x.data>=lim)&&(!pf.prod||x.productId===pf.prod)).sort(byTime).reverse();
+  const OCs=ocGrupos(36500).filter(g=>{const oc=g[0].oc||{};return (!lim||(oc.data||"")>=lim)&&(!pf.prod||oc.productId===pf.prod)});
+  const ocAb=OCs.filter(g=>!g.every(v=>(v.conclusao?.status||"aberta")==="concluida")).length;
+  const pesoOk=!pf.prod||pf.prod===PESO_PROD,DP={seco:cepDados("seco"),umido:cepDados("umido")};
+  const sit=D=>!D.L?{v:"Em formação",c:"",s:`${D.elig.length} de ${CEP_KMIN} subgrupos`}:D.instavel?{v:"Instável",c:"var(--nc)",s:`sinais nos últimos ${CEP_RECENTES} subgrupos`}:{v:"Sob controle",c:"var(--ok)",s:`${D.comp.length} subgrupos · X̄̄ ${kgFmt(D.kpi.xbb)} kg`};
+  h+=`<div class="grid g4 kpis" style="margin-bottom:14px">
+   <div class="kpi click" data-go2="inspecoes"><div class="l">Lotes aguardando decisão</div><div class="v" ${PL.filter(x=>lotStage(x).k==="disp").length?'style="color:var(--nc)"':""}>${PL.filter(x=>lotStage(x).k==="disp").length}</div><div class="s">${PL.filter(x=>lotStage(x).k==="cem").length} em inspeção 100% com o operador</div></div>
+   <div class="kpi click" data-go2="ocorrencias"><div class="l">Ocorrências no processo</div><div class="v">${OCs.length}</div><div class="s">${ocAb} com análise em aberto</div></div>
+   ${pesoOk?["seco","umido"].map(t=>{const z=sit(DP[t]);return `<div class="kpi click" data-pfpk="${t}"><div class="l">Pesagem · ${PESO_T[t].nome.toLowerCase()}</div><div class="v" ${z.c?`style="color:${z.c}"`:""}>${z.v}</div><div class="s">${z.s}</div></div>`}).join(""):`<div class="kpi"><div class="l">Pesagem</div><div class="v">—</div><div class="s">só a Caixa Toyota (${PESO_PROD})</div></div><div class="kpi"><div class="l">&nbsp;</div><div class="v">&nbsp;</div><div class="s">&nbsp;</div></div>`}</div>`;
+  // lotes para decidir + ocorrências por defeito
+  {const cnt={};OCs.forEach(g=>g.forEach(v=>{cnt[v.defeito]=(cnt[v.defeito]||0)+1}));const par=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6),mx=par.length?par[0][1]:1;
+   h+=`<div class="grid g2"><div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Lotes para a Qualidade decidir</h2><button class="lnk" type="button" data-go2="inspecoes">Ver inspeções</button></div>${PL.length?`<div class="fila" style="margin-top:10px">${PL.slice(0,6).map(x=>{const st=lotStage(x);return `<button class="filarow click" data-lote="${x.id}"><div class="filainfo"><b>Lote ${esc(x.lote||"—")}${x.demo?' <span class="pill">DEMO</span>':""}</b><span class="small muted">${esc(POINTS[x.ponto]?.nome||"")} · ${fmtD(x.data)} · d = ${x.d} de ${x.n}${Object.keys(x.defeitos||{}).length?" · "+esc(Object.keys(x.defeitos).map(k=>DEF[k]?.nome||k).join(", ")):""}</span></div><span class="pill ${st.k==="disp"?"nc":"info"}">${st.k==="disp"?"Decidir":"Em 100%"}</span></button>`}).join("")}</div>${PL.length>6?`<p class="small muted" style="margin-top:6px">+ ${PL.length-6} lote(s)</p>`:""}`:`<div class="empty small" style="margin-top:10px">Nenhum lote aguardando decisão${lim||pf.prod?" com estes filtros":""}.</div>`}</div>
+   <div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Ocorrências no processo por defeito</h2><button class="lnk" type="button" data-go2="ocorrencias">Ver ocorrências</button></div>${par.length?`<div style="margin-top:10px">${par.map(([k,v])=>`<div class="barrow"><span title="${esc(DEF[k]?.nome||k)}">${esc(DEF[k]?.nome||k)}</span><div class="track"><div class="bar" style="width:${v/mx*100}%"></div></div><b>${v}</b></div>`).join("")}</div><p class="small muted" style="margin-top:6px">Defeitos vistos pelo operador fora da inspeção. Não entram na taxa de aceitação.</p>`:`<div class="empty small" style="margin-top:10px">Nenhuma ocorrência${lim||pf.prod?" com estes filtros":""}.</div>`}</div></div>`}
+  // pesagem: carta X̄-R do peso seco ou do úmido (escolha no próprio quadro)
+  if(pesoOk)h+=cepCartasHtml(DP[pfPeso]);
   // Pareto
   const cnt={};I.forEach(x=>[...new Set([...Object.keys(x.defeitos||{}),...Object.keys(x.naoSeg||{})])].forEach(k=>{cnt[k]=(cnt[k]||0)+1}));
   const par=Object.entries(cnt).sort((a,b)=>b[1]-a[1]),max=par.length?par[0][1]:1,totD=par.reduce((a,b)=>a+b[1],0);let cum=0;
@@ -1185,7 +1204,12 @@ function pgPainel(){
   if($("#goLots"))$("#goLots").onclick=()=>{const k=lotStage(pl[0]).k;if(pl.length===1)go(k==="cem"?"cem":"disposicao",pl[0].id);else{filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""};filt.res=pl.every(x=>lotStage(x).k==="cem")?"C":pl.every(x=>lotStage(x).k!=="cem")?"P":"";go("inspecoes")}};
   if($("#verRegras"))$("#verRegras").onclick=()=>{ptab="com";go("planos")};
   if($("#pfD"))$("#pfD").onchange=e=>{pf.dias=e.target.value;pgPainel()};if($("#pfP"))$("#pfP").onchange=e=>{pf.prod=e.target.value;pgPainel()};if($("#pfX"))$("#pfX").onclick=()=>{pf={dias:"",prod:""};pgPainel()};
-  if($("#verPed"))$("#verPed").onclick=()=>{cadTab="usuarios";go("cadastros")};$$("[data-go2]").forEach(b=>b.onclick=()=>go(b.dataset.go2));$$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
+  if($("#verPed"))$("#verPed").onclick=()=>{cadTab="usuarios";go("cadastros")};
+  const reP=()=>{const y=window.scrollY;pgPainel();window.scrollTo(0,y)};
+  $$("[data-pfp]").forEach(b=>b.onclick=()=>{pfPeso=b.dataset.pfp;reP()});
+  $$("[data-pfpk]").forEach(b=>b.onclick=()=>{pfPeso=b.dataset.pfpk;reP();$("#cepCard")?.scrollIntoView({block:"start",behavior:"smooth"})});
+  if($("#psVer"))$("#psVer").onchange=e=>{psVer=+e.target.value;reP()};
+  $$("[data-lote]").forEach(b=>b.onclick=()=>go(lotStage(S.inspecoes.find(x=>x.id===b.dataset.lote)).k==="disp"?"disposicao":"inspecao",b.dataset.lote));$$("[data-go2]").forEach(b=>b.onclick=()=>go(b.dataset.go2));$$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
 }
 
 /* =========================================================================
@@ -1320,7 +1344,7 @@ function pgNova(){
    ========================================================================= */
 let filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""},listLim=100;
 function pgInspecoes(){
-  head("Operação","Inspeções registradas",`<button class="btn" id="exI">Exportar CSV</button><button class="btn primary" id="newI">Nova inspeção</button>`);
+  head("Operação","Inspeções registradas",`<button class="btn" id="exI">Exportar CSV</button>`);
   const L=S.inspecoes.filter(x=>(!filt.prod||x.productId===filt.prod)&&(!filt.maq||x.maquina===filt.maq)&&(!filt.ponto||x.ponto===filt.ponto)&&(!filt.res||lotSit(x)===filt.res)&&(!filt.de||x.data>=filt.de)&&(!filt.ate||x.data<=filt.ate)&&(!filt.q||[x.lote,x.op,x.maquina,x.inspetor,x.produto].join(" ").toLowerCase().includes(filt.q.toLowerCase()))).sort((a,b)=>byTime(b,a));
   const V=L.slice(0,listLim),nvBy={};S.investigacoes.forEach(v=>(nvBy[v.inspecaoId]=nvBy[v.inspecaoId]||[]).push(v));
   let h=`<div class="card" style="margin-bottom:14px"><div class="grid filtgrid"><label class="f">Buscar<input id="q" value="${esc(filt.q)}" placeholder="Lote, OP, máquina, inspetor…"></label><label class="f">Ponto<select id="fp"><option value="">Todos</option>${Object.entries(POINTS).map(([k,v])=>`<option value="${k}" ${filt.ponto===k?"selected":""}>${v.nome}</option>`).join("")}</select></label><label class="f">Situação<select id="fr"><option value="">Todas</option>${[["A","Aceitos"],["R","Rejeitados"],["P","Aguardando árvore ou decisão"],["C","Em inspeção 100%"]].map(([k,l])=>`<option value="${k}" ${filt.res===k?"selected":""}>${l}</option>`).join("")}</select></label><label class="f">De<input type="date" id="fde" value="${filt.de}"></label><label class="f">Até<input type="date" id="fate" value="${filt.ate}"></label>
@@ -1336,7 +1360,7 @@ function pgInspecoes(){
   f("q","q");f("fp","ponto");f("fr","res");f("fde","de");f("fate","ate");f("fprod","prod");f("fmaq","maq");
   if($("#fclr"))$("#fclr").onclick=()=>{filt={q:"",ponto:"",res:"",de:"",ate:"",prod:"",maq:""};pgInspecoes()};
   $$("[data-id]").forEach(r=>r.onclick=()=>go("inspecao",r.dataset.id));
-  $("#newI").onclick=()=>{draft=null;go("nova")};
+
   $("#exI").onclick=()=>download("JSP_inspecoes.csv",csv([["ID","Data","Produto","Código","Ponto","Turno","Máquina","Molde","OP","Lote","Inspetor","N","Nível","NQA","Regime","Letra","n","Ac","Re","d","Resultado da amostragem","Situação do lote","Decisão de disposição","Motivo","Justificativa","Decidido por","Decidido em","100%: inspecionadas","100%: aprovadas","100%: reprovadas","100%: critério","Reapresentação","Defeitos","Não segrega (registrado)","Observações","Demo"],...S.inspecoes.sort(byTime).map(x=>[x.id,x.data,x.produto,x.productId,POINTS[x.ponto]?.nome,x.turno,x.maquina,x.molde,x.op,x.lote,x.inspetor,x.N,x.nivel,NQA[x.nqa],REG[x.regime],x.letra,x.n,x.ac,x.re,x.d,{A:"Aceito",AR:"Aceito (volta ao normal)",R:"Rejeitado"}[x.result],lotStage(x).label,x.disp?DISP[x.disp.tipo]:"",x.disp?.motivo?motLabel(x.disp.motivo):"",x.disp?.just||"",x.disp?.por||"",x.disp?.em?new Date(x.disp.em).toLocaleString("pt-BR"):"",...(x.c100?(c=>{const k=c.status==="concluida"?{a:c.aprov,r:c.reprov,t:c.total}:c100Count(c);return [k.t,k.a,k.r,c.criterio||"em andamento"]})(x.c100):["","","",""]),x.reap?"Sim":"Não",Object.keys(x.defeitos||{}).map(k=>(DEF[k]?.nome||k)+(defN(x,k)!=null?": "+defN(x,k):"")).join(" | "),nsTxt(x),x.obs,x.demo?"Sim":""])]),"text/csv;charset=utf-8");
 }
 const REACTION_STEPS=[["segregar","Lote segregado e identificado (FS 342 – Fluxo de produto não conforme / PR 8.7)"],["lider","Líder / Qualidade comunicado(s)"],["cem","Inspeção 100% do lote: todas as unidades reexaminadas"],["retirar","Peças defeituosas retiradas ou reparadas (retrabalho conforme FS 046, quando aplicável)"],["arvore","Árvore de falha aberta para os defeitos encontrados"],["reap","Lote reapresentado para nova inspeção (4.12.4)"]];
@@ -1355,7 +1379,7 @@ function destinoCard(x,ls){
 }
 function pgInspecao(){
   const x=S.inspecoes.find(i=>i.id===route.id);if(!x){go("inspecoes");return}
-  head("Inspeções · "+fmtD(x.data),"Lote "+(x.lote||"—"),`<button class="btn" onclick="window.print()">Imprimir relatório</button><button class="btn" id="editI">Corrigir</button><button class="btn danger" id="delI">Excluir</button>`);
+  head("Inspeções · "+fmtD(x.data),"Lote "+(x.lote||"—"),`<button class="btn" onclick="window.print()">Imprimir relatório</button>${isAdmin()?`<button class="btn danger" id="delI">Excluir</button>`:""}`);
   const invs=S.investigacoes.filter(v=>v.inspecaoId===x.id),reaps=S.inspecoes.filter(i=>i.refId===x.id),ref=x.refId?S.inspecoes.find(i=>i.id===x.refId):null;
   const found=[...Object.keys(x.defeitos||{}).map(k=>[k,defN(x,k)]),...nsKeys(x).filter(k=>!(x.defeitos||{})[k]).map(k=>[k,x.modo==="qtd"?null:+x.naoSeg[k],true])];
   let h=`<div class="printonly"><h1>JSP Brasil · Relatório de inspeção por amostragem</h1><p class="muted">NBR 5426 · amostragem simples por atributos</p><br></div>`;
@@ -1368,7 +1392,7 @@ function pgInspecao(){
   h+=`<div class="card"><h2>Falhas encontradas na amostra</h2>${found.length?`<div class="tw"><table class="t"><thead><tr><th>Falha (FS 070 / Plano de Controle)</th>${x.modo==="qtd"?"":"<th>Peças com a falha</th>"}<th>Especificação</th><th>Árvore de falha</th></tr></thead><tbody>${found.map(([k,v,ns])=>{const iv=invs.find(i=>i.defeito===k);return `<tr><td>${esc(DEF[k]?.nome||k)}${ns?`<br><span class="small muted">${x.naoSeg[k]} peça(s) · não separa o lote</span>`:""}</td>${v==null?"":`<td><b>${v}</b></td>`}<td class="small">${esc(defSpec(k,prod(x.productId)))}${(()=>{const m=(x.pecas||[]).map(pc=>pc.med?.[k]).filter(Boolean);return m.length?`<div><b>Medido:</b> ${m.map(esc).join("; ")} kg</div>`:""})()}</td><td>${iv?`<a href="#arvore/${iv.id}">${invPill(iv.conclusao?.status)} abrir</a>`:`<button class="btn sm noprint" data-open="${k}">Abrir árvore</button>`}</td></tr>`}).join("")}</tbody></table></div>`:'<p class="muted">Nenhum defeito na amostra.</p>'}
    ${x.pecas?.length?`<h3 style="margin:14px 0 6px">Peças não conformes da amostra (d = ${x.d})</h3><div class="tw"><table class="t"><thead><tr><th>Peça</th><th>Cavidade / posição</th><th>Falhas</th></tr></thead><tbody>${x.pecas.map(pc=>`<tr><td>${pc.n}</td><td>${esc(pc.cav||"—")}</td><td>${pc.def.map(k=>esc(DEF[k]?.nome||k)).join("; ")}</td></tr>`).join("")}</tbody></table></div>`:""}
    ${nsTxt(x)?`<p class="small" style="margin-top:10px"><b>Defeito que não separa o lote (FS 070):</b> ${esc(nsTxt(x))}. Não entra em d.</p>`:""}
-   <div class="row noprint" style="margin-top:12px"><select id="anyDef" style="width:auto;margin:0"><option value="">Abrir árvore para outro defeito…</option>${DEFECTS.filter(dd=>dd.pts.includes(x.ponto)).map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select></div></div>`;
+   <div class="row noprint" style="margin-top:12px;${soOperador()?"":"display:none"}"><select id="anyDef" style="width:auto;margin:0"><option value="">Abrir árvore para outro defeito…</option>${DEFECTS.filter(dd=>dd.pts.includes(x.ponto)).map(dd=>`<option value="${dd.id}">${esc(dd.nome)}</option>`).join("")}</select></div></div>`;
   if(ls.k==="final"&&ls.st==="R"){const r=x.reacao||{};h+=`<div class="card"><h2>Plano de reação ao lote rejeitado</h2><p class="muted" style="margin-bottom:8px">${esc(REACT[x.ponto]||"")} ${x.disp?"":"Lotes rejeitados só podem ser reapresentados após o reexame de todas as unidades (NBR 5426, 4.12.4)."}</p>${REACTION_STEPS.filter(([k])=>!x.disp||!["cem","arvore","reap"].includes(k)).map(([k,t])=>`<label class="chk"><input type="checkbox" data-rx="${k}" ${r[k]?"checked":""}> <span>${t}${r[k+"_em"]?` <span class="muted small">· ${new Date(r[k+"_em"]).toLocaleString("pt-BR")}</span>`:""}</span></label>`).join("")}
     <div class="row noprint" style="margin-top:12px">${reaps.length?`<span class="muted small">Reapresentações: ${reaps.map(i=>`<a href="#inspecao/${i.id}">${fmtD(i.data)} ${i.result==="R"?"(rejeitado)":"(aceito)"}</a>`).join(", ")}</span>`:""}</div></div>`}
   if(invs.length)h+=`<div class="card"><h2>Árvores de falha deste lote</h2><div class="tw"><table class="t"><thead><tr><th>Defeito</th><th>Origem localizada</th><th>Causa provável</th><th>Responsável</th><th>Status</th></tr></thead><tbody>${invs.map(v=>`<tr class="click" data-inv="${v.id}"><td>${esc(DEF[v.defeito]?.nome)}</td><td>${esc(originLabel(v))}</td><td class="small">${esc(probable(v).map(c=>c.nome).join("; ")||"—")}</td><td>${esc(acaoRec(v).resp||"—")}</td><td>${invPill(v.conclusao?.status)}</td></tr>`).join("")}</tbody></table></div></div>`;
@@ -1376,7 +1400,7 @@ function pgInspecao(){
   const pendLot=invs.filter(v=>!treeFilled(v));
   if(pendLot.length&&(ls.k!=="final"||ls.auto))setBar(`<div class="bar-info"><span class="bar-plan">${pendLot.length} árvore(s) de falha deste lote sem preencher</span><span class="bar-hint">${ls.k==="cem"?"Depois volte à inspeção 100%":x.result==="R"?"Depois delas vem a decisão do lote":"Lote aceito: registre a causa da falha encontrada"}</span></div><button class="btn primary" data-goinv="${pendLot[0].id}">Preencher árvores →</button>`);
   else if(ls.k==="disp")setBar(`<div class="bar-info"><span class="bar-plan">Árvores preenchidas · falta decidir o destino do lote</span><span class="bar-hint">Aceitar, inspecionar 100% ou rejeitar</span></div><button class="btn primary" id="dispB">Decidir destino do lote →</button>`);
-  else if(ls.k==="cem")setBar(`<div class="bar-info"><span class="bar-plan">Lote em inspeção 100% · com o operador</span><span class="bar-hint">O aviso já está na tela do operador</span></div><button class="btn" id="cemB">Registrar a 100% por aqui</button><button class="btn primary" id="painelB">Voltar ao painel</button>`);
+  else if(ls.k==="cem")setBar(`<div class="bar-info"><span class="bar-plan">Lote em inspeção 100% · com o operador</span><span class="bar-hint">O aviso já está na tela do operador</span></div><button class="btn primary" id="painelB">Voltar ao painel</button>`);
   else if(ls.st==="R")setBar(`<div class="bar-info"><span class="bar-plan">Lote rejeitado · bloqueado</span><span class="bar-hint">Siga o plano de reação</span></div><button class="btn primary" id="novaB">Voltar ao painel →</button>`);
   else setBar(`<div class="bar-info"><span class="bar-plan">${esc(ls.label)} · lote liberado</span>${x.c100?.status==="concluida"?`<span class="bar-hint">${x.c100.subst!=null?`Lote completo · ${x.c100.reprov} peças trocadas`:`Liberar só as ${x.c100.aprov} peças aprovadas`}</span>`:""}</div><button class="btn primary" id="novaB">Voltar ao painel →</button>`);
   if($("#dispB"))$("#dispB").onclick=()=>go("disposicao",x.id);if($("#cemB"))$("#cemB").onclick=()=>go("opcem",x.id);if($("#painelB"))$("#painelB").onclick=()=>go("painel");
@@ -1387,8 +1411,8 @@ function pgInspecao(){
   $("#anyDef").onchange=e=>{if(e.target.value)openInvestigation(x,e.target.value)};
   $$("[data-inv]").forEach(r=>r.onclick=()=>go("arvore",r.dataset.inv));
   $$("[data-rx]").forEach(c=>c.onchange=async()=>{x.reacao=x.reacao||{};x.reacao[c.dataset.rx]=c.checked;x.reacao[c.dataset.rx+"_em"]=c.checked?Date.now():null;await persist("inspecoes",x);pgInspecao()});
-  $("#delI").onclick=()=>askReason({titulo:"Excluir inspeção do lote "+(x.lote||""),texto:`A inspeção e ${invs.length?invs.length+" árvore(s) de falha ligada(s) a ela":"seus registros"} deixam de aparecer para todos. O registro fica guardado no banco com o motivo, para rastreabilidade.`,botao:"Excluir inspeção",perigo:true},async motivo=>{for(const v of invs)await remove("investigacoes",v.id,{excluidoMotivo:motivo});await remove("inspecoes",x.id,{excluidoMotivo:motivo});toast("Inspeção excluída.");go("inspecoes")});
-  $("#editI").onclick=()=>{draft=newDraft({id:x.id,editOf:x.id,createdAt:x.createdAt,productId:x.productId,ponto:x.ponto,data:x.data,turno:x.turno||"",maquina:x.maquina||"",molde:x.molde||"",op:x.op||"",lote:x.lote||"",inspetor:x.inspetor||"",N:String(x.N),nivel:x.nivel,nqa:String(x.nqa),applyR:x.regime==="R",pecas:[],nc:String(x.d||0),defs:Object.keys(x.defeitos||{}),ns:Object.fromEntries(Object.entries(x.naoSeg||{}).map(([k,v])=>[k,String(v)])),obs:x.obs||"",reap:!!x.reap,refId:x.refId||null});go("nova")};
+  if($("#delI"))$("#delI").onclick=()=>askReason({titulo:"Excluir inspeção do lote "+(x.lote||""),texto:`A inspeção e ${invs.length?invs.length+" árvore(s) de falha ligada(s) a ela":"seus registros"} deixam de aparecer para todos. O registro fica guardado no banco com o motivo, para rastreabilidade.`,botao:"Excluir inspeção",perigo:true},async motivo=>{for(const v of invs)await remove("investigacoes",v.id,{excluidoMotivo:motivo});await remove("inspecoes",x.id,{excluidoMotivo:motivo});toast("Inspeção excluída.");go("inspecoes")});
+  if($("#editI"))$("#editI").onclick=()=>{draft=newDraft({id:x.id,editOf:x.id,createdAt:x.createdAt,productId:x.productId,ponto:x.ponto,data:x.data,turno:x.turno||"",maquina:x.maquina||"",molde:x.molde||"",op:x.op||"",lote:x.lote||"",inspetor:x.inspetor||"",N:String(x.N),nivel:x.nivel,nqa:String(x.nqa),applyR:x.regime==="R",pecas:[],nc:String(x.d||0),defs:Object.keys(x.defeitos||{}),ns:Object.fromEntries(Object.entries(x.naoSeg||{}).map(([k,v])=>[k,String(v)])),obs:x.obs||"",reap:!!x.reap,refId:x.refId||null});go("nova")};
 }
 /* =========================================================================
    8b. DESTINO DO LOTE: decisão de disposição, inspeção 100% e resultado final
@@ -1440,7 +1464,7 @@ function lotStage(x){
 }
 const statusPill=x=>{const s=lotStage(x);return `<span class="pill ${s.cls}">${s.label}</span>`};
 const lotSit=x=>{const s=lotStage(x);return s.k==="final"?s.st:s.k==="cem"?"C":"P"};
-const pendingLots=()=>S.inspecoes.filter(x=>!x.demo&&["disp","cem"].includes(lotStage(x).k));
+const pendingLots=()=>S.inspecoes.filter(x=>["disp","cem"].includes(lotStage(x).k));
 // Trilha do lote: mostra em que etapa o lote está
 function lotFlow(x,cur){
   const s=lotStage(x),tr=lotTrees(x),dp=x.disp,steps=[["insp","Inspeção por amostragem",true,"inspecao/"+x.id]];
@@ -1543,6 +1567,9 @@ async function cemFinalizar(x){
    ========================================================================= */
 const OPR={operador:1,opnova:1,oparvore:1,oplote:1,opcem:1,opocorr:1,opoc:1,oppeso:1};
 const soOperador=()=>!localMode()&&cloudState==="ok"&&colab?.papel==="inspetor";
+// Gestor e Administrador só consultam e decidem os lotes; quem registra é o operador. No modo local (um aparelho,
+// apresentação) a Tela do operador continua acessível para simular os dois lados.
+const simulaOp=()=>localMode()||cloudState==="off";
 let OP=null;
 const opTurno=()=>{const h=new Date().getHours();return h>=6&&h<14?"1º":h>=14&&h<22?"2º":"3º"};
 const opNovo=()=>({step:1,ponto:"",productId:"",maquina:"",lote:"",N:"",turno:opTurno(),op:"",molde:"",pecas:[],nc:"",defs:[],confirmado:false,obs:""});
@@ -2470,7 +2497,9 @@ async function loadDemo(){
         else{v.presenca={};v.conclusao={status:"aberta"}}}
       await persist("investigacoes",v)}}
   // destino dos lotes com falha: decisão de disposição e, às vezes, inspeção 100%
-  for(const x of novos){if(x.result!=="R")continue;const st=lotStage(x);if(st.k!=="disp")continue;
+  // os 2 lotes rejeitados mais recentes ficam aguardando a decisão da Qualidade (para a demonstração mostrar a fila)
+  const pendDemo=new Set(novos.filter(x=>x.result==="R"&&lotStage(x).k==="disp").sort((a,b)=>b.createdAt-a.createdAt).slice(0,2).map(x=>x.id));
+  for(const x of novos){if(x.result!=="R")continue;const st=lotStage(x);if(st.k!=="disp"||pendDemo.has(x.id))continue;
     const em=new Date(x.createdAt+3*3600e3).toISOString(),por="Qualidade (DEMO)",arvores=lotTrees(x).map(v=>v.id),k0=Object.keys(x.defeitos)[0];
     const rc=recente(x),tipo=wpick(rc?[["segregar",3],["aceitar",1],["rejeitar",1],["pend",2],["andamento",2]]:[["segregar",5],["aceitar",2],["rejeitar",2]]);if(tipo==="pend")continue;
     const t=tipo==="andamento"?"segregar":tipo;
@@ -2551,7 +2580,17 @@ function cepSvg(o){
     if(i%passo===0||i===P.length-1)s+=`<text x="${X(i)}" y="${H-10}" class="cep-ax" text-anchor="middle">${p.lab}</text>`});
   return s+`</svg>`;
 }
-let psVer=40,psForm=null,psEdit=null;
+function cepCartasHtml(D){const T=PESO_T[D.tipo],L=D.L;
+  const vis=D.comp.slice(psVer?-psVer:0),tip=(s,v,c)=>`SG-${s.seq} · ${new Date(s.r.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}${s.r.lote?" · lote "+s.r.lote:""} · ${c} = ${kgFmt(v,4)} kg${(c==="X̄"?s.sx:s.sr).length?" · sinal: regra "+(c==="X̄"?s.sx:s.sr).join(", "):""}${s.r.foraBase?" · fora da base":""}${s.r.demo?" · DEMO":""}`;
+  const ptsX=vis.map(s=>({y:s.xb,lab:s.seq,sinal:s.sx.length>0,fora:!!s.r.foraBase,tip:tip(s,s.xb,"X̄")})),ptsR=vis.map(s=>({y:s.R,lab:s.seq,sinal:s.sr.length>0,fora:!!s.r.foraBase,tip:tip(s,s.R,"R")}));
+  return `<div class="card pscharts" id="cepCard"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">Pesagem · carta X̄-R</h2><div class="pstabs sm" role="tablist">${Object.entries(PESO_T).map(([k,t])=>`<button role="tab" class="pstab ${k===D.tipo?"on":""}" aria-selected="${k===D.tipo}" data-pfp="${k}"><b>${t.nome}</b><small>${t.ponto}</small></button>`).join("")}</div>${D.comp.length>25?`<label class="row small" style="gap:6px">Mostrar <select id="psVer" style="width:auto;margin:0"><option value="25" ${psVer===25?"selected":""}>últimos 25</option><option value="40" ${psVer===40?"selected":""}>últimos 40</option><option value="0" ${!psVer?"selected":""}>todos (${D.comp.length})</option></select></label>`:""}</div>
+    ${(()=>{const L=D.L;return `<div class="cepsum"><span class="pill ${!L?"":D.instavel?"nc":"ok"}">${!L?"Em formação":D.instavel?"Sinais de causa especial":"Sob controle"}</span><span>${D.comp.length} subgrupos (n = ${D.n})</span><span>X̄̄ ${kgFmt(D.kpi.xbb)} kg</span><span>R̄ ${kgFmt(D.kpi.rb)} kg</span><span>${D.fase==="estab"?"limites estabelecidos":D.fase==="prov"?"limites provisórios":"sem limites ainda"}</span><span>FTP ${kgFmt(D.sp.min)} a ${kgFmt(D.sp.max)} kg</span></div>`})()}
+    <div class="cepleg"><span><i class="lg lim${D.fase==="prov"?" prov":""}"></i>LSC / LIC · limites de controle${D.fase==="prov"?" (provisórios)":""}</span><span><i class="lg lc"></i>LC · linha central</span><span><i class="lg pt"></i>subgrupo</span><span><i class="lg sinal"></i>sinal de causa especial</span>${D.comp.some(s=>s.r.foraBase)?`<span><i class="lg fora"></i>fora da base dos limites</span>`:""}</div>
+    <h3 class="cepth">Gráfico 1 · Controle das médias (X̄) · kg</h3>${cepSvg({pts:ptsX,L,lsc:L?.lsc,lc:L?.lc,lic:L?.lic,prov:D.fase==="prov",carta:"X̄",fmt:v=>kgFmt(v),aria:"Carta das médias do "+T.nome})}
+    <h3 class="cepth">Gráfico 2 · Controle das amplitudes (R) · kg</h3>${cepSvg({pts:ptsR,L,lsc:L?.rlsc,lc:L?.rlc,lic:L?.rlic,prov:D.fase==="prov",carta:"R",fmt:v=>kgFmt(v),aria:"Carta das amplitudes do "+T.nome})}
+    <p class="small muted" style="margin-top:6px">Eixo horizontal: número do subgrupo (SG). Passe o dedo ou o mouse sobre um ponto para ver data, lote e valor. <a href="#pesagem/${D.tipo}">Subgrupos, limites e sinais →</a></p></div>`;
+}
+let psVer=40,psForm=null,psEdit=null,pfPeso="seco";
 function psNovoForm(tipo){const d=new Date(),l=new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);return {tipo,em:l,lote:"",turno:opTurno(),por:colab?.nome||"",v:Array(PESO_N).fill("")}}
 function pgPesagem(){pesagemPage(false)}
 function pgOpPeso(){pesagemPage(true)}
@@ -2559,10 +2598,10 @@ function pesagemPage(op){
   const tipo=route.id==="umido"?"umido":"seco",T=PESO_T[tipo],D=cepDados(tipo),p=prod(PESO_PROD),ed=!op&&isGestor(),L=D.L,K=D.K;
   if(!psForm||psForm.tipo!==tipo){psForm=psNovoForm(tipo);psEdit=null}
   const f=psForm,sp=D.sp;
-  head(op?"Tela do operador":"Operação",op?"Pesagem":"Pesagem · controle estatístico (X̄-R)",op?opTop():"");
+  head(op?"Tela do operador":"Operação",op?"Pesagem":"Pesagem · subgrupos e limites",op?opTop():"");
   const demo=D.sgs.some(s=>s.r.demo);
   let h=`<div class="${op?"opwrap":""}">`;
-  if(!op)h+=`<div class="banner info"><span><b>Protótipo:</b> a Pesagem acompanha só a <b>Caixa de ferramentas Toyota</b> (${esc(PESO_PROD)} · ${esc(p?.codCliente||"64993-BZ100")}). Não há escolha nem cadastro de produto nesta etapa.${demo?" Os subgrupos marcados como <b>DEMO</b> são fictícios, gerados para demonstração.":""}</span></div>`;
+  if(!op)h+=`<div class="banner info"><span>Os gráficos X̄-R ficam no <a href="#painel">Painel</a>. Aqui ficam os subgrupos, os limites e os sinais. As pesagens são registradas pelo operador. <b>Protótipo:</b> só a <b>Caixa de ferramentas Toyota</b> (${esc(PESO_PROD)} · ${esc(p?.codCliente||"64993-BZ100")}). Não há escolha nem cadastro de produto nesta etapa.${demo?" Os subgrupos marcados como <b>DEMO</b> são fictícios, gerados para demonstração.":""}</span></div>`;
   h+=`<div class="pstabs" role="tablist">${Object.entries(PESO_T).map(([k,t])=>`<button role="tab" class="pstab ${k===tipo?"on":""}" aria-selected="${k===tipo}" data-pst="${k}"><b>${t.nome}</b><small>${t.ponto}</small></button>`).join("")}</div>`;
   // situação
   const st=!L?{c:"info",t:"Gráfico em formação",x:`${D.elig.length} de ${CEP_KMIN} subgrupos completos para calcular limites provisórios (${CEP_KBASE} para estabelecer os limites).`}
@@ -2575,18 +2614,10 @@ function pesagemPage(op){
   if(op)h+="%%PSFORM%%";
   // indicadores
   const k=D.kpi,kp=(l,v,s,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v" ${c?`style="color:${c}"`:""}>${v}</div><div class="s">${s}</div></div>`;
-  h+=`<div class="grid g4 kpis pskpi">${kp("Medições",k.med.toLocaleString("pt-BR"),"pesos válidos registrados")}${kp("Subgrupos",k.sg,`completos (n = ${D.n})${k.inc?` · ${k.inc} incompleto(s)`:""}`)}${kp("Média geral (X̄̄)",kgFmt(k.xbb)+" kg","todos os subgrupos completos")}${kp("Amplitude média (R̄)",kgFmt(k.rb)+" kg","todos os subgrupos completos")}
+  if(!op)h+=`<div class="grid g4 kpis pskpi">${kp("Medições",k.med.toLocaleString("pt-BR"),"pesos válidos registrados")}${kp("Subgrupos",k.sg,`completos (n = ${D.n})${k.inc?` · ${k.inc} incompleto(s)`:""}`)}${kp("Média geral (X̄̄)",kgFmt(k.xbb)+" kg","todos os subgrupos completos")}${kp("Amplitude média (R̄)",kgFmt(k.rb)+" kg","todos os subgrupos completos")}
     ${kp("Maior valor",kgFmt(k.max)+" kg",sp.max!=null&&k.max>sp.max?"acima da especificação":"",sp.max!=null&&k.max>sp.max?"var(--nc)":"")}${kp("Menor valor",kgFmt(k.min)+" kg",sp.min!=null&&k.min<sp.min?"abaixo da especificação":"",sp.min!=null&&k.min<sp.min?"var(--nc)":"")}
     ${kp("Situação",!L?"Em formação":D.instavel?"Instável":"Sob controle",!L?`${D.elig.length}/${CEP_KMIN} subgrupos`:D.fase==="estab"?"limites estabelecidos":"limites provisórios",!L?"":D.instavel?"var(--nc)":"var(--ok)")}
     ${kp("Especificação (FTP)",sp.min!=null?`${kgFmt(sp.min)} a ${kgFmt(sp.max)}`:"—",sp.nom!=null?`nominal ${kgFmt(sp.nom)} kg · não é limite de controle`:"cadastre na FTP do produto")}</div>`;
-  // gráficos
-  const vis=D.comp.slice(psVer?-psVer:0),tip=(s,v,c)=>`SG-${s.seq} · ${new Date(s.r.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}${s.r.lote?" · lote "+s.r.lote:""} · ${c} = ${kgFmt(v,4)} kg${(c==="X̄"?s.sx:s.sr).length?" · sinal: regra "+(c==="X̄"?s.sx:s.sr).join(", "):""}${s.r.foraBase?" · fora da base":""}${s.r.demo?" · DEMO":""}`;
-  const ptsX=vis.map(s=>({y:s.xb,lab:s.seq,sinal:s.sx.length>0,fora:!!s.r.foraBase,tip:tip(s,s.xb,"X̄")})),ptsR=vis.map(s=>({y:s.R,lab:s.seq,sinal:s.sr.length>0,fora:!!s.r.foraBase,tip:tip(s,s.R,"R")}));
-  h+=`<div class="card pscharts"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">Carta X̄-R · ${T.nome}</h2>${D.comp.length>25?`<label class="row small" style="gap:6px">Mostrar <select id="psVer" style="width:auto;margin:0"><option value="25" ${psVer===25?"selected":""}>últimos 25</option><option value="40" ${psVer===40?"selected":""}>últimos 40</option><option value="0" ${!psVer?"selected":""}>todos (${D.comp.length})</option></select></label>`:""}</div>
-    <div class="cepleg"><span><i class="lg lim${D.fase==="prov"?" prov":""}"></i>LSC / LIC · limites de controle${D.fase==="prov"?" (provisórios)":""}</span><span><i class="lg lc"></i>LC · linha central</span><span><i class="lg pt"></i>subgrupo</span><span><i class="lg sinal"></i>sinal de causa especial</span>${D.comp.some(s=>s.r.foraBase)?`<span><i class="lg fora"></i>fora da base dos limites</span>`:""}</div>
-    <h3 class="cepth">Gráfico 1 · Controle das médias (X̄) · kg</h3>${cepSvg({pts:ptsX,L,lsc:L?.lsc,lc:L?.lc,lic:L?.lic,prov:D.fase==="prov",carta:"X̄",fmt:v=>kgFmt(v),aria:"Carta das médias do "+T.nome})}
-    <h3 class="cepth">Gráfico 2 · Controle das amplitudes (R) · kg</h3>${cepSvg({pts:ptsR,L,lsc:L?.rlsc,lc:L?.rlc,lic:L?.rlic,prov:D.fase==="prov",carta:"R",fmt:v=>kgFmt(v),aria:"Carta das amplitudes do "+T.nome})}
-    <p class="small muted" style="margin-top:6px">Eixo horizontal: número do subgrupo (SG). Passe o dedo ou o mouse sobre um ponto para ver data, lote e valor.</p></div>`;
   // linhas de controle e premissas
   if(!op){const f4=v=>kgFmt(v,4);
     h+=`<div class="grid g2"><div class="card"><h2>Linhas de controle</h2>${L?`<div class="tw"><table class="t"><thead><tr><th>Carta</th><th>LSC</th><th>LC</th><th>LIC</th></tr></thead><tbody><tr><td>X̄ (média)</td><td>${f4(L.lsc)}</td><td>${f4(L.lc)}</td><td>${f4(L.lic)}</td></tr><tr><td>R (amplitude)</td><td>${f4(L.rlsc)}</td><td>${f4(L.rlc)}</td><td>${f4(L.rlic)}</td></tr></tbody></table></div>
@@ -2608,7 +2639,7 @@ function pesagemPage(op){
     <div class="psprev"><span>X̄ = <b id="psPxb">${prev?kgFmt(prev.xb,4):"—"}</b> kg</span><span>R = <b id="psPr">${prev?kgFmt(prev.R,4):"—"}</b> kg</span><span class="small muted" id="psPn">${fil}/${PESO_N} pesos</span></div>
     ${inval.some(Boolean)?`<p class="small" style="color:var(--nc)">Valor inválido: confira a vírgula e a unidade (kg). Aceita de ${kgFmt(sp.min!=null?sp.min*.5:0)} a ${kgFmt(sp.max!=null?sp.max*1.5:20)} kg.</p>`:""}
     ${okv.some(v=>sp.min!=null&&(v<sp.min||v>sp.max))?`<p class="small" style="color:var(--warn)">Há peso fora da especificação da FTP (${kgFmt(sp.min)} a ${kgFmt(sp.max)} kg). O subgrupo é registrado normalmente; a peça segue o fluxo de não conforme.</p>`:""}</div>`;
-  h=op?h.replace("%%PSFORM%%",fh):h+fh;
+  h=op?h.replace("%%PSFORM%%",fh):h;
   // tabela de subgrupos
   const lista=D.sgs.slice().reverse(),mostra=lista.slice(0,op?8:30);
   h+=`<div class="card"><h2>Subgrupos registrados · ${T.nome}</h2>${lista.length?`<div class="tw"><table class="t pstab"><thead><tr><th>SG</th><th>Data e hora</th><th>Lote</th><th>Turno</th>${Array.from({length:PESO_N},(_,i)=>`<th>P${i+1}</th>`).join("")}<th>X̄</th><th>R</th><th>Responsável</th><th>Situação</th>${ed||op?"<th></th>":""}</tr></thead><tbody>${mostra.map(s=>{const r=s.r,sx=[...(s.sx||[]),...(s.sr||[]).map(x=>"R"+x)];
@@ -2616,18 +2647,18 @@ function pesagemPage(op){
       ${Array.from({length:PESO_N},(_,i)=>{const v=s.vals[i];return `<td class="${v!=null&&!pesoValido(v,sp)?"bad":v!=null&&sp.min!=null&&(v<sp.min||v>sp.max)?"foraesp":""}">${v==null||isNaN(v)?"—":kgFmt(v)}</td>`}).join("")}
       <td><b>${s.comp?kgFmt(s.xb,4):"—"}</b></td><td>${s.comp?kgFmt(s.R,4):"—"}</td><td class="small">${esc(r.por||"—")}</td>
       <td class="small">${!s.comp?`<span class="pill warn">${s.inval?"valor inválido":"incompleto"}</span>`:sx.length?`<span class="pill nc">sinal ${sx.join(", ")}</span>`:L&&L.ids.has(r.id)?'<span class="pill">base dos limites</span>':'<span class="pill ok">ok</span>'}${r.foraBase?` <span class="pill">fora da base</span>`:""}</td>
-      ${ed||op?`<td class="nowrap">${!s.comp?`<button class="btn sm" data-psfix="${r.id}">Completar</button>`:""}${ed&&s.comp?`<button class="btn sm" data-psbase="${r.id}">${r.foraBase?"Devolver à base":"Tirar da base"}</button>`:""}${ed?`<button class="btn sm danger" data-psdel="${r.id}">Excluir</button>`:""}</td>`:""}</tr>`}).join("")}</tbody></table></div>${lista.length>mostra.length?`<p class="small muted" style="margin-top:6px">Mostrando os ${mostra.length} mais recentes de ${lista.length}.</p>`:""}`
+      ${ed||op?`<td class="nowrap">${op&&!s.comp?`<button class="btn sm" data-psfix="${r.id}">Completar</button>`:""}${ed&&s.comp?`<button class="btn sm" data-psbase="${r.id}">${r.foraBase?"Devolver à base":"Tirar da base"}</button>`:""}${ed?`<button class="btn sm danger" data-psdel="${r.id}">Excluir</button>`:""}</td>`:""}</tr>`}).join("")}</tbody></table></div>${lista.length>mostra.length?`<p class="small muted" style="margin-top:6px">Mostrando os ${mostra.length} mais recentes de ${lista.length}.</p>`:""}`
     :`<div class="empty">Nenhum subgrupo de ${T.nome.toLowerCase()} registrado ainda.</div>`}</div>`;
   setPage(h+`</div>`);if(op)opBind();
   // barra de ações
   const falta=!f.em?"Informe a data e a hora":new Date(f.em).getTime()>Date.now()+5*6e4?"A data e hora não podem estar no futuro":inval.some(Boolean)?"Corrija o valor inválido":!fil?"Digite os pesos":"";
   const completo=okv.length===PESO_N&&!falta;
-  setBar(`${op?`<button class="btn" id="opBack">Início</button>`:""}<div class="bar-info"><span class="bar-plan">${T.nome} · ${fil}/${PESO_N} pesos</span><span class="bar-hint">${falta||(completo?"Pronto para registrar":`Faltam ${PESO_N-fil} peso(s) para completar o subgrupo`)}</span></div>${!falta&&!completo?`<button class="btn" id="psInc">Guardar incompleto</button>`:""}${psEdit?`<button class="btn" id="psCancel">Cancelar</button>`:""}<button class="btn primary" id="psSave" ${completo?"":"disabled"}>${psEdit?"Salvar subgrupo":"Registrar subgrupo"} →</button>`);
+  if(!op)setBar("");else setBar(`${op?`<button class="btn" id="opBack">Início</button>`:""}<div class="bar-info"><span class="bar-plan">${T.nome} · ${fil}/${PESO_N} pesos</span><span class="bar-hint">${falta||(completo?"Pronto para registrar":`Faltam ${PESO_N-fil} peso(s) para completar o subgrupo`)}</span></div>${!falta&&!completo?`<button class="btn" id="psInc">Guardar incompleto</button>`:""}${psEdit?`<button class="btn" id="psCancel">Cancelar</button>`:""}<button class="btn primary" id="psSave" ${completo?"":"disabled"}>${psEdit?"Salvar subgrupo":"Registrar subgrupo"} →</button>`);
   if($("#opBack"))$("#opBack").onclick=()=>go("operador");
   const re=()=>{if(!["pesagem","oppeso"].includes(route.p))return;const y=window.scrollY,a=document.activeElement?.dataset?.psv;pesagemPage(op);window.scrollTo(0,y);if(a!=null){const el=$(`[data-psv="${a}"]`);if(el){el.focus();const v=el.value;el.value="";el.value=v}}};
   $$("[data-pst]").forEach(b=>b.onclick=()=>{psForm=null;go(op?"oppeso":"pesagem",b.dataset.pst)});
   if($("#psVer"))$("#psVer").onchange=e=>{psVer=+e.target.value;re()};
-  $("#psEm").onchange=e=>{f.em=e.target.value;re()};$("#psLote").oninput=e=>{f.lote=e.target.value};$("#psTurno").onchange=e=>{f.turno=e.target.value};$("#psPor").oninput=e=>{f.por=e.target.value};
+  if(op){$("#psEm").onchange=e=>{f.em=e.target.value;re()};$("#psLote").oninput=e=>{f.lote=e.target.value};$("#psTurno").onchange=e=>{f.turno=e.target.value};$("#psPor").oninput=e=>{f.por=e.target.value};
   // enquanto digita: só a prévia de X̄ e R e o botão; a página é redesenhada ao sair do campo
   const prevUpd=()=>{const vs=f.v.map(numIn),ok=vs.filter(v=>v!=null&&pesoValido(v,sp)),bad=vs.some((v,i)=>f.v[i].trim()!==""&&!pesoValido(v,sp)),pr=ok.length===PESO_N?{xb:media(ok),R:Math.max(...ok)-Math.min(...ok)}:null;
     $("#psPxb").textContent=pr?kgFmt(pr.xb,4):"—";$("#psPr").textContent=pr?kgFmt(pr.R,4):"—";$("#psPn").textContent=vs.filter(v=>v!=null).length+"/"+PESO_N+" pesos";
@@ -2646,7 +2677,7 @@ function pesagemPage(op){
     toast(inc?`Subgrupo guardado incompleto (${vv.length} de ${PESO_N}). Ele não entra nos cálculos até ser completado.`:s2&&(s2.sx?.length||s2.sr?.length)?`SG-${s2.seq} registrado: sinal de causa especial (regra ${[...(s2.sx||[]),...(s2.sr||[])].join(", ")}).`:`SG-${s2?.seq||""} registrado. X̄ = ${kgFmt(s2?.xb,4)} kg · R = ${kgFmt(s2?.R,4)} kg.`);
     re()};
   $("#psSave").onclick=()=>salvar(false);if($("#psInc"))$("#psInc").onclick=()=>salvar(true);
-  if($("#psCancel"))$("#psCancel").onclick=()=>{psForm=psNovoForm(tipo);psEdit=null;re()};
+  if($("#psCancel"))$("#psCancel").onclick=()=>{psForm=psNovoForm(tipo);psEdit=null;re()};}
   $$("[data-psfix]").forEach(b=>b.onclick=()=>{const r=S.pesagens.find(x=>x.id===b.dataset.psfix);if(!r)return;const l=new Date(new Date(r.em).getTime()-new Date(r.em).getTimezoneOffset()*6e4).toISOString().slice(0,16);
     psForm={tipo,em:l,lote:r.lote||"",turno:r.turno||opTurno(),por:r.por||"",v:Array.from({length:PESO_N},(_,i)=>r.valores?.[i]!=null?String(r.valores[i]).replace(".",","):"")};psEdit=r.id;re();$("#psFormCard")?.scrollIntoView({block:"start"})});
   $$("[data-psbase]").forEach(b=>b.onclick=async()=>{const r=S.pesagens.find(x=>x.id===b.dataset.psbase);if(!r)return;
