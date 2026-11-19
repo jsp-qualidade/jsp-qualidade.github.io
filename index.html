@@ -1092,7 +1092,7 @@ function renderNav(){
   let g="",h="";PAGES.filter(p=>p.id!=="nova"&&(p.id!=="operador"||simulaOp())).forEach(p=>{if(p.grp!==g){h+=`<div class="navsep">${p.grp}</div>`;g=p.grp}
     const act=route.p===p.id||(OPR[route.p]&&p.id==="operador")||(["inspecao","disposicao","cem"].includes(route.p)&&p.id==="inspecoes")||(route.p==="arvore"&&p.id===(S.investigacoes.find(v=>v.id===route.id)?.ocId?"ocorrencias":"investigacoes"))||((route.p==="produto"||route.p==="falha")&&p.id==="cadastros")||(route.p==="causa"&&p.id==="biblioteca");
     const badge=p.id==="ocorrencias"?ocGrupos(36500).filter(g=>!g.every(v=>(v.conclusao?.status||"aberta")==="concluida")).length:p.id==="investigacoes"?pendingTrees().length:p.id==="inspecoes"?pendingLots().length:p.id==="cadastros"?pendentes.length:0;
-    h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}${p.id==="operador"?`<em class="navtag">simulação</em>`:""}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":p.id==="ocorrencias"?"Ocorrências com análise em aberto":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
+    h+=`<button class="navbtn ${act?"active":""}" data-go="${p.id}">${ICON[p.ic]}<span>${p.t}${p.id==="operador"&&(localMode()||cloudState==="off")?`<em class="navtag">simulação</em>`:""}</span>${badge?`<span class="nbadge" title="${p.id==="cadastros"?"Pedidos de acesso":p.id==="inspecoes"?"Lotes aguardando decisão ou em inspeção 100%":p.id==="ocorrencias"?"Ocorrências com análise em aberto":"Árvores não preenchidas"}">${badge}</span>`:""}</button>`});
   $("#nav").innerHTML=h;$$("#nav [data-go]").forEach(b=>b.onclick=()=>{document.body.classList.remove("menuopen");$("#menuBtn").setAttribute("aria-expanded","false");go(b.dataset.go)});
 }
 function head(crumb,title,right=""){$("#crumb").textContent=crumb;
@@ -1621,7 +1621,10 @@ const OPR={operador:1,opnova:1,oparvore:1,oplote:1,opcem:1,opocorr:1,opoc:1,oppe
 const soOperador=()=>!localMode()&&cloudState==="ok"&&colab?.papel==="inspetor";
 // Gestor e Administrador só consultam e decidem os lotes; quem registra é o operador. No modo local (um aparelho,
 // apresentação) a Tela do operador continua acessível para simular os dois lados.
-const simulaOp=()=>localMode()||cloudState==="off";
+// PROTÓTIPO: enquanto o sistema está em testes, Gestor e Administrador também acessam a Tela do operador
+// para registrar e testar tudo. Para a operação real, troque para false: aí só o operador registra.
+const OP_PARA_TODOS=true;
+const simulaOp=()=>OP_PARA_TODOS||localMode()||cloudState==="off";
 let OP=null;
 const opTurno=()=>{const h=new Date().getHours();return h>=6&&h<14?"1º":h>=14&&h<22?"2º":"3º"};
 const opNovo=()=>({step:1,ponto:"",productId:"",maquina:"",lote:"",N:"",turno:opTurno(),op:"",molde:"",pecas:[],nc:"",defs:[],confirmado:false,obs:""});
