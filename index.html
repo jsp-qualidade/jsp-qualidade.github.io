@@ -380,6 +380,13 @@ body.opmode .top{padding:12px 16px}
 @media(max-width:520px){.opchips{grid-template-columns:1fr}.optri b{font-size:16.5px;overflow-wrap:anywhere}.opcount{grid-template-columns:minmax(0,1fr) 90px}}
 .acrec{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;background:var(--sunk)}.acrec-h{margin-bottom:8px}.acrec .list-kv{margin-bottom:6px}@media(max-width:600px){.acrec .list-kv{grid-template-columns:1fr;gap:2px 0}.acrec .list-kv dd{margin-bottom:8px}}
 table.t.mtx td{vertical-align:top;line-height:1.45}table.t.mtx td.mtx-def{background:var(--sunk);border-right:1px solid var(--line)}
+.bibg{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 8px}
+.biblist{display:flex;flex-direction:column;gap:6px}
+.bibf{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;font:inherit;color:inherit}
+.bibf:hover{border-color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.bibf-n{display:flex;flex-direction:column;gap:2px;min-width:0}.bibf-n b{font-size:15px}.bibf-n small{color:var(--muted)}
+.bibf-c{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}.bibf-a{font-size:22px;color:var(--muted);line-height:1;margin-left:4px}
+@media (max-width:600px){.bibf{flex-direction:column;align-items:flex-start}.bibf-c{justify-content:flex-start}.bibf-a{display:none}}
 .mtxcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.mtxcard-h{display:flex;justify-content:space-between;gap:8px;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--line)}
 .mtxc{padding:10px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.45}.mtxc:last-child{border-bottom:0;padding-bottom:2px}.mtxc-n{font-weight:700;margin-bottom:4px}.mtxc-l{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:6px}
 </style>
@@ -1968,7 +1975,10 @@ const natPill=c=>`<span class="pill ${c.nat==="fato"?"ok":c.nat==="estudo"?"info
 const causeMark=c=>c._custom||c._mod?`<span class="hint" style="display:block">${c._custom?"Incluída":"Alterada"} pela JSP</span>`:"";
 function pgBiblioteca(){
   const ed=isGestor();
-  head("Análise","Biblioteca causa/efeito e ação/reação",`<button class="btn" id="exB">Exportar CSV</button>`);
+  bf.def=route.id&&DEF[route.id]?route.id:"";
+  if(!bf.def){bibLista(ed);return}
+  const dSel=DEF[bf.def];
+  head("Análise · Biblioteca causa/efeito",dSel.nome,`<button class="btn" id="bVolta">← Todas as falhas</button><button class="btn" id="exB">Exportar CSV</button>`);
   const qq=bf.q.trim().toLowerCase();
   const match=c=>(!bf.st||c.st===bf.st)&&(!bf.nat||c.nat===bf.nat)&&(!qq||[c.nome,c.mech,c.acao,c.resp,fontesOf(c),(c.evid||[]).map(e=>e[0]).join(" ")].join(" ").toLowerCase().includes(qq));
   const grupos=DEFECTS.filter(d=>!bf.def||d.id===bf.def).map(d=>({d,cs:CAUSES.filter(c=>c.defs.includes(d.id)&&match(c)).sort((a,b)=>STAGES.findIndex(x=>x.id===a.st)-STAGES.findIndex(x=>x.id===b.st))}))
@@ -1976,7 +1986,7 @@ function pgBiblioteca(){
   const nRel=grupos.reduce((a,g)=>a+g.cs.length,0),rem=Object.values(CA).filter(c=>c.removida),nMod=CAUSES.filter(c=>c._mod||c._custom).length;
   let h=`<div class="pagehead"><p>Para cada falha da FS 070, a causa raiz provável, a ação de reação (corretiva) e a fonte de dados ou evidência para confirmar. Cada causa cadastrada aqui aparece na árvore de falha daquela falha.</p></div>
    ${ed?`<div class="banner info"><span><b>Para incluir uma causa,</b> use “+ Incluir causa” na linha da falha. Para corrigir, use “Editar” na causa. ${nMod?`<b>${nMod}</b> causa(s) já incluída(s) ou alterada(s) pela JSP.`:""}</span></div>`:`<div class="banner info"><span>A biblioteca é mantida pelos administradores. Se encontrar um erro ou souber de uma causa que falta, avise o administrador do sistema.</span></div>`}
-   <div class="card" style="margin-bottom:14px"><div class="grid g4"><label class="f">Buscar<input id="bq" value="${esc(bf.q)}" placeholder="Causa, ação, fonte…"></label><label class="f">Falha<select id="bdef"><option value="">Todas (${DEFECTS.length})</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa do processo<select id="bst"><option value="">Todas</option>${STAGES.map(x=>`<option value="${x.id}" ${bf.st===x.id?"selected":""}>${esc(x.nome)}</option>`).join("")}</select></label><label class="f">Status da relação<select id="bnat"><option value="">Todos</option>${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${bf.nat===k?"selected":""}>${l}</option>`).join("")}</select></label></div>
+   <div class="card" style="margin-bottom:14px"><div class="grid g4"><label class="f">Buscar<input id="bq" value="${esc(bf.q)}" placeholder="Causa, ação, fonte…"></label><label class="f">Falha<select id="bdef"><option value="">← Todas as falhas</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa do processo<select id="bst"><option value="">Todas</option>${STAGES.map(x=>`<option value="${x.id}" ${bf.st===x.id?"selected":""}>${esc(x.nome)}</option>`).join("")}</select></label><label class="f">Status da relação<select id="bnat"><option value="">Todos</option>${Object.entries(NAT).map(([k,l])=>`<option value="${k}" ${bf.nat===k?"selected":""}>${l}</option>`).join("")}</select></label></div>
    <div class="row" style="justify-content:space-between;margin-top:10px"><span class="hint" style="margin:0">${nRel} relação(ões) falha × causa · “hipótese” = levantada pelo grupo, a validar</span><label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" id="bdet" ${bDet?"checked":""} style="width:auto;margin:0"> Mostrar detalhes (etapa, mecanismo, responsável, eficácia)</label></div></div>`;
   const addBtn=d=>ed?`<button class="btn sm" data-addc="${d.id}">+ Incluir causa</button>`:"";
   const det=bDet;
@@ -1985,14 +1995,34 @@ function pgBiblioteca(){
    :`<div class="card empty">Nenhuma causa encontrada com esses filtros.</div>`;
   if(ed&&rem.length)h+=`<div class="card" style="margin-top:14px"><h2>Causas removidas</h2><p class="muted small" style="margin-bottom:10px">Não aparecem mais nas árvores novas. As árvores antigas guardam as respostas já dadas.</p>${rem.map(c=>`<div class="filarow" style="margin-bottom:6px"><div class="filainfo"><b>${esc(c.nome)}</b><span class="small muted">${esc(c.defs.map(k=>DEF[k]?.nome).filter(Boolean).join(", "))}</span></div><button class="btn sm" data-restc="${esc(c.id)}">Restaurar</button></div>`).join("")}</div>`;
   setPage(h);
-  $("#bdef").onchange=e=>{bf.def=e.target.value;pgBiblioteca()};$("#bst").onchange=e=>{bf.st=e.target.value;pgBiblioteca()};$("#bnat").onchange=e=>{bf.nat=e.target.value;pgBiblioteca()};
+  $("#bdef").onchange=e=>go("biblioteca",e.target.value||null);$("#bVolta").onclick=()=>go("biblioteca");$("#bst").onchange=e=>{bf.st=e.target.value;pgBiblioteca()};$("#bnat").onchange=e=>{bf.nat=e.target.value;pgBiblioteca()};
   $("#bdet").onchange=e=>{bDet=e.target.checked;const y=window.scrollY;pgBiblioteca();window.scrollTo(0,y)};
   $("#bq").oninput=e=>{bf.q=e.target.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{pgBiblioteca();const el=$("#bq");el.focus();const v=el.value;el.value="";el.value=v},400)};
   $$("[data-addc]").forEach(b=>b.onclick=()=>{cdraft=null;cDef=b.dataset.addc;go("causa","nova")});
   $$("[data-edc]").forEach(b=>b.onclick=()=>{cdraft=null;cDef=b.dataset.edd;go("causa",b.dataset.edc)});
   $$("[data-restc]").forEach(b=>b.onclick=async()=>{const c=CA[b.dataset.restc];await saveCause({...c,removida:false},"restaurada");toast("Causa restaurada.");render()});
+  $("#exB").onclick=bibCsv;
+}
+function bibCsv(){
   const rows=[];CAUSES.forEach(c=>c.defs.forEach(df=>rows.push({c,df})));rows.sort((a,b)=>DEFECTS.findIndex(x=>x.id===a.df)-DEFECTS.findIndex(x=>x.id===b.df));
-  $("#exB").onclick=()=>download("JSP_biblioteca_causa_efeito.csv",csv([["Falha","Causa raiz provável","Ação de reação (corretiva)","Fonte de dados / evidência","O que verificar","Etapa do processo","Mecanismo","Contenção imediata","Responsável","Critério de eficácia","Status","Fonte da informação","Origem do registro"],...rows.map(({c,df})=>[DEF[df].nome,c.nome,c.acao,fontesOf(c),(c.evid||[]).map(e=>e[0]).join(" | "),ST[c.st].nome,c.mech,reactOf(c),c.resp,c.efic,NAT[c.nat],c.fonte,c._custom?"Incluída pela JSP":c._mod?"Alterada pela JSP":"Original"])]),"text/csv;charset=utf-8");
+  download("JSP_biblioteca_causa_efeito.csv",csv([["Falha","Causa raiz provável","Ação de reação (corretiva)","Fonte de dados / evidência","O que verificar","Etapa do processo","Mecanismo","Contenção imediata","Responsável","Critério de eficácia","Status","Fonte da informação","Origem do registro"],...rows.map(({c,df})=>[DEF[df].nome,c.nome,c.acao,fontesOf(c),(c.evid||[]).map(e=>e[0]).join(" | "),ST[c.st].nome,c.mech,reactOf(c),c.resp,c.efic,NAT[c.nat],c.fonte,c._custom?"Incluída pela JSP":c._mod?"Alterada pela JSP":"Original"])]),"text/csv;charset=utf-8");
+}
+// Primeira tela da Biblioteca: as falhas listadas por grupo; clicar abre a tabela de causa/efeito da falha
+function bibLista(ed){
+  head("Análise","Biblioteca causa/efeito e ação/reação",`<button class="btn" id="exB">Exportar CSV</button>`);
+  const qq=bf.q.trim().toLowerCase();
+  const hit=c=>!qq||[c.nome,c.mech,c.acao,c.resp,fontesOf(c),(c.evid||[]).map(e=>e[0]).join(" ")].join(" ").toLowerCase().includes(qq);
+  const L=DEFECTS.map(d=>{const cs=CAUSES.filter(c=>c.defs.includes(d.id));return {d,n:cs.length,hip:cs.filter(c=>c.nat!=="fato"&&c.nat!=="estudo").length,m:qq?cs.filter(hit).length:cs.length}})
+    .filter(x=>!qq||x.m||x.d.nome.toLowerCase().includes(qq));
+  const tot=CAUSES.reduce((a,c)=>a+c.defs.length,0);
+  let h=`<div class="pagehead"><p>Escolha a falha para ver as causas raiz prováveis, a ação de reação (corretiva) e a fonte de dados ou evidência. Cada causa cadastrada aqui aparece na árvore de falha daquela falha.</p></div>
+    <div class="card" style="margin-bottom:14px"><label class="f" style="margin:0">Buscar falha ou causa<input id="bq" value="${esc(bf.q)}" placeholder="Ex.: rebarba, molde, pressão…"></label><span class="hint" style="margin:8px 0 0">${DEFECTS.length} falhas · ${tot} relações falha × causa${qq?` · ${L.length} falha(s) com resultado`:""}</span></div>`;
+  h+=L.length?GRUPOS_FALHA.map(g=>{const G=L.filter(x=>defGrupo(x.d)===g);return G.length?`<h2 class="bibg">${esc(g)}</h2><div class="biblist">${G.map(({d,n,hip,m})=>`<button class="bibf" data-bibf="${d.id}"><span class="bibf-n"><b>${esc(d.nome)}</b><small>${esc((d.pts||[]).map(k=>POINTS[k]?.nome||k).join(" · "))}</small></span><span class="bibf-c">${qq&&m!==n?`<span class="pill brand">${m} com “${esc(bf.q.trim())}”</span>`:""}${n?`<span class="pill">${n} causa${n>1?"s":""}</span>`:'<span class="pill warn">sem causas</span>'}${hip?`<span class="pill warn">${hip} hipótese${hip>1?"s":""}</span>`:""}<span class="bibf-a" aria-hidden="true">›</span></span></button>`).join("")}</div>`:""}).join("")
+    :`<div class="card empty">Nenhuma falha ou causa encontrada com “${esc(bf.q)}”.</div>`;
+  setPage(h);
+  $$("[data-bibf]").forEach(b=>b.onclick=()=>go("biblioteca",b.dataset.bibf));
+  $("#bq").oninput=e=>{bf.q=e.target.value;clearTimeout(window._bt);window._bt=setTimeout(()=>{pgBiblioteca();const el=$("#bq");el.focus();const v=el.value;el.value="";el.value=v},300)};
+  $("#exB").onclick=bibCsv;
 }
 // grava uma causa (nova, alterada, removida ou restaurada) com histórico de quem mexeu
 async function saveCause(c,acao){
@@ -2047,8 +2077,8 @@ function pgCausa(){
   $$("[data-ev]").forEach(el=>el.oninput=()=>{C.evid[+el.dataset.ev][+el.dataset.ek]=el.value});
   $$("[data-evdel]").forEach(b=>b.onclick=()=>{C.evid.splice(+b.dataset.evdel,1);rr()});
   $("#evAdd").onclick=()=>{C.evid.push(["",""]);rr()};
-  const sair=()=>{cdraft=null;bf.def=bf.def&&C.df?C.df:bf.def;go("biblioteca")};
-  $("#cC").onclick=()=>{cdraft=null;go("biblioteca")};
+  const sair=()=>{cdraft=null;go("biblioteca",C.df||bf.def||null)};
+  $("#cC").onclick=()=>{cdraft=null;go("biblioteca",cDef||bf.def||null)};
   $("#cS").onclick=async()=>{
     if(!C.df){toast("Escolha a falha.");$("#c_df").focus();return}if(!C.st){toast("Escolha a etapa do processo.");$("#c_st").focus();return}
     if(!C.nome.trim()){toast("Descreva a causa.");$("#c_nome").focus();return}if(!C.acao.trim()){toast("Descreva a ação de reação.");$("#c_acao").focus();return}
