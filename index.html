@@ -1958,7 +1958,7 @@ function pgFalha(){
   if(isNew&&!ed){go("cadastros");return}
   if(!fdraft||fdraft._for!==route.id)fdraft=isNew?{_for:"novo",nome:"",grupo:"Outras",pts:[],naoSeg:[],spec:"",src:"",ativo:true}:{_for:route.id,nome:orig.nome,grupo:defGrupo(orig),pts:[...(orig.pts||[])],naoSeg:[...(orig.naoSeg||[])],spec:orig.spec||"",src:orig.src||"",ativo:orig.ativo!==false};
   const f=fdraft,u=isNew?{insp:0,arv:0,causas:0}:falhaUso(route.id);
-  head("Cadastros · Falhas",isNew?"Nova falha":orig.nome,"");
+  head("Cadastros · Falhas",isNew?"Adicionar falha":orig.nome,"");
   let h=`<div class="grid g2"><div class="card"><h2>Dados da falha</h2>
     <label class="f">Nome da falha <span class="req">*</span><input id="fl_nome" value="${esc(f.nome)}" ${ed?"":"disabled"} placeholder="Ex.: Mancha de óleo"></label>
     <label class="f">Grupo<select id="fl_grupo" ${ed?"":"disabled"}>${GRUPOS_FALHA.map(g=>`<option ${g===f.grupo?"selected":""}>${esc(g)}</option>`).join("")}</select><span class="hint">Organiza a falha na lista de falhas da inspeção.</span></label>
@@ -1971,7 +1971,7 @@ function pgFalha(){
     ${!isNew&&!u.causas?`<div class="banner warn" style="margin-top:10px"><span>Ainda não há causas para esta falha. Inclua na Biblioteca causa/efeito para a árvore de falha ter perguntas.</span></div>`:""}</div></div>`;
   setPage(h);
   const valid=()=>f.nome.trim().length>=3&&f.pts.length>0;
-  const bar=()=>{setBar(ed?`<div class="bar-info"><span class="bar-hint">${valid()?"":"Informe o nome e pelo menos um ponto de detecção"}</span></div>${!isNew&&orig._mod?`<button class="btn" id="flRest">Restaurar original da FS 070</button>`:""}${!isNew&&orig._custom&&!u.insp&&!u.arv?`<button class="btn danger" id="flDel">Excluir</button>`:""}<button class="btn primary" id="flSave" ${valid()?"":"disabled"}>Salvar falha</button>`:"");
+  const bar=()=>{setBar(ed?`<div class="bar-info"><span class="bar-hint">${valid()?"":"Informe o nome e pelo menos um ponto de detecção"}</span></div>${!isNew&&orig._mod?`<button class="btn" id="flRest">Restaurar original da FS 070</button>`:""}${!isNew&&orig._custom&&!u.insp&&!u.arv?`<button class="btn danger" id="flDel">Excluir</button>`:""}<button class="btn primary" id="flSave" ${valid()?"":"disabled"}>${isNew?"Adicionar falha":"Salvar falha"}</button>`:"");
     if($("#flSave"))$("#flSave").onclick=salvar;
     if($("#flRest"))$("#flRest").onclick=async()=>{if(!confirm("Voltar esta falha ao texto original da FS 070?"))return;await remove("falhas",route.id,{excluidoMotivo:"Restaurada ao original"});fdraft=null;toast("Falha restaurada.");go("cadastros")};
     if($("#flDel"))$("#flDel").onclick=async()=>{if(!confirm("Excluir a falha "+orig.nome+"?"))return;await remove("falhas",route.id,{excluidoMotivo:"Excluída no cadastro"});fdraft=null;toast("Falha excluída.");go("cadastros")}};
@@ -2126,10 +2126,10 @@ function pgBiblioteca(){
     .filter(g=>g.cs.length||(!qq&&!bf.st));
   const nRel=grupos.reduce((a,g)=>a+g.cs.length,0),rem=Object.values(CA).filter(c=>c.removida),nMod=CAUSES.filter(c=>c._mod||c._custom).length;
   let h=`<div class="pagehead"><p>Para cada falha da FS 070, a causa raiz provável, a ação de reação (corretiva) e a fonte de dados ou evidência para confirmar. Cada causa cadastrada aqui aparece na árvore de falha daquela falha.</p></div>
-   ${ed?`<div class="banner info"><span><b>Para incluir uma causa,</b> use “+ Incluir causa” na linha da falha. Para corrigir, use “Editar” na causa. ${nMod?`<b>${nMod}</b> causa(s) já incluída(s) ou alterada(s) pela JSP.`:""}</span></div>`:`<div class="banner info"><span>A biblioteca é mantida pelos administradores. Se encontrar um erro ou souber de uma causa que falta, avise o administrador do sistema.</span></div>`}
+   ${ed?`<div class="banner info"><span><b>Para incluir uma causa,</b> use “+ Adicionar causa” na linha da falha. Para corrigir, use “Editar” na causa. ${nMod?`<b>${nMod}</b> causa(s) já incluída(s) ou alterada(s) pela JSP.`:""}</span></div>`:`<div class="banner info"><span>A biblioteca é mantida pelos administradores. Se encontrar um erro ou souber de uma causa que falta, avise o administrador do sistema.</span></div>`}
    <div class="card" style="margin-bottom:14px"><div class="grid g4"><label class="f">Buscar<input id="bq" value="${esc(bf.q)}" placeholder="Causa, ação, fonte…"></label><label class="f">Falha<select id="bdef"><option value="">← Todas as falhas</option>${DEFECTS.map(d=>`<option value="${d.id}" ${bf.def===d.id?"selected":""}>${esc(d.nome)}</option>`).join("")}</select></label><label class="f">Etapa do processo<select id="bst"><option value="">Todas</option>${STAGES.map(x=>`<option value="${x.id}" ${bf.st===x.id?"selected":""}>${esc(x.nome)}</option>`).join("")}</select></label></div>
    <div class="row" style="justify-content:space-between;margin-top:10px"><span class="hint" style="margin:0">${nRel} relação(ões) falha × causa</span><label class="row small" style="gap:6px;cursor:pointer"><input type="checkbox" id="bdet" ${bDet?"checked":""} style="width:auto;margin:0"> Mostrar detalhes (etapa, mecanismo, responsável, eficácia)</label></div></div>`;
-  const addBtn=d=>ed?`<button class="btn sm" data-addc="${d.id}">+ Incluir causa</button>`:"";
+  const addBtn=d=>ed?`<button class="btn sm" data-addc="${d.id}">+ Adicionar causa</button>`:"";
   const det=bDet;
   h+=grupos.length?`<div class="tw hidem"><table class="t mtx ${det?"wide":""}"><thead><tr><th style="width:${det?14:18}%">Falha</th><th style="width:${det?18:26}%">Causa raiz provável</th>${det?"<th>Etapa</th><th>Mecanismo</th>":""}<th style="width:${det?18:28}%">Ação de reação (corretiva)</th><th>Fonte de dados / evidência</th>${det?"<th>Responsável</th><th>Eficácia</th>":""}${ed?"<th></th>":""}</tr></thead><tbody>${grupos.map(({d,cs})=>cs.length?cs.map((c,ix)=>`<tr>${ix===0?`<td rowspan="${cs.length}" class="mtx-def"><b>${esc(d.nome)}</b><div class="hint">${esc(POINTS[d.pts[0]]?.nome||"")}${d.pts.length>1?" e outros":""}</div><div style="margin-top:8px">${addBtn(d)}</div></td>`:""}<td>${esc(c.nome)}${causeMark(c)}</td>${det?`<td class="small">${esc(ST[c.st].nome)}</td><td class="small">${esc(c.mech)}</td>`:""}<td>${esc(c.acao)}${c.reacao?`<div class="hint"><b>Contenção:</b> ${esc(c.reacao)}</div>`:""}</td><td>${esc(fontesOf(c))}${det?`<div class="hint">${(c.evid||[]).map(e=>esc(e[0])).join("<br>")}</div>`:""}</td>${det?`<td class="small">${esc(c.resp)}</td><td class="small">${esc(c.efic)}</td>`:""}${ed?`<td><button class="btn sm" data-edc="${esc(c.id)}" data-edd="${d.id}">Editar</button></td>`:""}</tr>`).join(""):`<tr><td class="mtx-def"><b>${esc(d.nome)}</b><div style="margin-top:8px">${addBtn(d)}</div></td><td colspan="${(det?7:3)+(ed?1:0)}" class="muted">Nenhuma causa cadastrada para esta falha.</td></tr>`).join("")}</tbody></table></div>
    <div class="mcards">${grupos.map(({d,cs})=>`<div class="mtxcard"><div class="mtxcard-h"><b>${esc(d.nome)}</b>${addBtn(d)}</div>${cs.length?cs.map(c=>`<div class="mtxc"><div class="mtxc-n">${esc(c.nome)}${causeMark(c)}</div><div class="mtxc-l">Ação de reação (corretiva)</div><div>${esc(c.acao)}</div><div class="mtxc-l">Fonte de dados / evidência</div><div>${esc(fontesOf(c))}</div>${det?`<div class="mtxc-l">Etapa · responsável</div><div>${esc(ST[c.st].nome)}${c.resp?" · "+esc(c.resp):""}</div><div class="mtxc-l">Mecanismo</div><div>${esc(c.mech)}</div>`:""}${ed?`<button class="btn sm" data-edc="${esc(c.id)}" data-edd="${d.id}" style="margin-top:8px">Editar</button>`:""}</div>`).join(""):'<p class="muted small" style="margin:6px 0 0">Nenhuma causa cadastrada para esta falha.</p>'}</div>`).join("")}</div>`
@@ -2188,7 +2188,7 @@ function pgCausa(){
   const C=cdraft;if(!C.evid.length)C.evid=[["",""]];
   const outras=isNew?[]:orig.defs.filter(k=>k!==df0),hist=isNew?[]:((S.causas.find(x=>x.id===C.id)||{}).hist||[]);
   const usos=isNew?0:S.investigacoes.filter(v=>v.defeito===df0&&(v.respostas||{})[C.id]).length;
-  head("Biblioteca",isNew?"Incluir causa":"Editar causa",isNew?"":`${orig._mod&&!outras.length&&!Object.keys(CA).some(k=>k.startsWith(orig.id+"__"))?'<button class="btn" id="cOrig">Voltar ao texto original</button>':""}<button class="btn danger" id="cDel">${outras.length?"Remover desta falha":"Remover causa"}</button>`);
+  head("Biblioteca",isNew?"Adicionar causa":"Editar causa",isNew?"":`${orig._mod&&!outras.length&&!Object.keys(CA).some(k=>k.startsWith(orig.id+"__"))?'<button class="btn" id="cOrig">Voltar ao texto original</button>':""}<button class="btn danger" id="cDel">${outras.length?"Remover desta falha":"Remover causa"}</button>`);
   const stOpts=STAGES.map(x=>`<option value="${x.id}" ${C.st===x.id?"selected":""}>${esc(x.nome)} · ${esc(x.sub)}</option>`).join("");
   let h=(C.df&&C.st?`<div class="banner ok"><span>Esta causa aparece na <b>árvore de falha de “${esc(DEF[C.df]?.nome)}”</b>, no ramo <b>${esc(ST[C.st].nome)}</b>.</span></div>`:"")
    +(outras.length?`<div class="banner warn"><span>Esta causa também está cadastrada para: <b>${outras.map(k=>esc(DEF[k]?.nome)).join(", ")}</b>. As alterações valem <b>só para “${esc(DEF[df0]?.nome)}”</b>; nas outras falhas ela continua como está.</span></div>`:"")
@@ -2211,7 +2211,7 @@ function pgCausa(){
     ${usos?`<p class="hint" style="margin-top:10px">Já usada em ${usos} árvore(s) de “${esc(DEF[df0]?.nome)}”. As respostas dadas continuam guardadas.</p>`:""}
     ${hist.length?`<details style="margin-top:12px"><summary class="muted small">Histórico de alterações (${hist.length})</summary><ul class="small muted" style="margin:8px 0 0 18px">${hist.slice().reverse().map(x=>`<li>${new Date(x.em).toLocaleString("pt-BR")} · ${esc(x.por)} · ${esc(x.acao)}</li>`).join("")}</ul></details>`:""}</div>`;
   setPage(h);
-  setBar(`<div class="bar-info">${isNew?"A causa vai direto para a árvore da falha escolhida":"A alteração vale para todos os usuários"}</div><button class="btn" id="cC">Cancelar</button><button class="btn primary" id="cS">${isNew?"Incluir causa":"Salvar causa"}</button>`);
+  setBar(`<div class="bar-info">${isNew?"A causa vai direto para a árvore da falha escolhida":"A alteração vale para todos os usuários"}</div><button class="btn" id="cC">Cancelar</button><button class="btn primary" id="cS">${isNew?"Adicionar causa":"Salvar causa"}</button>`);
   const rr=()=>{const y=window.scrollY;pgCausa();window.scrollTo(0,y)};
   ["nome","mech","reacao","acao","resp","efic"].forEach(k=>{$("#c_"+k).oninput=e=>C[k]=e.target.value});
   $("#c_st").onchange=e=>{C.st=e.target.value;rr()};$("#c_df").onchange=e=>{C.df=e.target.value;rr()};
@@ -2352,7 +2352,7 @@ let cbEdit=null;
 function pgCadastros(){
   const adm=colab?.papel==="admin"&&cloudState==="ok";if(cadTab==="usuarios"&&!adm)cadTab="produtos";
   const ed=isGestor();
-  head("Referência","Cadastros",cadTab==="produtos"&&ed?`<button class="btn primary" id="newP">+ Novo produto</button>`:cadTab==="falhas"&&ed?`<button class="btn primary" id="newF">+ Nova falha</button>`:"");
+  head("Referência","Cadastros",cadTab==="produtos"&&ed?`<button class="btn primary" id="newP">+ Adicionar produto</button>`:cadTab==="maquinas"&&ed&&!maqEdit?`<button class="btn primary" id="newM">+ Adicionar máquina</button>`:cadTab==="falhas"&&ed?`<button class="btn primary" id="newF">+ Adicionar falha</button>`:"");
   let h=`<div class="tabs" style="margin-bottom:14px"><button data-ct="produtos" aria-selected="${cadTab==="produtos"}">Produtos <span class="muted">(${S.produtos.length})</span></button><button data-ct="maquinas" aria-selected="${cadTab==="maquinas"}">Máquinas <span class="muted">(${S.maquinas.length})</span></button><button data-ct="falhas" aria-selected="${cadTab==="falhas"}">Falhas <span class="muted">(${DEFECTS.length})</span></button>${adm?`<button data-ct="usuarios" aria-selected="${cadTab==="usuarios"}">Usuários${pendentes.length?` <span class="nbadge" style="position:static;margin-left:4px">${pendentes.length}</span>`:""}</button>`:""}</div>`;
   if(!ed)h+=`<div class="banner info"><span>Você pode consultar os cadastros. Somente gestores e administradores incluem, alteram ou excluem produtos, máquinas e falhas.</span></div>`;
   if(cadTab==="produtos"){
@@ -2362,9 +2362,9 @@ function pgCadastros(){
   }else if(cadTab==="falhas"){
     h+=falhasTab(ed);
   }else if(cadTab==="maquinas"){
-    const m=maqEdit?S.maquinas.find(x=>x.id===maqEdit):null;
-    if(ed)h+=`<div class="card"><h2>${m?"Editar máquina":"Cadastrar máquina"}</h2><div class="grid g3" style="margin-top:8px"><label class="f">Identificação <span class="req">*</span><input id="mq_cod" value="${esc(m?.codigo||"")}" placeholder="Ex.: K1014 10"></label><label class="f">Tipo / modelo<input id="mq_tipo" value="${esc(m?.tipo||"")}" placeholder="Ex.: Moldadora K1014"></label><label class="f">Descrição / observação<input id="mq_desc" value="${esc(m?.descricao||"")}"></label></div>
-      <div class="row" style="margin-top:10px"><button class="btn primary" id="mq_save">${m?"Salvar alterações":"Adicionar máquina"}</button>${m?'<button class="btn" id="mq_canc">Cancelar</button>':""}</div></div>`;
+    const m=maqEdit&&maqEdit!=="novo"?S.maquinas.find(x=>x.id===maqEdit):null;
+    if(ed&&maqEdit)h+=`<div class="card"><h2>${m?"Editar máquina":"Adicionar máquina"}</h2><div class="grid g3" style="margin-top:8px"><label class="f">Identificação <span class="req">*</span><input id="mq_cod" value="${esc(m?.codigo||"")}" placeholder="Ex.: K1014 10"></label><label class="f">Tipo / modelo<input id="mq_tipo" value="${esc(m?.tipo||"")}" placeholder="Ex.: Moldadora K1014"></label><label class="f">Descrição / observação<input id="mq_desc" value="${esc(m?.descricao||"")}"></label></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="mq_save">${m?"Salvar alterações":"Adicionar máquina"}</button><button class="btn" id="mq_canc">Cancelar</button></div></div>`;
     const L=[...S.maquinas].sort((a,b)=>a.codigo.localeCompare(b.codigo,"pt-BR",{numeric:true}));
     h+=L.length?`<div class="cadlist">${L.map(q=>{const np=S.produtos.filter(p=>p.maquina===q.codigo).length,ni=S.inspecoes.filter(x=>x.maquina===q.codigo).length;
       return `<div class="caditem"><div class="cadmain"><b>${esc(q.codigo)}</b>${q.tipo?` <span class="muted">· ${esc(q.tipo)}</span>`:""}${q.descricao?`<div class="small muted">${esc(q.descricao)}</div>`:""}<div class="small" style="margin-top:4px"><span class="pill">${np} produto(s)</span> <span class="pill">${ni} inspeção(ões)</span></div></div>
@@ -2372,11 +2372,11 @@ function pgCadastros(){
   }else{
     h+=`<div class="card" id="filaCard"><h2>Pedidos de acesso</h2><p class="muted small" style="margin-bottom:10px">Quem cria uma conta pela tela de entrada aparece aqui. Aceite escolhendo o papel ou recuse. Recusados ficam na lista abaixo como bloqueados e podem ser liberados ou excluídos depois.</p><div id="filaList" class="muted small">Carregando…</div></div>
     <div class="card"><h2>Usuários</h2><p class="muted small" style="margin-bottom:10px">Só os e-mails liberados desta lista conseguem ver e registrar dados. “Excluir” apaga a conta de acesso; as inspeções que a pessoa registrou continuam guardadas. Também dá para cadastrar um e-mail antes de a pessoa criar a conta.</p><div id="colabList" class="muted small">Carregando…</div>
-    <div class="grid g4" style="margin-top:12px;grid-template-columns:2fr 2fr minmax(220px,1.3fr) auto"><label class="f">E-mail<input id="cbEmail" type="email"></label><label class="f">Nome<input id="cbNome"></label><label class="f">Papel<select id="cbPapel">${papelOpts("inspetor")}</select></label><div style="align-self:end"><button class="btn primary" id="cbAdd">Incluir</button></div></div></div>`;
+    <div class="grid g4" style="margin-top:12px;grid-template-columns:2fr 2fr minmax(220px,1.3fr) auto"><label class="f">E-mail<input id="cbEmail" type="email"></label><label class="f">Nome<input id="cbNome"></label><label class="f">Papel<select id="cbPapel">${papelOpts("inspetor")}</select></label><div style="align-self:end"><button class="btn primary" id="cbAdd">Adicionar</button></div></div></div>`;
   }
   setPage(h);
   $$("[data-ct]").forEach(b=>b.onclick=()=>{cadTab=b.dataset.ct;maqEdit=null;pgCadastros()});
-  if($("#newP"))$("#newP").onclick=()=>{pdraft=null;go("produto","novo")};if($("#newF"))$("#newF").onclick=()=>{fdraft=null;go("falha","novo")};$$("[data-edf]").forEach(b=>b.onclick=e=>{e.stopPropagation();fdraft=null;go("falha",b.dataset.edf)});
+  if($("#newM"))$("#newM").onclick=()=>{maqEdit="novo";pgCadastros()};if($("#newP"))$("#newP").onclick=()=>{pdraft=null;go("produto","novo")};if($("#newF"))$("#newF").onclick=()=>{fdraft=null;go("falha","novo")};$$("[data-edf]").forEach(b=>b.onclick=e=>{e.stopPropagation();fdraft=null;go("falha",b.dataset.edf)});
   $$("[data-edp]").forEach(b=>b.onclick=()=>{pdraft=null;go("produto",b.dataset.edp)});
   $$("[data-delp]").forEach(b=>b.onclick=()=>delProduto(b.dataset.delp));
   $$("[data-edm]").forEach(b=>b.onclick=()=>{maqEdit=b.dataset.edm;pgCadastros();window.scrollTo(0,0)});
@@ -2386,7 +2386,7 @@ function pgCadastros(){
   if($("#mq_canc"))$("#mq_canc").onclick=()=>{maqEdit=null;pgCadastros()};
   if($("#mq_save"))$("#mq_save").onclick=async()=>{const cod=$("#mq_cod").value.trim();if(!cod){toast("Informe a identificação da máquina.");return}
     if(S.maquinas.some(x=>x.codigo.toLowerCase()===cod.toLowerCase()&&x.id!==maqEdit)){toast("Já existe uma máquina com essa identificação.");return}
-    const old=maqEdit?S.maquinas.find(x=>x.id===maqEdit):null;const rec={...(old||{id:uid()}),codigo:cod,tipo:$("#mq_tipo").value.trim(),descricao:$("#mq_desc").value.trim()};
+    const old=maqEdit&&maqEdit!=="novo"?S.maquinas.find(x=>x.id===maqEdit):null;const rec={...(old||{id:uid()}),codigo:cod,tipo:$("#mq_tipo").value.trim(),descricao:$("#mq_desc").value.trim()};
     if(old&&old.codigo!==cod)for(const p of S.produtos.filter(p=>p.maquina===old.codigo)){p.maquina=cod;await persist("produtos",p)}
     await persist("maquinas",rec);toast(old?"Máquina atualizada.":"Máquina cadastrada.");maqEdit=null;pgCadastros()};
   if(cadTab==="usuarios"&&adm){
@@ -2421,14 +2421,14 @@ function pgProduto(){
   if(!pdraft||pdraft._for!==route.id){pdraft=isNew?{_for:"novo",_new:true,id:"",nome:"",cliente:"",codCliente:"",maquina:"",preset:{MOLD:{N:null,nivel:"II",nqa:null},EST:{N:null,nivel:"II",nqa:null},FL:{N:null,nivel:"II",nqa:null}},ftp:{rev:"",data:"",params:ftpTemplate(false)}}:{...JSON.parse(JSON.stringify(orig)),_for:route.id};
     if(!pdraft.ftp)pdraft.ftp={rev:"",data:"",params:ftpTemplate(!!pdraft.ref)}}
   const P=pdraft;
-  head("Cadastros · Produtos",isNew?"Novo produto":P.id+" · "+P.nome,isNew||!ed?"":`<button class="btn danger" id="delP">Excluir produto</button>`);
+  head("Cadastros · Produtos",isNew?"Adicionar produto":P.id+" · "+P.nome,isNew||!ed?"":`<button class="btn danger" id="delP">Excluir produto</button>`);
   let h=`<div class="card"><p class="sec-title">1 · Identificação</p><div class="grid g3">
     <label class="f">Código JSP <span class="req">*</span><input id="pd_id" value="${esc(P.id)}" ${isNew?"":"disabled"} placeholder="Ex.: 1500130050"></label>
     <label class="f">Descrição <span class="req">*</span><input id="pd_nome" value="${esc(P.nome)}"></label>
     <label class="f">Cliente<input id="pd_cliente" value="${esc(P.cliente||"")}"></label>
     <label class="f">Código do cliente<input id="pd_codCliente" value="${esc(P.codCliente||"")}"></label>
     <label class="f">Máquina padrão<select id="pd_maquina"><option value="">—</option>${machineOptions(P.maquina)}</select></label>
-    <div style="align-self:end"><button class="lnk" id="pd_newm" type="button">+ Cadastrar outra máquina</button></div></div></div>`;
+    <div style="align-self:end"><button class="lnk" id="pd_newm" type="button">+ Adicionar outra máquina</button></div></div></div>`;
   h+=`<div class="card"><p class="sec-title">2 · Pré-definições de amostragem (NBR 5426)</p><p class="muted small" style="margin-bottom:10px">Preenchem a nova inspeção automaticamente e podem ser alteradas em cada lote. O NQA deve ser confirmado pela Qualidade da JSP ou pelo contrato com o cliente (NBR 5426, 4.2).</p>
     <div class="presets">${Object.entries(POINTS).map(([k,pt])=>{const ps=presetOf(P,k),pl=ps.N&&ps.nqa!=null?samplingPlan(ps.N,ps.nivel,ps.nqa,"N"):null;
       return `<div class="preset"><b>${pt.nome}</b><span class="small muted">${pt.op}</span><div class="grid g3" style="margin-top:6px"><label class="f">Tamanho do lote (N)<input type="number" min="1" data-pp="${k}" data-f="N" value="${ps.N??""}" placeholder="A definir"></label><label class="f">Nível<div class="fixval" style="font-size:15px;padding:7px 10px">II (fixo)</div></label><label class="f">NQA (%)<select data-pp="${k}" data-f="nqa"><option value="">A definir</option>${NQA_P.map((v,i)=>`<option value="${i}" ${ps.nqa===i?"selected":""}>${v}</option>`).join("")}</select></label></div>
@@ -2444,7 +2444,7 @@ function pgProduto(){
   setPage(h);
   if(!ed){setBar("");$$("#page input,#page select,#page textarea").forEach(el=>el.disabled=true);$$("#page [data-fpdel],#page details,#pd_newm").forEach(el=>el.remove());
     $("#page").insertAdjacentHTML("afterbegin",'<div class="banner info"><span>Consulta. Somente administradores alteram o cadastro do produto.</span></div>');return}
-  setBar(`<div class="bar-info">${isNew?"Novo produto":"Alterações ainda não salvas são perdidas ao sair"}</div><button class="btn" id="pdC">Cancelar</button><button class="btn primary" id="pdS">${isNew?"Cadastrar produto":"Salvar produto"}</button>`);
+  setBar(`<div class="bar-info">${isNew?"Adicionar produto":"Alterações ainda não salvas são perdidas ao sair"}</div><button class="btn" id="pdC">Cancelar</button><button class="btn primary" id="pdS">${isNew?"Adicionar produto":"Salvar produto"}</button>`);
   ["id","nome","cliente","codCliente","maquina"].forEach(k=>{const el=$("#pd_"+k);el.oninput=el.onchange=()=>P[k]=el.value});
   $("#ftp_rev").oninput=e=>P.ftp.rev=e.target.value;$("#ftp_data").onchange=e=>P.ftp.data=e.target.value;
   $("#pd_newm").onclick=()=>{cadTab="maquinas";go("cadastros")};
