@@ -1,0 +1,47 @@
+# Mantém o banco (Supabase) sempre ativo.
+# O plano gratuito do Supabase pausa o projeto depois de 7 dias sem uso. Esta rotina roda
+# todo dia no GitHub, chama a função public.manter_ativo() (banco/07_manter_ativo.sql) e assim
+# o projeto nunca fica 7 dias parado, mesmo que ninguém use o sistema.
+# O endereço e a chave publicável são lidos do próprio index.html: se o projeto do Supabase
+# mudar, basta atualizar o index.html. Nenhuma chave secreta é usada.
+# Se a chamada falhar, a execução fica vermelha e o GitHub avisa o dono do repositório por e-mail.
+name: Manter o Supabase ativo
+
+on:
+  schedule:
+    - cron: "17 11 * * *"   # todo dia às 08:17 (horário de Brasília)
+  workflow_dispatch:         # botão "Run workflow" para rodar na hora
+
+permissions:
+  contents: read
+  actions: write             # para a rotina se manter ligada (ver o último passo)
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chamar o banco
+        run: |
+          URL=$(grep -oE 'https://[a-z0-9]{20}\.supabase\.co' index.html | head -1)
+          KEY=$(grep -oE 'sb_publishable_[A-Za-z0-9_-]+' index.html | head -1)
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then echo "Endereço ou chave do Supabase não encontrados no index.html"; exit 1; fi
+          for tentativa in 1 2 3; do
+            CODE=$(curl -s -o resposta.json -w '%{http_code}' -m 60 -X POST "$URL/rest/v1/rpc/manter_ativo" \
+              -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}')
+            echo "Tentativa $tentativa: HTTP $CODE · $(cat resposta.json)"
+            [ "$CODE" = "200" ] && exit 0
+            sleep 30
+          done
+          echo "O banco não respondeu. Se o projeto já estiver pausado, reative em supabase.com/dashboard (Restore project)."
+          exit 1
+
+      - name: Manter esta rotina ligada
+        # O GitHub desliga rotinas agendadas de repositórios sem nenhuma alteração por 60 dias.
+        # Reativar a própria rotina a cada execução evita isso.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/manter-supabase-ativo.yml/enable" || true
