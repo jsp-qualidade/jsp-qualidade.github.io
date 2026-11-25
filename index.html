@@ -920,7 +920,7 @@ async function pullCloud(full){
   finally{pullCloud._busy=false}
 }
 function setCloud(st,msg){cloudState=st;cloudMsg=msg||"";updateDbStatus()}
-let authLanding=null;
+let authLanding=null,loginNome="";
 function readAuthLanding(){
   const h=new URLSearchParams(location.hash.replace(/^#/,"")),q=new URLSearchParams(location.search);
   const g=k=>h.get(k)||q.get(k);
@@ -1148,7 +1148,8 @@ function pgLogin(){
   if(neg&&colabStatus==="bloqueado")h+=`<div class="banner nc"><span>O acesso do e-mail <b>${esc(user?.email)}</b> não foi liberado pelo administrador do sistema. Se acha que é um engano, fale com o responsável pela Qualidade.</span></div>`+`<div class="row"><button class="btn" id="lgOut">Entrar com outro e-mail</button></div>`;
   else if(neg)h+=`<div class="banner info"><span><b>Pedido de acesso enviado.</b> Sua conta <b>${esc(user?.email)}</b> foi criada e está na fila de aprovação. Assim que o administrador aceitar, é só clicar em “Verificar liberação”.</span></div><div class="row"><button class="btn" id="lgOut">Entrar com outro e-mail</button><button class="btn primary" id="lgRetry">Verificar liberação</button></div>`;
   else h+=`<div class="tabs" style="margin-top:6px"><button data-lm="entrar" aria-selected="${loginMode==="entrar"}">Entrar</button><button data-lm="criar" aria-selected="${loginMode==="criar"}">Criar conta</button></div>
-    <label class="f">E-mail<input id="lgEmail" type="email" autocomplete="username" inputmode="email" value="${esc(loginEmail)}"></label>
+    ${loginMode==="criar"?`<label class="f">Nome completo<input id="lgNome" autocomplete="name" maxlength="80" value="${esc(loginNome)}" placeholder="Como aparecerá nos registros"></label>`:""}
+    <label class="f"${loginMode==="criar"?' style="margin-top:10px"':""}>E-mail<input id="lgEmail" type="email" autocomplete="username" inputmode="email" value="${esc(loginEmail)}"></label>
     <label class="f" style="margin-top:10px">${loginMode==="criar"?"Crie uma senha (mínimo 8 caracteres)":"Senha"}<input id="lgPass" type="password" autocomplete="${loginMode==="criar"?"new-password":"current-password"}"></label>
     ${loginMode==="entrar"?`<div style="margin-top:8px"><button class="lnk" id="lgForgot" type="button">Esqueci a senha</button></div>`:`<p class="hint" style="margin-top:8px">Depois de criar a conta, confirme pelo link enviado ao seu e-mail. O administrador recebe o seu pedido e libera o acesso.</p><div><button class="lnk" id="lgResend" type="button">Não recebeu o e-mail? Reenviar confirmação</button></div>`}
     <div id="lgCap" style="margin-top:10px"></div><div id="lgSlot"></div><p id="lgMsg" class="small" style="color:var(--nc);min-height:18px;margin-top:8px"></p>
@@ -1159,7 +1160,7 @@ function pgLogin(){
   {const g=$("#lgGo"),sl=$("#lgSlot");if(g&&sl){g.classList.add("lgbtn");sl.appendChild(g);setBar("")}}
   const em=()=>($("#lgEmail")?.value||"").trim().toLowerCase();
   if($("#lgEmail"))$("#lgEmail").oninput=()=>loginEmail=$("#lgEmail").value;
-  $$("[data-lm]").forEach(b=>b.onclick=()=>{loginEmail=$("#lgEmail")?.value||loginEmail;loginMode=b.dataset.lm;pgLogin()});
+  $$("[data-lm]").forEach(b=>b.onclick=()=>{loginEmail=$("#lgEmail")?.value||loginEmail;if($("#lgNome"))loginNome=$("#lgNome").value;loginMode=b.dataset.lm;pgLogin()});
   const msg=(t,ok)=>{const m=$("#lgMsg");if(m){m.textContent=t;m.style.color=ok?"var(--ok)":"var(--nc)"}};
   const errMsg=e=>/captcha/i.test(e.message)?"A verificação anti-robô não foi concluída. Aguarde a caixinha mostrar ✓ e tente de novo (se ela não aparecer, recarregue a página).":/fetch|network/i.test(e.message)?"Sem conexão com a internet ou com o banco. Verifique a rede e tente de novo.":/Invalid login/i.test(e.message)?"E-mail ou senha incorretos.":/not confirmed/i.test(e.message)?"Confirme o e-mail pelo link recebido antes de entrar.":/rate limit|security purposes/i.test(e.message)?"Aguarde um minuto antes de pedir outro e-mail.":/already registered/i.test(e.message)?"Este e-mail já tem conta. Use a aba Entrar.":e.message||"Não foi possível concluir.";
   if($("#lgPass"))$("#lgPass").onkeydown=e=>{if(e.key==="Enter")$("#lgGo").click()};
@@ -1171,7 +1172,7 @@ function pgLogin(){
     if(capFalta()){msg("Aguarde a verificação anti-robô terminar e tente de novo.");return}
     $("#lgGo").disabled=true;
     try{if(loginMode==="entrar"){const {data,error}=await sb.auth.signInWithPassword({email,password:pass,options:capOpt()});capReset();if(error)throw error;user=data.user;await checkColab();await ensureProducts();route={p:"painel",id:null};render()}
-      else{if(pass.length<8){msg("A senha deve ter pelo menos 8 caracteres.");$("#lgGo").disabled=false;return}const {error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:authRedirect(),...capOpt()}});capReset();if(error)throw error;msg("Conta criada. Abra o e-mail que enviamos para "+email+" e clique no link para confirmar. Depois, aguarde a liberação do administrador.",true)}
+      else{const nome=($("#lgNome")?.value||"").replace(/\s+/g," ").trim();loginNome=nome;if(nome.length<3){msg("Informe o seu nome completo.");$("#lgGo").disabled=false;return}if(pass.length<8){msg("A senha deve ter pelo menos 8 caracteres.");$("#lgGo").disabled=false;return}const {error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:authRedirect(),data:{nome},...capOpt()}});capReset();if(error)throw error;msg("Conta criada. Abra o e-mail que enviamos para "+email+" e clique no link para confirmar. Depois, aguarde a liberação do administrador.",true)}
     }catch(e){msg(errMsg(e))}
     if($("#lgGo"))$("#lgGo").disabled=false};
   if($("#lgOut"))$("#lgOut").onclick=signOut;
@@ -1261,7 +1262,7 @@ function pgPainel(){
   const open=V.filter(v=>(v.conclusao?.status||"aberta")!=="concluida").length;
   const sumN=I.reduce((a,x)=>a+(x.n||0),0),sumD=I.reduce((a,x)=>a+(x.d||0),0);
   let h="";
-  if(pendentes.length&&colab?.papel==="admin")h+=`<div class="banner info"><span><b>${pendentes.length} pedido(s) de acesso aguardando aprovação.</b> ${pendentes.slice(0,3).map(p=>esc(p.email)).join(", ")}${pendentes.length>3?"…":""}</span><button class="btn sm primary" id="verPed">Ver pedidos</button></div>`;
+  if(pendentes.length&&colab?.papel==="admin")h+=`<div class="banner info"><span><b>${pendentes.length} pedido(s) de acesso aguardando aprovação.</b> ${pendentes.slice(0,3).map(p=>esc(p.nome||p.email)).join(", ")}${pendentes.length>3?"…":""}</span><button class="btn sm primary" id="verPed">Ver pedidos</button></div>`;
   const pend=pendingTrees(),pl=pendingLots();
   const ocs=ocGrupos(7);
   if(!S.inspecoes.length){
@@ -2469,7 +2470,7 @@ function pgCadastros(){
         const {error}=await sb.rpc("excluir_usuario",{p_email:e});if(error){toast("Não foi possível excluir: "+error.message);return}toast("Usuário excluído.");loadC();loadF()})};
     const loadF=async()=>{await loadPendentes();renderNav();const el=$("#filaList");if(!el)return;
       if(!pendentes.length){el.innerHTML='<span class="muted">Nenhum pedido aguardando.</span>';return}
-      el.innerHTML=`<div class="fila">${pendentes.map((p,i)=>`<div class="filarow"><div class="filainfo"><b>${esc(p.email)}</b><span class="small muted">Pedido em ${new Date(p.criado_em).toLocaleString("pt-BR")} · ${p.confirmado?'<span style="color:var(--ok)">e-mail confirmado</span>':'<span style="color:var(--warn)">e-mail ainda não confirmado</span>'}</span></div><div class="filaact"><input data-fnome="${i}" placeholder="Nome (opcional)"><select data-fpapel="${i}">${papelOpts("inspetor")}</select><button class="btn sm primary" data-faceitar="${i}">Aceitar</button><button class="btn sm danger" data-frecusar="${i}">Recusar</button></div></div>`).join("")}</div>`;
+      el.innerHTML=`<div class="fila">${pendentes.map((p,i)=>`<div class="filarow"><div class="filainfo"><b>${esc(p.nome||p.email)}</b>${p.nome?`<span class="small">${esc(p.email)}</span>`:""}<span class="small muted">Pedido em ${new Date(p.criado_em).toLocaleString("pt-BR")} · ${p.confirmado?'<span style="color:var(--ok)">e-mail confirmado</span>':'<span style="color:var(--warn)">e-mail ainda não confirmado</span>'}</span></div><div class="filaact"><input data-fnome="${i}" placeholder="Nome (opcional)" value="${esc(p.nome||"")}"><select data-fpapel="${i}">${papelOpts("inspetor")}</select><button class="btn sm primary" data-faceitar="${i}">Aceitar</button><button class="btn sm danger" data-frecusar="${i}">Recusar</button></div></div>`).join("")}</div>`;
       const act=async(i,ativo)=>{const p=pendentes[i];if(!ativo&&!confirm("Recusar o acesso de "+p.email+"?"))return;const {error}=await sb.from("colaboradores").upsert({email:p.email,nome:($(`[data-fnome="${i}"]`)?.value||"").trim()||null,papel:ativo?$(`[data-fpapel="${i}"]`).value:"inspetor",ativo});if(error){toast("Não foi possível salvar: "+error.message);return}toast(ativo?"Acesso liberado para "+p.email+".":"Pedido recusado.");loadF();loadC()};
       $$("[data-faceitar]").forEach(b=>b.onclick=()=>act(+b.dataset.faceitar,true));$$("[data-frecusar]").forEach(b=>b.onclick=()=>act(+b.dataset.frecusar,false))};
     loadF();loadC();$("#cbAdd").onclick=async()=>{const email=$("#cbEmail").value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email)){toast("Informe um e-mail válido.");return}const {error}=await sb.from("colaboradores").upsert({email,nome:$("#cbNome").value.trim(),papel:$("#cbPapel").value,ativo:true});if(error){toast("Não foi possível incluir: "+error.message);return}$("#cbEmail").value="";$("#cbNome").value="";toast("Colaborador incluído.");loadC()}}
