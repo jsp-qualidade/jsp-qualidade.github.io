@@ -1,0 +1,58 @@
+# Backup semanal do banco (o plano gratuito do Supabase não faz backup automático).
+#
+# Precisa de dois segredos em Settings > Secrets and variables > Actions:
+#   SUPABASE_DB_URL     conexão do "Session pooler" (Supabase > Connect > Session pooler),
+#                       no formato postgresql://postgres.<ref>:<SENHA>@aws-0-sa-east-1.pooler.supabase.com:5432/postgres
+#   BACKUP_PASSPHRASE   uma frase longa só para criptografar o backup (guarde fora do GitHub!)
+# Sem os segredos, a rotina apenas avisa e termina sem erro.
+#
+# O arquivo sai CRIPTOGRAFADO (AES-256 com a frase acima) e fica 30 dias em Actions > Artifacts.
+# O repositório é público: nunca publique o backup sem criptografia.
+# Para abrir:  gpg --decrypt backup_AAAA-MM-DD.sql.gz.gpg | gunzip > backup.sql
+# Para restaurar num projeto novo: psql "<conexão do projeto novo>" -f backup.sql
+name: "Backup semanal do banco"
+
+on:
+  schedule:
+    - cron: "33 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Conferir segredos
+        id: chk
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PW: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$DB" ] || [ -z "$PW" ]; then
+            echo "::warning::Backup não configurado: cadastre SUPABASE_DB_URL e BACKUP_PASSPHRASE (ver o início deste arquivo)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Gerar backup criptografado
+        if: steps.chk.outputs.ok == 'true'
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PW: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -o pipefail
+          F="backup_$(date -u +%F).sql.gz.gpg"
+          docker run --rm -e DB postgres:17 sh -c 'pg_dump "$DB" --no-owner --no-privileges --schema=public --schema=private --schema=audit' \
+            | gzip -9 | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PW" -o "$F"
+          ls -la "$F"
+          echo "ARQ=$F" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.chk.outputs.ok == 'true'
+        with:
+          name: backup-banco-criptografado
+          path: ${{ env.ARQ }}
+          retention-days: 30
+          if-no-files-found: error

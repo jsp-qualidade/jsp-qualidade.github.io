@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>JSP · Inspeção por Amostragem e Análise de Falhas</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,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"><link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAHDElEQVR42u2aS2xcVxnHf+dx750Z22PHsd3Edp2krpNARaOmEo8KoiKkRFRCBYkFBVQJlQVihyooq7Ip7Y4FiyIkoMiCBbuUR1lAEKkQSG0aCk2JcNu4sWMncl5+jGfm3nvO+VjcsZ0maRKRNhH0ns3MnfO653e+//+cc+cqERE+wEnzAU8lgBJACaAEUAIoAZQASgAlgBJACaAEUAIoAZQASgAlgBJACeCDlex70UgQQSvF9NwyTzz7Ej73BKXprmqe/c6n6KnFABw6MsevD89w/OR5lpbb5AGS2NDbnTAxUuf73/wo9a6YP750ih8dfBMtGS4IRoFWCoDcB7pqCXt3DfLVA+MM9VcRgU727QEgAig4dXaVI1NNxDVBR0Q6I3cBgKeee4Wf/fZtkIBIQEe1onJbWGjA1OwZvv1oSr0r5thbF3j1RIuQLoLSKB2hTAUQxLUQWeavxxY5+OdpJr/3INu29hCCoLW6PQDWGzMa5TM0geBzqhVNrRIxPb/CT3/zFoQcowFleOyhEXYM12lljpOnG0zNLGJ1ocg4KtqJLHgP41sjDnx8hLMXm/z+b7OsrHqMdsxd7OGHv3qNH3zrAXwQNLcZgIgQELQEAgoXwBrF4koKKLSCEBTGwkBflft2DzB2Rw/VxBTh3YkWpVTRDiAm5r6JzTz+lT0AjI/28swvp0Ba4FNOnF4CwGh9+yTw7g6rabYdO7f1sqXPsNDoIaTLiPM884vjPD15jIrxTGzr59HPjvPFz4xfARQJnFtOmZ5b5uximz+8PA8hQ2lQGPq7k3UfMuoWR4APAgL+Xf5d01rIfaDeVeG5Jz/N05Ov8fLrbVKnC9OQQCtzHDuxxBM//he5DzyyfwLni0iQEAi+xZ+OnOLw0Tm8WFAa8Sm5iVFG8aUDO2/fKmA6pmM62lOKjmkpCKBQWFOE9+7tm5h8ch+rbcfUzBLHpy8w+cIUU7MrWOMQcRw8PM0j+ydQl82kiMYFQBxKCdZEjA338I3P72T/x0YJQdbv5ZYAWFt2fveXkyyuOrZurpC7wE+eP47CFQ1rjbGK7qpl5kyDp35+lPt3DbBrrI/e7oi7huv01xOUamFUTiqKejVa6wGNwhqN6IQH7+3nu1/bi/OCUlBNLCODtSJf+K/c/6YArOlt8oV/c3QmwrcuFKEZHOJzRBlMpc7D+4YwWtFo5Rx6dYVDf19GggMJoDQEh4ScTFeJlePrX7inIy0QbUlTj45jqlXLxJ29V5WguYnB37QEPnHvFs6vnGHRQjvNcLkHYxns7+ahB7bw+Jf3IAKDfRU++eEqM6dXWWrktFKHF4hjzUBfN3t3D/HY5ya4565+APrrCUN9ikTXyYJhx3CdIPKOAatLJHgzSV3v/YCNbNUJzo1rrSDNPI1WTpoH0syhtWagr0JXxa6bpNYKpaCVOhpNVwAIQiWxbOqJqcQby6BWChcCzoVCZ1KU27hLWV8q1weh1Mbv63uBK8vdEAARuW6l/+uzwKWD90EIQchcwPtAmgVy52lnniwPtDNHs+3I8kCae5ptR5p7vBcyV5TJOtdFCBdtbHS2tl9Q69exNesRY7QijjRJbKjEFqMVSWyoxoYkNsSRoZoYksh0yhis0VQSgzGa2Gq0VteUyjsAvH7iAqcWVplbWGX+XJOFi00uLKacX2mz1EhZbTkarYwQDMrEoC1KW5TShakp3QF4IxF0ufJurM7a5qg4U3gk+I6ZZmgVqCURPd2WelfCQE+F/r6YwU01hgdqjAx2cecd3etec4UEggjBC0GK2Xfekzshyzdms5V58tzTTD258zgXaKWeNPfkLpC5zqwHwXshzz25LyIpzRxKK0IQLncepQqvkCAksUZrTWwN1mqsVmijiK0hjjSR1SSd2bdWE1lDLbFEkaaamPVycWSIrMYajdGFZ2mjuTQg1M2+JBVC4Rk+BHIXaLUdzdTRbBdSSTNPK83J8iI/iJDlxeea3KRznI4jjVaKyGriSFNNIpJYU4kNtYqllliqFUtkNUbrYjl+P5dBWTvnrn1XRaiKFKH45qllnn/xJC++Ms/xty+CraK02QhTZGPXhLrk0K6uLQuRq9Qt5CXBg2vxoe2b2Hf/MA/vG+Pu0V6UUhurgVzqZdc2dfVevCa31MiYml3iH2+c559vnGdqdonTZxssNXKUiToDDiCCdPSrlKDQCJ19v6wNUncGrQvNh5yeasTIUBc7x/r4yN2b2TOxmV1jvfR2x+//PuC6D0K4+tOY0+eaTM+vcGJ+mem5ZWYXGiycb7G0mrLazFnNHOI7a7VRVBNLTzWitythaHOV0YEaO0Z7GR/tZfuWbrYOdF3Rz7X6vyUAyoeiJYASQAmgBFACKAGUAEoAJYASQAmgBFACKAGUAEoAJYASQAmgBFAC+N9K/wGdwmZF08QeJgAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -944,15 +946,27 @@ async function initCloud(){
   user=data.session.user;await checkColab();
 }
 async function checkColab(){
-  try{const {data,error}=await sb.from("colaboradores").select("email,nome,papel,ativo").eq("email",(user.email||"").toLowerCase()).maybeSingle();if(error)throw error;
+  try{const {data:aal}=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(aal&&aal.nextLevel==="aal2"&&aal.currentLevel!=="aal2"){setCloud("mfa");return}
+    const {data,error}=await sb.from("colaboradores").select("email,nome,papel,ativo").eq("email",(user.email||"").toLowerCase()).maybeSingle();if(error)throw error;
     if(!data||!data.ativo){colab=null;colabStatus=data?"bloqueado":"pendente";setCloud("negado");return}
     colab=data;colabStatus="ok";setCloud("ok");
     const novaConta=S.meta.cloudUid!==user.id;
     if(novaConta)await setMeta("fila",[]);
     const full=novaConta||S.meta.cloudUser!==user.email||!S.meta.lastPull;if(full){await setMeta("lastPull",null)}
-    await setMeta("cloudUser",user.email);await setMeta("cloudUid",user.id);await flushQueue();await pullCloud(full);await ensureProducts();await loadPendentes();
+    await setMeta("cloudUser",user.email);await setMeta("cloudUid",user.id);await flushQueue();await pullCloud(full);await ensureProducts();await loadPendentes();await mfaEstado();
   }catch(e){setCloud("offline","Sem conexão com o banco: usando a cópia deste aparelho.")}
 }
+let mfaAtivo=null;
+// CAPTCHA (Cloudflare Turnstile). Fica desligado enquanto a chave do site estiver vazia.
+// Para ligar: criar o site no Cloudflare Turnstile, colar a "Site Key" aqui e a "Secret Key" no Supabase
+// (Authentication > Attack Protection > Enable CAPTCHA). Ver SECURITY.md.
+const TURNSTILE_SITE_KEY="";let capTok=null,capId=null;
+function capMount(){if(!TURNSTILE_SITE_KEY||!$("#lgCap"))return;const go=()=>{try{capId=turnstile.render("#lgCap",{sitekey:TURNSTILE_SITE_KEY,language:"pt-br",callback:t=>capTok=t,"expired-callback":()=>capTok=null})}catch(e){}};
+  if(window.turnstile)go();else if(!document.getElementById("tsScript")){const sc=document.createElement("script");sc.id="tsScript";sc.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";sc.async=true;sc.onload=go;document.head.appendChild(sc)}else document.getElementById("tsScript").addEventListener("load",go)}
+const capOpt=()=>capTok?{captchaToken:capTok}:{};
+function capReset(){capTok=null;try{if(window.turnstile&&capId!=null)turnstile.reset(capId)}catch(e){}}
+const capFalta=()=>TURNSTILE_SITE_KEY&&!capTok;
+async function mfaEstado(){if(!sb||!user){mfaAtivo=null;return null}try{const {data,error}=await sb.auth.mfa.listFactors();if(error)throw error;mfaAtivo=(data.totp||[]).some(f=>f.status==="verified")}catch(e){mfaAtivo=null}return mfaAtivo}
 async function loadPendentes(){
   if(!sb||colab?.papel!=="admin"){pendentes=[];return}
   try{const {data,error}=await sb.rpc("acessos_pendentes");if(error)throw error;pendentes=data||[]}catch(e){}
@@ -1108,6 +1122,7 @@ function render(){
   c100Flush();rebuildCauses();renderNav();updateDbStatus();setBar("");
   if(authLanding){pgAuthLanding();return}
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
+  if(cloudState==="mfa"){pgMfa();return}
   // Inspetor usa só a tela do operador
   if(soOperador()&&!OPR[route.p]){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
   else if(!soOperador()&&(route.p==="nova"||route.p==="cem"||(OPR[route.p]&&!simulaOp()))){route={p:"painel",id:null};history.replaceState(null,"","#painel")}
@@ -1117,6 +1132,7 @@ function render(){
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="demostrip noprint" id="demoBanner"><span class="demotag">Demonstração</span><span>Os registros marcados como DEMO são fictícios e ficam só neste aparelho.</span>${route.p!=="dados"&&!OPR[route.p]?`<a href="#dados">Remover</a>`:""}</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
+  if(cloudState==="ok"&&colab?.papel==="admin"&&mfaAtivo===false&&route.p!=="dados"&&!$("#mfaBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="mfaBanner"><span><b>Ative a verificação em duas etapas.</b> Ela é obrigatória para administradores e protege o sistema se a sua senha vazar.</span><button class="btn sm" id="mfaGo">Ativar agora</button></div>`);$("#mfaGo").onclick=()=>go("dados")}
 }
 
 /* =========================================================================
@@ -1133,7 +1149,7 @@ function pgLogin(){
     <label class="f">E-mail<input id="lgEmail" type="email" autocomplete="username" inputmode="email" value="${esc(loginEmail)}"></label>
     <label class="f" style="margin-top:10px">${loginMode==="criar"?"Crie uma senha (mínimo 8 caracteres)":"Senha"}<input id="lgPass" type="password" autocomplete="${loginMode==="criar"?"new-password":"current-password"}"></label>
     ${loginMode==="entrar"?`<div style="margin-top:8px"><button class="lnk" id="lgForgot" type="button">Esqueci a senha</button></div>`:`<p class="hint" style="margin-top:8px">Depois de criar a conta, confirme pelo link enviado ao seu e-mail. O administrador recebe o seu pedido e libera o acesso.</p><div><button class="lnk" id="lgResend" type="button">Não recebeu o e-mail? Reenviar confirmação</button></div>`}
-    <div id="lgSlot"></div><p id="lgMsg" class="small" style="color:var(--nc);min-height:18px;margin-top:8px"></p>
+    <div id="lgCap" style="margin-top:10px"></div><div id="lgSlot"></div><p id="lgMsg" class="small" style="color:var(--nc);min-height:18px;margin-top:8px"></p>
     <p class="hint">Acesso restrito a colaboradores autorizados.</p>`;
   h+=`<details style="margin-top:14px"><summary class="muted small">Sem acesso ao banco?</summary><p class="small muted" style="margin:8px 0">O modo local permite usar e demonstrar o sistema neste aparelho, sem compartilhar os dados.</p><button class="btn sm" id="lgLocal">Usar modo local (demonstração)</button></details></div></div>`;
   setPage(h);
@@ -1146,18 +1162,57 @@ function pgLogin(){
   const errMsg=e=>/fetch|network/i.test(e.message)?"Sem conexão com a internet ou com o banco. Verifique a rede e tente de novo.":/Invalid login/i.test(e.message)?"E-mail ou senha incorretos.":/not confirmed/i.test(e.message)?"Confirme o e-mail pelo link recebido antes de entrar.":/rate limit|security purposes/i.test(e.message)?"Aguarde um minuto antes de pedir outro e-mail.":/already registered/i.test(e.message)?"Este e-mail já tem conta. Use a aba Entrar.":e.message||"Não foi possível concluir.";
   if($("#lgPass"))$("#lgPass").onkeydown=e=>{if(e.key==="Enter")$("#lgGo").click()};
   if($("#lgForgot"))$("#lgForgot").onclick=async()=>{const email=em();if(!email||!email.includes("@")){msg("Digite seu e-mail no campo acima e clique em “Esqueci a senha” de novo.");$("#lgEmail").focus();return}
-    $("#lgForgot").disabled=true;try{const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:authRedirect()});if(error)throw error;msg("Enviamos um link para "+email+" criar uma nova senha.",true)}catch(e){msg(errMsg(e))}$("#lgForgot").disabled=false};
+    $("#lgForgot").disabled=true;try{if(capFalta()){msg("Aguarde a verificação anti-robô terminar e tente de novo.");$("#lgForgot").disabled=false;return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:authRedirect(),...capOpt()});capReset();if(error)throw error;msg("Enviamos um link para "+email+" criar uma nova senha.",true)}catch(e){msg(errMsg(e))}$("#lgForgot").disabled=false};
   if($("#lgResend"))$("#lgResend").onclick=async()=>{const email=em();if(!email){msg("Digite seu e-mail no campo acima.");return}
-    try{const {error}=await sb.auth.resend({type:"signup",email,options:{emailRedirectTo:authRedirect()}});if(error)throw error;msg("E-mail de confirmação reenviado para "+email+".",true)}catch(e){msg(errMsg(e))}};
+    try{if(capFalta()){msg("Aguarde a verificação anti-robô terminar e tente de novo.");return}const {error}=await sb.auth.resend({type:"signup",email,options:{emailRedirectTo:authRedirect(),...capOpt()}});capReset();if(error)throw error;msg("E-mail de confirmação reenviado para "+email+".",true)}catch(e){msg(errMsg(e))}};
   if($("#lgGo"))$("#lgGo").onclick=async()=>{const email=em(),pass=$("#lgPass")?.value||"";if(!email){msg("Informe o e-mail.");return}
+    if(capFalta()){msg("Aguarde a verificação anti-robô terminar e tente de novo.");return}
     $("#lgGo").disabled=true;
-    try{if(loginMode==="entrar"){const {data,error}=await sb.auth.signInWithPassword({email,password:pass});if(error)throw error;user=data.user;await checkColab();await ensureProducts();route={p:"painel",id:null};render()}
-      else{if(pass.length<8){msg("A senha deve ter pelo menos 8 caracteres.");$("#lgGo").disabled=false;return}const {error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:authRedirect()}});if(error)throw error;msg("Conta criada. Abra o e-mail que enviamos para "+email+" e clique no link para confirmar. Depois, aguarde a liberação do administrador.",true)}
+    try{if(loginMode==="entrar"){const {data,error}=await sb.auth.signInWithPassword({email,password:pass,options:capOpt()});capReset();if(error)throw error;user=data.user;await checkColab();await ensureProducts();route={p:"painel",id:null};render()}
+      else{if(pass.length<8){msg("A senha deve ter pelo menos 8 caracteres.");$("#lgGo").disabled=false;return}const {error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:authRedirect(),...capOpt()}});capReset();if(error)throw error;msg("Conta criada. Abra o e-mail que enviamos para "+email+" e clique no link para confirmar. Depois, aguarde a liberação do administrador.",true)}
     }catch(e){msg(errMsg(e))}
     if($("#lgGo"))$("#lgGo").disabled=false};
   if($("#lgOut"))$("#lgOut").onclick=signOut;
+  capMount();
   if($("#lgRetry"))$("#lgRetry").onclick=async()=>{await checkColab();if(cloudState==="negado"&&colabStatus==="pendente")toast("Ainda aguardando a aprovação do administrador.");else{await ensureProducts();render()}};
   $("#lgLocal").onclick=async()=>{try{sessionStorage.setItem("jsp-modo-local","1")}catch(e){}setCloud("local");await ensureProducts();route={p:"painel",id:null};render()};
+}
+function pgMfa(){
+  head("Acesso","Verificação em duas etapas");$("#nav").innerHTML="";document.body.classList.add("loginmode");
+  setPage(`<div class="login"><div class="card"><h2 style="margin:0 0 6px">Verificação em duas etapas</h2><p class="muted small" style="margin:0 0 12px">Abra o aplicativo autenticador do celular (Google Authenticator, Microsoft Authenticator ou similar) e digite o código de 6 dígitos da conta <b>${esc(user?.email||"")}</b>.</p>
+    <label class="f">Código<input id="mfCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+    <p id="mfMsg" class="small" style="color:var(--nc);min-height:18px;margin-top:8px"></p>
+    <div class="row"><button class="btn primary" id="mfGo">Confirmar</button><button class="btn" id="mfOut">Sair</button></div></div></div>`);
+  setBar("");
+  const ok=async()=>{const code=($("#mfCode").value||"").replace(/\D/g,""),m=$("#mfMsg");if(code.length!==6){m.textContent="Digite os 6 dígitos.";return}
+    $("#mfGo").disabled=true;
+    try{const {data:f,error:e1}=await sb.auth.mfa.listFactors();if(e1)throw e1;const fa=(f.totp||[]).find(x=>x.status==="verified");if(!fa)throw new Error("nenhum autenticador ativo");
+      const {error}=await sb.auth.mfa.challengeAndVerify({factorId:fa.id,code});if(error)throw error;
+      await checkColab();route={p:"painel",id:null};render()}
+    catch(e){m.textContent=/invalid|expired|code/i.test(e.message||"")?"Código incorreto ou expirado. Use o código novo que aparece no aplicativo.":"Não foi possível verificar: "+(e.message||e);$("#mfGo").disabled=false}};
+  $("#mfGo").onclick=ok;$("#mfCode").onkeydown=e=>{if(e.key==="Enter")ok()};$("#mfOut").onclick=signOut;setTimeout(()=>$("#mfCode")?.focus(),50);
+}
+async function mfaCardRender(){const box=$("#mfaBox");if(!box)return;
+  let f;try{const {data,error}=await sb.auth.mfa.listFactors();if(error)throw error;f=data}catch(e){box.innerHTML='<span class="small" style="color:var(--nc)">Não foi possível consultar a verificação em duas etapas.</span>';return}
+  const ativo=(f.totp||[]).find(x=>x.status==="verified"),adm=colab?.papel==="admin";mfaAtivo=!!ativo;
+  if(ativo){box.innerHTML=`<p class="small" style="margin:0 0 10px"><span class="pill ok">Ativada</span> Ao entrar, o sistema pede o código do aplicativo autenticador além da senha.</p><div class="row"><button class="btn sm" id="mfaOff">Desativar</button></div>`;
+    $("#mfaOff").onclick=async()=>{if(!confirm(adm?"A verificação em duas etapas é obrigatória para administradores. Desativar mesmo assim?":"Desativar a verificação em duas etapas?"))return;
+      const {error}=await sb.auth.mfa.unenroll({factorId:ativo.id});if(error){toast("Não foi possível desativar: "+error.message);return}
+      try{await sb.auth.refreshSession()}catch(e){}mfaAtivo=false;toast("Verificação em duas etapas desativada.");render()};return}
+  box.innerHTML=`<p class="small muted" style="margin:0 0 10px">Protege a conta mesmo se a senha vazar: além da senha, o login pede um código de 6 dígitos gerado no celular por um aplicativo autenticador (Google Authenticator, Microsoft Authenticator ou similar).${adm?" <b>Obrigatória para administradores.</b>":""}</p><div class="row"><button class="btn primary sm" id="mfaOn">Ativar</button></div>`;
+  $("#mfaOn").onclick=async()=>{$("#mfaOn").disabled=true;for(const x of (f.all||[]).filter(x=>x.status!=="verified"))try{await sb.auth.mfa.unenroll({factorId:x.id})}catch(e){}
+    const {data,error}=await sb.auth.mfa.enroll({factorType:"totp",friendlyName:"JSP Qualidade "+Date.now().toString(36)});
+    if(error){toast("Não foi possível iniciar: "+error.message);$("#mfaOn").disabled=false;return}
+    box.innerHTML=`<ol class="small" style="margin:0 0 10px 18px;padding:0"><li>Abra o aplicativo autenticador no celular e escaneie o código abaixo.</li><li>Digite o código de 6 dígitos que aparecer no aplicativo.</li></ol>
+      <img src="${esc(data.totp.qr_code)}" alt="Código QR para o aplicativo autenticador" width="180" height="180" style="background:#fff;border-radius:8px;padding:6px;display:block">
+      <p class="small muted">Sem câmera? Digite esta chave no aplicativo: <code style="word-break:break-all">${esc(data.totp.secret)}</code></p>
+      <label class="f" style="max-width:240px">Código de 6 dígitos<input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+      <div class="row" style="margin-top:8px"><button class="btn primary sm" id="mfaOk">Confirmar e ativar</button><button class="btn sm" id="mfaCancel">Cancelar</button></div>`;
+    $("#mfaCancel").onclick=async()=>{try{await sb.auth.mfa.unenroll({factorId:data.id})}catch(e){}mfaCardRender()};
+    $("#mfaOk").onclick=async()=>{const code=($("#mfaCode").value||"").replace(/\D/g,"");if(code.length!==6){toast("Digite os 6 dígitos do aplicativo.");return}
+      $("#mfaOk").disabled=true;const {error:e2}=await sb.auth.mfa.challengeAndVerify({factorId:data.id,code});
+      if(e2){toast("Código incorreto. Confira se o horário do celular está certo e use o código novo.");$("#mfaOk").disabled=false;return}
+      mfaAtivo=true;toast("Verificação em duas etapas ativada.");render()}};
 }
 function pgAuthLanding(){
   const a=authLanding;$("#nav").innerHTML="";
@@ -2310,11 +2365,18 @@ function pgDados(){
    <div class="row"><button class="btn primary" id="bk">Baixar backup (JSON)</button><button class="btn" id="imp">Importar backup</button><input type="file" id="impF" accept=".json,application/json" hidden></div>
    <div class="row" style="margin-top:10px"><button class="btn" data-x="I">CSV inspeções</button><button class="btn" data-x="V">CSV árvores de falha</button><button class="btn" data-x="B">CSV biblioteca</button></div></div></div>`;
   if(adm&&cloudState==="ok")h+=`<div class="card"><h2>Inspeções excluídas</h2><p class="muted small" style="margin-bottom:10px">Toda exclusão fica guardada no banco com o motivo e o usuário. Se uma inspeção foi excluída por engano, restaure aqui: ela volta para todos, junto com as árvores de falha.</p><div id="lixo"><button class="btn sm" id="lixoLoad">Ver inspeções excluídas</button></div></div>`;
+  if(user&&cloudState==="ok")h+=`<div class="card" id="mfaCard"><h2>Verificação em duas etapas</h2><div id="mfaBox"><span class="muted small">Carregando…</span></div></div>`;
+  if(adm&&cloudState==="ok")h+=`<div class="card"><h2>Registro de auditoria</h2><p class="muted small" style="margin-bottom:10px">Toda inclusão, alteração ou exclusão no banco fica registrada com o usuário, a data e o conteúdo antes e depois. Aqui aparecem as 100 mais recentes; o registro completo fica no banco.</p><div id="audBox"></div><div class="row" style="margin-top:8px"><button class="btn sm" id="audLoad">Carregar registros</button></div></div>`;
   h+=`<div class="card"><h2>Produtos, máquinas e usuários</h2><p class="muted small" style="margin-bottom:10px">Cadastro de produtos (com a FTP e as pré-definições de amostragem), máquinas e, para administradores, usuários e pedidos de acesso.</p><button class="btn" id="toCad2">Abrir Cadastros</button></div>`;
   h+=`<div class="grid g2"><div class="card"><h2>Demonstração</h2><p class="muted small" style="margin-bottom:12px">Gera lotes, árvores de falha, decisões de lote, inspeções 100%, ocorrências no processo e pesagens (peso seco e úmido) fictícios, sorteados a partir dos produtos, das pré-definições e das máquinas cadastradas. Cada clique acrescenta cerca de um mês de histórico, anterior ao que já existe, como se o sistema estivesse em uso há mais tempo.</p><p class="small" style="margin-bottom:10px"><span class="pill ok">Só neste aparelho</span> Os dados DEMO não são enviados ao banco e não entram na contagem de regime das inspeções reais. Ao remover, somem por completo.${S.inspecoes.some(x=>x.demo)?` <b>${S.inspecoes.filter(x=>x.demo).length} lotes, ${S.investigacoes.filter(x=>x.demo).length} árvores (${new Set(S.investigacoes.filter(x=>x.demo&&x.ocId).map(v=>v.ocId)).size} ocorrências) e ${S.pesagens.filter(x=>x.demo).length} pesagens DEMO carregados.</b>`:""}</p><div class="row"><button class="btn" id="demoOn">${S.inspecoes.some(x=>x.demo)?"Gerar mais um mês de demonstração":"Carregar demonstração"}</button><button class="btn danger" id="demoOff" ${S.inspecoes.some(x=>x.demo)?"":"disabled"}>Remover dados DEMO</button></div></div>
    <div class="card"><h2>Zona de risco</h2><p class="muted small" style="margin-bottom:12px">${cloudState==="ok"?"Apaga apenas a cópia guardada neste aparelho; o banco compartilhado não é alterado e é baixado de novo.":"Apaga todas as inspeções e árvores deste aparelho. Baixe um backup antes."}</p><button class="btn danger" id="wipe">Limpar dados deste aparelho</button></div></div>
    <div class="card"><h2>Sobre o sistema</h2><p class="small muted">Desenvolvido pelo Grupo 2 (Gestão de Processos e Qualidade) para a JSP Brasil. Amostragem simples por atributos conforme NBR 5426 (Tabelas 1 a 4 e 17; regras de comutação 5.3). Defeitos conforme FS 070 rev. 06/07 e Plano de Controle 64993-BZ100; reação conforme FS 342 / PR 8.7. Arquivo único; o banco compartilhado é o Supabase da JSP e cada aparelho mantém uma cópia para uso sem internet.</p></div>`;
   setPage(h);
+  if($("#mfaBox"))mfaCardRender();
+  if($("#audLoad"))$("#audLoad").onclick=async()=>{const el=$("#audBox");el.innerHTML='<span class="muted small">Carregando…</span>';
+    const {data,error}=await sb.rpc("auditoria_recente",{p_limite:100});if(error){el.innerHTML='<span class="small" style="color:var(--nc)">Não foi possível carregar.</span>';return}
+    const OPN={INSERT:"Inclusão",UPDATE:"Alteração",DELETE:"Exclusão"},TBN={inspecoes:"Inspeções",investigacoes:"Árvores de falha",pesagens:"Pesagens",produtos:"Produtos",maquinas:"Máquinas",falhas:"Falhas",causas:"Causas",colaboradores:"Usuários"};
+    el.innerHTML=(data||[]).length?`<div class="tw"><table class="t"><thead><tr><th>Quando</th><th>Usuário</th><th>Cadastro</th><th>Operação</th><th>Registro</th></tr></thead><tbody>${data.map(r=>`<tr><td>${esc(new Date(r.em).toLocaleString("pt-BR"))}</td><td>${esc(r.usuario_email||"sistema")}</td><td>${esc(TBN[r.tabela]||r.tabela)}</td><td>${esc(OPN[r.operacao]||r.operacao)}</td><td class="small">${esc(r.registro_id||"")}</td></tr>`).join("")}</tbody></table></div>`:'<span class="muted small">Nenhum registro ainda.</span>'};
   if($("#syncNow"))$("#syncNow").onclick=async()=>{await flushQueue();await pullCloud(true);toast("Sincronizado.");pgDados()};
   if($("#sairB"))$("#sairB").onclick=signOut;
   if($("#sairLocal"))$("#sairLocal").onclick=()=>{try{sessionStorage.removeItem("jsp-modo-local")}catch(e){}location.reload()};

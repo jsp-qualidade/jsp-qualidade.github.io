@@ -1,0 +1,12 @@
+# Mantém atualizadas as ações usadas nos workflows (abre um pull request por semana, se houver versão nova).
+# Observação: o Dependabot não lê bibliotecas dentro do index.html; a biblioteca do Supabase
+# vem embutida no próprio arquivo e deve ser conferida manualmente (ver SECURITY.md).
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "Dependências"

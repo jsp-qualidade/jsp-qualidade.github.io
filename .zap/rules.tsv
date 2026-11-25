@@ -1,0 +1,5 @@
+10038	IGNORE	(Content Security Policy por cabeçalho: o GitHub Pages não permite; a CSP está numa meta tag)
+10020	IGNORE	(Anti-clickjacking por cabeçalho: o GitHub Pages não permite cabeçalhos HTTP)
+10021	IGNORE	(X-Content-Type-Options: definido pelo GitHub Pages, fora do nosso controle)
+10035	IGNORE	(Strict-Transport-Security: gerenciado pelo GitHub Pages)
+90004	IGNORE	(Cross-Origin headers: o GitHub Pages não permite cabeçalhos HTTP)

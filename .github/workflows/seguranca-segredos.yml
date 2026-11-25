@@ -1,0 +1,29 @@
+# Procura chaves e senhas vazadas em todo o histórico do repositório (TruffleHog).
+# Roda a cada envio para a main, em pull requests e toda segunda-feira.
+# Se encontrar uma chave VÁLIDA, a execução fica vermelha: gere uma chave nova no serviço
+# correspondente (ex.: Supabase > Settings > API Keys) e só depois apague do código.
+name: "Segurança: segredos vazados"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "23 10 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trufflehog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Varredura do histórico completo
+        run: |
+          docker run --rm -v "$PWD:/repo" trufflesecurity/trufflehog:3.100.1 \
+            git file:///repo --only-verified --fail --no-update
