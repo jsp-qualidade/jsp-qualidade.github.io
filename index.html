@@ -361,6 +361,7 @@ body.opmode .top{padding:12px 16px}
 .cep-grid{stroke:var(--line);stroke-width:1}.cep-ax{font-size:10.5px;fill:var(--muted)}.cep-lab{font-size:11px;font-weight:700}
 .cep-lim{stroke:var(--nc);stroke-width:1.6;stroke-dasharray:6 4;fill:var(--nc)}.cep-lim.prov{stroke-dasharray:2 4}text.cep-lim{stroke:none}
 .cep-lc{stroke:var(--ok);stroke-width:1.6;fill:var(--ok)}text.cep-lc{stroke:none}
+.cep-spec{stroke:#8B5CF6;stroke-width:2.4;fill:#8B5CF6}text.cep-spec{stroke:none;font-weight:700}.lg.spec{border-color:#8B5CF6;border-top-width:3px}
 .cep-line{fill:none;stroke:var(--brand);stroke-width:1.4;opacity:.55}.cep-pt{fill:var(--brand);stroke:var(--surface);stroke-width:1.2}
 .cep-pt.sinal{fill:var(--nc);stroke:var(--nc);stroke-width:2;fill-opacity:.9}.cep-pt.fora{fill:var(--surface);stroke:var(--muted);stroke-width:1.6}
 .cepleg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin:8px 0 2px}.cepleg span{display:flex;align-items:center;gap:6px}
@@ -2695,10 +2696,14 @@ function cepDados(tipo){
 function cepSvg(o){
   const W=Math.max(300,Math.min(1100,($("#page")?.clientWidth||900)-(innerWidth<700?36:72))),H=innerWidth<700?210:240,ml=innerWidth<700?44:56,mr=innerWidth<700?44:62,mt=12,mb=30;
   const P=o.pts;if(!P.length)return `<div class="empty small">Sem subgrupos completos ainda.</div>`;
-  const ys=P.map(p=>p.y).concat(o.L?[o.lsc,o.lic,o.lc]:[]),lo0=Math.min(...ys),hi0=Math.max(...ys),pad=(hi0-lo0||Math.abs(hi0)*.01||.001)*.12,lo=o.carta==="R"?Math.max(0,lo0-pad):lo0-pad,hi=hi0+pad;
+  const spL=o.spec?[o.spec.min,o.spec.max].filter(v=>v!=null&&isFinite(v)):[];
+  const ys=P.map(p=>p.y).concat(o.L?[o.lsc,o.lic,o.lc]:[]).concat(spL),lo0=Math.min(...ys),hi0=Math.max(...ys),pad=(hi0-lo0||Math.abs(hi0)*.01||.001)*.12,lo=o.carta==="R"?Math.max(0,lo0-pad):lo0-pad,hi=hi0+pad;
   const X=i=>ml+(P.length===1?(W-ml-mr)/2:i*(W-ml-mr)/(P.length-1)),Y=v=>mt+(hi-v)*(H-mt-mb)/(hi-lo);
   let s=`<svg class="cepsvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria)}">`;
   for(let t=0;t<=4;t++){const v=lo+(hi-lo)*t/4;s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="cep-grid"/><text x="${ml-6}" y="${Y(v)+4}" class="cep-ax" text-anchor="end">${o.fmt(v)}</text>`}
+  if(spL.length){const sl=(v,lab,acima)=>`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="cep-spec"/><text x="${ml+6}" y="${Y(v)+(acima?-5:13)}" class="cep-lab cep-spec">${lab} ${o.fmt(v)}</text>`;
+    if(o.spec.max!=null&&isFinite(o.spec.max))s+=sl(o.spec.max,"LSE · especificação máx.",true);
+    if(o.spec.min!=null&&isFinite(o.spec.min))s+=sl(o.spec.min,"LIE · especificação mín.",false)}
   if(o.L){const ln=(v,cls,lab)=>`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}${o.prov?" prov":""}"/><text x="${W-mr+4}" y="${Y(v)+4}" class="cep-lab ${cls}">${lab}</text>`;
     s+=ln(o.lsc,"cep-lim","LSC")+ln(o.lc,"cep-lc","LC")+(o.lic>0||o.carta==="X̄"?ln(o.lic,"cep-lim","LIC"):`<text x="${W-mr+4}" y="${Y(Math.max(lo,0))}" class="cep-lab cep-lim">LIC 0</text>`)}
   s+=`<polyline class="cep-line" points="${P.map((p,i)=>X(i)+","+Y(p.y)).join(" ")}"/>`;
@@ -2712,8 +2717,9 @@ function cepCartasHtml(D){const T=PESO_T[D.tipo],L=D.L;
   const ptsX=vis.map(s=>({y:s.xb,lab:s.seq,sinal:s.sx.length>0,fora:!!s.r.foraBase,tip:tip(s,s.xb,"X̄")})),ptsR=vis.map(s=>({y:s.R,lab:s.seq,sinal:s.sr.length>0,fora:!!s.r.foraBase,tip:tip(s,s.R,"R")}));
   return `<div class="card pscharts" id="cepCard"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">Pesagem · carta X̄-R</h2><div class="pstabs sm" role="tablist">${Object.entries(PESO_T).map(([k,t])=>`<button role="tab" class="pstab ${k===D.tipo?"on":""}" aria-selected="${k===D.tipo}" data-pfp="${k}"><b>${t.nome}</b><small>${t.ponto}</small></button>`).join("")}</div>${D.comp.length>25?`<label class="row small" style="gap:6px">Mostrar <select id="psVer" style="width:auto;margin:0"><option value="25" ${psVer===25?"selected":""}>últimos 25</option><option value="40" ${psVer===40?"selected":""}>últimos 40</option><option value="0" ${!psVer?"selected":""}>todos (${D.comp.length})</option></select></label>`:""}</div>
     ${(()=>{const L=D.L;return `<div class="cepsum"><span class="pill ${!L?"":D.instavel?"nc":"ok"}">${!L?"Em formação":D.instavel?"Sinais de causa especial":"Sob controle"}</span><span>${D.comp.length} subgrupos (n = ${D.n})</span><span>X̄̄ ${kgFmt(D.kpi.xbb)} kg</span><span>R̄ ${kgFmt(D.kpi.rb)} kg</span><span>${D.fase==="estab"?"limites estabelecidos":D.fase==="prov"?"limites provisórios":"sem limites ainda"}</span><span>FTP ${kgFmt(D.sp.min)} a ${kgFmt(D.sp.max)} kg</span></div>`})()}
-    <div class="cepleg"><span><i class="lg lim${D.fase==="prov"?" prov":""}"></i>LSC / LIC · limites de controle${D.fase==="prov"?" (provisórios)":""}</span><span><i class="lg lc"></i>LC · linha central</span><span><i class="lg pt"></i>subgrupo</span><span><i class="lg sinal"></i>sinal de causa especial</span>${D.comp.some(s=>s.r.foraBase)?`<span><i class="lg fora"></i>fora da base dos limites</span>`:""}</div>
-    <h3 class="cepth">Gráfico 1 · Controle das médias (X̄) · kg</h3>${cepSvg({pts:ptsX,L,lsc:L?.lsc,lc:L?.lc,lic:L?.lic,prov:D.fase==="prov",carta:"X̄",fmt:v=>kgFmt(v),aria:"Carta das médias do "+T.nome})}
+    <div class="cepleg"><span><i class="lg lim${D.fase==="prov"?" prov":""}"></i>LSC / LIC · limites de controle${D.fase==="prov"?" (provisórios)":""}</span><span><i class="lg lc"></i>LC · linha central</span>${D.sp.min!=null||D.sp.max!=null?`<span><i class="lg spec"></i>LSE / LIE · especificação da FTP (fixa, só na carta X̄)</span>`:""}<span><i class="lg pt"></i>subgrupo</span><span><i class="lg sinal"></i>sinal de causa especial</span>${D.comp.some(s=>s.r.foraBase)?`<span><i class="lg fora"></i>fora da base dos limites</span>`:""}</div>
+    <h3 class="cepth">Gráfico 1 · Controle das médias (X̄) · kg</h3>${cepSvg({pts:ptsX,L,lsc:L?.lsc,lc:L?.lc,lic:L?.lic,spec:D.sp,prov:D.fase==="prov",carta:"X̄",fmt:v=>kgFmt(v),aria:"Carta das médias do "+T.nome})}
+    ${D.sp.min!=null||D.sp.max!=null?`<p class="small muted" style="margin:4px 0 0">Os limites de controle (LSC e LIC) vêm do próprio processo e mostram desvios a investigar. A especificação (LSE e LIE) vem da FTP e diz se o peso atende à JSP: um sinal dentro da especificação é um desvio do processo, não peça fora do padrão.</p>`:""}
     <h3 class="cepth">Gráfico 2 · Controle das amplitudes (R) · kg</h3>${cepSvg({pts:ptsR,L,lsc:L?.rlsc,lc:L?.rlc,lic:L?.rlic,prov:D.fase==="prov",carta:"R",fmt:v=>kgFmt(v),aria:"Carta das amplitudes do "+T.nome})}
     <p class="small muted" style="margin-top:6px">Eixo horizontal: número do subgrupo (SG). Passe o dedo ou o mouse sobre um ponto para ver data, lote e valor. <a href="#pesagem/${D.tipo}">Subgrupos, limites e sinais →</a></p></div>`;
 }
