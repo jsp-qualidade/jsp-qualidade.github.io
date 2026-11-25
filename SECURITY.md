@@ -43,6 +43,7 @@ Não abra uma issue pública: o repositório é público. Avise diretamente o re
 | Verificação em duas etapas (TOTP) | Em Dados e configuração > Verificação em duas etapas. Funciona com Google Authenticator, Microsoft Authenticator e similares. **Obrigatória para administradores**: o sistema mostra um aviso até ser ativada. |
 | CAPTCHA no login (Cloudflare Turnstile) | O código já está pronto e desligado. Ver "Configuração manual". |
 | Biblioteca do Supabase embutida | O `supabase-js` está dentro do próprio arquivo, e não num CDN externo. Não existe script de terceiros que possa ser trocado sem passar pelo repositório. |
+| Fontes no próprio site | A fonte IBM Plex Sans (licença SIL OFL) fica na pasta `fontes/`. O site não chama o Google Fonts, então o IP dos usuários não vai para terceiros e não há folha de estilo externa sem verificação de integridade. |
 | Registro de auditoria | O Administrador vê as 100 alterações mais recentes em Dados e configuração > Registro de auditoria. |
 
 ### No GitHub (rotinas automáticas)
@@ -51,7 +52,7 @@ Não abra uma issue pública: o repositório é público. Avise diretamente o re
 |---|---|---|---|
 | Segredos vazados (TruffleHog) | `.github/workflows/seguranca-segredos.yml` | Cada envio, pull request e toda segunda | Procura chaves válidas em todo o histórico. Fica vermelha se achar. |
 | Análise do código (CodeQL) | `.github/workflows/seguranca-codigo.yml` | Cada envio, pull request e toda terça | Procura padrões vulneráveis no JavaScript e nos workflows. Alertas em Security > Code scanning. |
-| Varredura do site (OWASP ZAP baseline) | `.github/workflows/seguranca-site.yml` | Toda quarta | Visita o site publicado e gera um relatório (Actions > Artifacts). Não abre issues públicas. |
+| Varredura do site (OWASP ZAP baseline) | `.github/workflows/seguranca-site.yml` | Toda quarta | Visita o site publicado e gera um relatório (Actions > Artifacts). Não abre issues públicas. Primeira execução (25/11/2026): nenhuma falha; os avisos restantes são limites do GitHub Pages ou falsos positivos, explicados um a um em `.zap/rules.tsv`. |
 | Atualização das ações (Dependabot) | `.github/dependabot.yml` | Toda segunda | Abre pull request quando sai versão nova das ações usadas. |
 | Backup semanal criptografado | `.github/workflows/backup-banco.yml` | Todo domingo | Exporta o banco, criptografa com AES-256 e guarda por 30 dias. Precisa de configuração (abaixo). |
 | Manter o Supabase ativo | `.github/workflows/manter-supabase-ativo.yml` | Todo dia | Evita que o plano gratuito pause o banco. Usa só a chave publicável. |
