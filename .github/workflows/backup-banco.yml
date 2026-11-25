@@ -34,9 +34,17 @@ jobs:
           if [ -z "$DB" ] || [ -z "$PW" ]; then
             echo "::warning::Backup não configurado: cadastre SUPABASE_DB_URL e BACKUP_PASSPHRASE (ver o início deste arquivo)."
             echo "ok=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          # Limpa espaços, quebras de linha e aspas coladas por engano (sem mostrar o conteúdo)
+          L=$(printf '%s' "$DB" | tr -d '\r\n' | sed -e "s/^[[:space:]\"']*//" -e "s/[[:space:]\"']*$//")
+          case "$L" in
+            postgres://*|postgresql://*) ;;
+            *) echo "::error::SUPABASE_DB_URL precisa começar com postgresql:// (copie o link do Session pooler)."; exit 1;;
+          esac
+          case "$L" in *"[YOUR-PASSWORD]"*|*"YOUR-PASSWORD"*) echo "::error::SUPABASE_DB_URL ainda tem [YOUR-PASSWORD]: troque pela senha do banco."; exit 1;; esac
+          case "$L" in *":5432/"*) ;; *) echo "::warning::SUPABASE_DB_URL não usa a porta 5432 (Session pooler). Confira se copiou o Session pooler.";; esac
+          echo "ok=true" >> "$GITHUB_OUTPUT"
       - name: Gerar backup criptografado
         if: steps.chk.outputs.ok == 'true'
         env:
@@ -44,6 +52,8 @@ jobs:
           PW: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           set -o pipefail
+          DB=$(printf '%s' "$DB" | tr -d '\r\n' | sed -e "s/^[[:space:]\"']*//" -e "s/[[:space:]\"']*$//")
+          export DB
           F="backup_$(date -u +%F).sql.gz.gpg"
           docker run --rm -e DB postgres:17 sh -c 'pg_dump "$DB" --no-owner --no-privileges --schema=public --schema=private --schema=audit' \
             | gzip -9 | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PW" -o "$F"
