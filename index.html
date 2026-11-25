@@ -947,7 +947,9 @@ async function initCloud(){
 }
 async function checkColab(){
   try{const {data:aal}=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(aal&&aal.nextLevel==="aal2"&&aal.currentLevel!=="aal2"){setCloud("mfa");return}
-    const {data,error}=await sb.from("colaboradores").select("email,nome,papel,ativo").eq("email",(user.email||"").toLowerCase()).maybeSingle();if(error)throw error;
+    let {data,error}=await sb.from("colaboradores").select("email,nome,papel,ativo").eq("email",(user.email||"").toLowerCase()).maybeSingle();if(error)throw error;
+    // Sistema sem nenhum usuário: o primeiro acesso confirmado vira Administrador
+    if(!data){try{const {data:prim}=await sb.rpc("primeiro_acesso_admin");if(prim===true){({data,error}=await sb.from("colaboradores").select("email,nome,papel,ativo").eq("email",(user.email||"").toLowerCase()).maybeSingle());if(error)throw error;if(data)toast("Primeiro acesso ao sistema: sua conta é a de Administrador.")}}catch(e){}}
     if(!data||!data.ativo){colab=null;colabStatus=data?"bloqueado":"pendente";setCloud("negado");return}
     colab=data;colabStatus="ok";setCloud("ok");
     const novaConta=S.meta.cloudUid!==user.id;
