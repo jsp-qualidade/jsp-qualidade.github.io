@@ -41,7 +41,7 @@ Não abra uma issue pública: o repositório é público. Avise diretamente o re
 | Política de referência | `strict-origin-when-cross-origin`: o endereço completo das páginas não vaza para outros sites. |
 | Senha mínima de 8 caracteres | Exigida no cadastro e na troca de senha. |
 | Verificação em duas etapas (TOTP) | Em Dados e configuração > Verificação em duas etapas. Funciona com Google Authenticator, Microsoft Authenticator e similares. **Obrigatória para administradores**: o sistema mostra um aviso até ser ativada. |
-| CAPTCHA no login (Cloudflare Turnstile) | O código já está pronto e desligado. Ver "Configuração manual". |
+| CAPTCHA no login (Cloudflare Turnstile) | Chave do site publicada em 25/11/2026. Fica ativo quando a chave secreta é cadastrada no Supabase. Se a verificação não carregar (rede bloqueada), o login não trava: o Supabase decide. |
 | Biblioteca do Supabase embutida | O `supabase-js` está dentro do próprio arquivo, e não num CDN externo. Não existe script de terceiros que possa ser trocado sem passar pelo repositório. |
 | Fontes no próprio site | A fonte IBM Plex Sans (licença SIL OFL) fica na pasta `fontes/`. O site não chama o Google Fonts, então o IP dos usuários não vai para terceiros e não há folha de estilo externa sem verificação de integridade. |
 | Registro de auditoria | O Administrador vê as 100 alterações mais recentes em Dados e configuração > Registro de auditoria. |

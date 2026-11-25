@@ -960,12 +960,12 @@ let mfaAtivo=null;
 // CAPTCHA (Cloudflare Turnstile). Fica desligado enquanto a chave do site estiver vazia.
 // Para ligar: criar o site no Cloudflare Turnstile, colar a "Site Key" aqui e a "Secret Key" no Supabase
 // (Authentication > Attack Protection > Enable CAPTCHA). Ver SECURITY.md.
-const TURNSTILE_SITE_KEY="";let capTok=null,capId=null;
-function capMount(){if(!TURNSTILE_SITE_KEY||!$("#lgCap"))return;const go=()=>{try{capId=turnstile.render("#lgCap",{sitekey:TURNSTILE_SITE_KEY,language:"pt-br",callback:t=>capTok=t,"expired-callback":()=>capTok=null})}catch(e){}};
-  if(window.turnstile)go();else if(!document.getElementById("tsScript")){const sc=document.createElement("script");sc.id="tsScript";sc.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";sc.async=true;sc.onload=go;document.head.appendChild(sc)}else document.getElementById("tsScript").addEventListener("load",go)}
+const TURNSTILE_SITE_KEY="0x4AAAAAAGTHx0wxr0iga8et";let capTok=null,capId=null,capErro=false;
+function capMount(){if(!TURNSTILE_SITE_KEY||!$("#lgCap"))return;const go=()=>{try{capId=turnstile.render("#lgCap",{sitekey:TURNSTILE_SITE_KEY,language:"pt-br",callback:t=>{capTok=t;capErro=false},"expired-callback":()=>capTok=null,"error-callback":()=>{capErro=true}})}catch(e){capErro=true}};
+  if(window.turnstile)go();else if(!document.getElementById("tsScript")){const sc=document.createElement("script");sc.id="tsScript";sc.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";sc.async=true;sc.onload=go;sc.onerror=()=>{capErro=true};document.head.appendChild(sc)}else document.getElementById("tsScript").addEventListener("load",go)}
 const capOpt=()=>capTok?{captchaToken:capTok}:{};
 function capReset(){capTok=null;try{if(window.turnstile&&capId!=null)turnstile.reset(capId)}catch(e){}}
-const capFalta=()=>TURNSTILE_SITE_KEY&&!capTok;
+const capFalta=()=>TURNSTILE_SITE_KEY&&!capTok&&!capErro;
 async function mfaEstado(){if(!sb||!user){mfaAtivo=null;return null}try{const {data,error}=await sb.auth.mfa.listFactors();if(error)throw error;mfaAtivo=(data.totp||[]).some(f=>f.status==="verified")}catch(e){mfaAtivo=null}return mfaAtivo}
 async function loadPendentes(){
   if(!sb||colab?.papel!=="admin"){pendentes=[];return}
@@ -1159,7 +1159,7 @@ function pgLogin(){
   if($("#lgEmail"))$("#lgEmail").oninput=()=>loginEmail=$("#lgEmail").value;
   $$("[data-lm]").forEach(b=>b.onclick=()=>{loginEmail=$("#lgEmail")?.value||loginEmail;loginMode=b.dataset.lm;pgLogin()});
   const msg=(t,ok)=>{const m=$("#lgMsg");if(m){m.textContent=t;m.style.color=ok?"var(--ok)":"var(--nc)"}};
-  const errMsg=e=>/fetch|network/i.test(e.message)?"Sem conexão com a internet ou com o banco. Verifique a rede e tente de novo.":/Invalid login/i.test(e.message)?"E-mail ou senha incorretos.":/not confirmed/i.test(e.message)?"Confirme o e-mail pelo link recebido antes de entrar.":/rate limit|security purposes/i.test(e.message)?"Aguarde um minuto antes de pedir outro e-mail.":/already registered/i.test(e.message)?"Este e-mail já tem conta. Use a aba Entrar.":e.message||"Não foi possível concluir.";
+  const errMsg=e=>/captcha/i.test(e.message)?"A verificação anti-robô não foi concluída. Aguarde a caixinha mostrar ✓ e tente de novo (se ela não aparecer, recarregue a página).":/fetch|network/i.test(e.message)?"Sem conexão com a internet ou com o banco. Verifique a rede e tente de novo.":/Invalid login/i.test(e.message)?"E-mail ou senha incorretos.":/not confirmed/i.test(e.message)?"Confirme o e-mail pelo link recebido antes de entrar.":/rate limit|security purposes/i.test(e.message)?"Aguarde um minuto antes de pedir outro e-mail.":/already registered/i.test(e.message)?"Este e-mail já tem conta. Use a aba Entrar.":e.message||"Não foi possível concluir.";
   if($("#lgPass"))$("#lgPass").onkeydown=e=>{if(e.key==="Enter")$("#lgGo").click()};
   if($("#lgForgot"))$("#lgForgot").onclick=async()=>{const email=em();if(!email||!email.includes("@")){msg("Digite seu e-mail no campo acima e clique em “Esqueci a senha” de novo.");$("#lgEmail").focus();return}
     $("#lgForgot").disabled=true;try{if(capFalta()){msg("Aguarde a verificação anti-robô terminar e tente de novo.");$("#lgForgot").disabled=false;return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:authRedirect(),...capOpt()});capReset();if(error)throw error;msg("Enviamos um link para "+email+" criar uma nova senha.",true)}catch(e){msg(errMsg(e))}$("#lgForgot").disabled=false};
