@@ -902,11 +902,14 @@ const reactOf=c=>(c&&c.reacao&&c.reacao.trim())||REACT[c?.st]||REACT.MOLD;
       + cópia local no aparelho (IndexedDB) para continuar funcionando sem internet
    ========================================================================= */
 // Endereço do banco da JSP. A TI pode alterar em "Dados e configuração" sem editar o arquivo.
+// PILOTO = true gera a versão para compartilhar: abre direto no modo local, sem login e sem banco,
+// com a demonstração carregada. Não altere aqui: use ferramentas/gerar_piloto.py.
+const PILOTO=false;
 const CLOUD_CFG={url:"https://okcnwdoxxwslmpptlyhs.supabase.co",key:"sb_publishable_9UT4r3EM6HE2E-kkmxxz0w_RPtpKQAh"};
 const DBNAME="jsp-qualidade-amostragem",STORES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas","pesagens","meta"],TABLES=["inspecoes","investigacoes","produtos","maquinas","causas","falhas","pesagens"];
 const S={inspecoes:[],investigacoes:[],produtos:[],maquinas:[],causas:[],falhas:[],pesagens:[],meta:{}};
 let idb=null,sb=null,user=null,colab=null,colabStatus="",pendentes=[],cloudState="off",cloudMsg="";
-const localMode=()=>{try{return sessionStorage.getItem("jsp-modo-local")==="1"}catch(e){return false}};
+const localMode=()=>{if(PILOTO)return true;try{return sessionStorage.getItem("jsp-modo-local")==="1"}catch(e){return false}};
 function openDB(){return new Promise(res=>{try{const r=indexedDB.open(DBNAME,5);r.onupgradeneeded=()=>{STORES.forEach(s=>{if(!r.result.objectStoreNames.contains(s))r.result.createObjectStore(s,{keyPath:"id"})})};r.onsuccess=()=>{idb=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})}
 function tx(store,mode,fn){return new Promise((res,rej)=>{if(!idb){res(null);return}const t=idb.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);t.onerror=()=>rej(t.error)})}
 function saveLS(){if(!idb){try{localStorage.setItem(DBNAME,JSON.stringify({inspecoes:S.inspecoes,investigacoes:S.investigacoes,produtos:S.produtos,maquinas:S.maquinas,causas:S.causas,falhas:S.falhas,pesagens:S.pesagens,meta:S.meta}))}catch(e){}}}
@@ -1026,7 +1029,7 @@ function cleanAuthUrl(){try{history.replaceState(null,"",location.pathname)}catc
 const authRedirect=()=>/^https?:/.test(location.protocol)?location.origin+location.pathname:undefined;
 async function initCloud(){
   authLanding=readAuthLanding();
-  if(localMode()){setCloud("local");return}
+  if(PILOTO||localMode()){setCloud("local");return}
   if(!cloudConfigured()){setCloud("off");return}
   if(!window.supabase){setCloud("offline","Não foi possível carregar a conexão com o banco (sem internet?). Usando a cópia deste aparelho.");return}
   const c=cfg();sb=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,storageKey:"jsp-qualidade-auth"}});
@@ -1227,6 +1230,7 @@ function render(){
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
   if(cloudState==="ok"&&colab?.papel==="admin"&&mfaAtivo===false&&route.p!=="dados"&&!$("#mfaBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="mfaBanner"><span><b>Ative a verificação em duas etapas.</b> Ela é obrigatória para administradores e protege o sistema se a sua senha vazar.</span><button class="btn sm" id="mfaGo">Ativar agora</button></div>`);$("#mfaGo").onclick=()=>go("dados")}
+  if(PILOTO&&!$("#pilBanner")&&!OPR[route.p]){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner info noprint" id="pilBanner"><span><b>Versão piloto.</b> Funciona sem internet e sem login, para conhecer e testar o sistema. Tudo o que você registrar fica só neste navegador e não vai para a JSP. Os lotes marcados como DEMO são exemplos; para começar do zero, use Dados e configuração › Remover dados DEMO.</span></div>`)}
   if(cloudState==="ok")orientTalvez();
 }
 
@@ -3972,6 +3976,7 @@ $("#logout").onclick=signOut;
 (async function init(){
   await openDB();await loadAll();if(draftHasContent(S.meta.rascunho)){draft=S.meta.rascunho;draftRestored=true}await initCloud();
   if(cloudState!=="login"&&cloudState!=="negado")await ensureProducts();
+  if(PILOTO&&!S.meta.pilotoIni){await setMeta("pilotoIni",1);try{await loadDemo()}catch(e){}}
   const [p,id]=location.hash.slice(1).split("/");if(p&&(PAGES.some(x=>x.id===p)||DETAIL[p]||OPR[p]))route={p,id:id||null};
   render();
   const digitando=()=>{const a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))||!!$("#dlg")?.open};

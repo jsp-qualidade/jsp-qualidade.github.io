@@ -20,6 +20,10 @@ python manual/gerar_capturas.py
 
 Ao mudar uma tela, atualize o tópico correspondente em `MANUAL` e rode o script de novo.
 
+## Versão piloto (para compartilhar)
+
+`python ferramentas/gerar_piloto.py pasta_de_saida` gera `Sistema_JSP_Piloto.html`: o mesmo sistema, mas que abre direto, sem login e sem o endereço do banco, com dados de demonstração. O que for registrado fica só no navegador de quem abriu. Serve para mostrar e testar o sistema sem dar acesso aos dados da JSP.
+
 ## Segurança
 
 Veja [SECURITY.md](SECURITY.md): o que protege o sistema, as rotinas automáticas do GitHub, a configuração manual pendente e o que fazer em caso de incidente.
