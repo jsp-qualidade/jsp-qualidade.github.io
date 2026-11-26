@@ -95,7 +95,7 @@ Estes itens não podem ser ligados pelo código e precisam de alguém com acesso
 
 ## LGPD
 
-O sistema trata dados pessoais de colaboradores: nome, e-mail e o registro de quem inspecionou, decidiu ou alterou cada item. A LGPD (Lei 13.709/2018) pede medidas de segurança "aptas a proteger os dados pessoais de acessos não autorizados" desde a concepção do sistema (art. 46). As medidas acima (controle de acesso por perfil, verificação em duas etapas, auditoria e backup) atendem às recomendações do *Guia Orientativo de Segurança da Informação para Agentes de Tratamento de Pequeno Porte* da ANPD.
+O sistema trata dados pessoais de colaboradores: nome, e-mail e o registro de quem inspecionou, decidiu ou alterou cada item. A orientação de primeiro acesso guarda só o identificador da conta e a data em que a pessoa viu a mensagem (tabela `orientacao_usuario`, lida e gravada apenas pelo próprio usuário). A LGPD (Lei 13.709/2018) pede medidas de segurança "aptas a proteger os dados pessoais de acessos não autorizados" desde a concepção do sistema (art. 46). As medidas acima (controle de acesso por perfil, verificação em duas etapas, auditoria e backup) atendem às recomendações do *Guia Orientativo de Segurança da Informação para Agentes de Tratamento de Pequeno Porte* da ANPD.
 
 **Em caso de incidente** (acesso indevido, vazamento ou perda de dados):
 

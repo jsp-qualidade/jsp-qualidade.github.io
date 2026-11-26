@@ -481,6 +481,93 @@ body.loginmode .side{display:none}body.loginmode .app{grid-template-columns:1fr}
 body.loginmode .page{min-height:100vh;display:grid;place-items:center;background:linear-gradient(180deg,var(--nav) 0 38%,var(--bg) 38%)}
 body.loginmode .login{width:min(420px,100%)}body.loginmode .login .card{padding:26px 26px 20px;box-shadow:0 10px 30px rgba(15,42,68,.18)}
 .lgbtn{width:100%;margin-top:14px;min-height:44px;font-size:15px;justify-content:center;text-align:center}
+/* ---------- Manual de uso ---------- */
+:root{--mark:#D9480F;--mark-soft:#FFF0E8}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.mn{max-width:1120px}
+.mn-op{max-width:none}
+.mn-ver{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin:0 0 16px}
+.mn-ver span{margin-right:4px}
+.mn-ver button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font:inherit;font-weight:600;color:var(--ink2);cursor:pointer}
+.mn-ver button[aria-pressed=true]{background:var(--nav);border-color:var(--nav);color:#fff}
+.mn-cab{max-width:760px;margin-bottom:22px}
+.mn-lead{font-size:16px;line-height:1.6;color:var(--ink);margin:0 0 14px;max-width:68ch}
+.mn-busca{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:0 12px;max-width:560px;color:var(--muted)}
+.mn-busca:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.mn-busca input{border:0;outline:0;background:transparent;padding:11px 0;font:inherit;font-size:15px;width:100%;color:var(--ink);margin:0}
+.mn-comece{background:var(--nav);color:#fff;border-radius:var(--r);padding:18px 20px;margin-bottom:26px}
+.mn-comece h2{color:#fff;margin:0 0 12px}
+.mn-comece ol{list-style:none;counter-reset:mnc;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.mn-comece li{counter-increment:mnc}
+.mn-comece a{display:flex;flex-direction:column;gap:3px;height:100%;box-sizing:border-box;padding:12px 12px 12px 44px;position:relative;border-radius:8px;background:var(--nav2);color:#fff;text-decoration:none}
+.mn-comece a::before{content:counter(mnc);position:absolute;left:12px;top:11px;width:22px;height:22px;border-radius:50%;background:var(--mark);font-weight:700;font-size:12.5px;display:grid;place-items:center}
+.mn-comece a span{color:var(--navtxt);font-size:12.5px;line-height:1.4}
+.mn-comece a:hover,.mn-comece a:focus-visible{background:#1E4870}
+.mn-mod{margin-bottom:22px}
+.mn-mod h2{font-size:15px;margin:0 0 8px;color:var(--ink2)}
+.mn-mod ul{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.mn-mod li+li{border-top:1px solid var(--line2)}
+.mn-mod a{display:grid;grid-template-columns:minmax(180px,300px) 1fr;gap:4px 18px;padding:11px 16px;text-decoration:none;color:var(--ink)}
+.mn-mod a b{font-weight:600;color:var(--brand)}
+.mn-mod a span{color:var(--muted);font-size:13.5px}
+.mn-mod a:hover,.mn-mod a:focus-visible{background:var(--brand-soft)}
+.mn-grid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:start}
+.mn-op .mn-grid{grid-template-columns:minmax(0,1fr)}
+.mn-op .mn-toc{display:none}
+.mn-toc{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;font-size:13px;padding-right:4px}
+.mn-toc p{margin:14px 0 4px;font-weight:600;color:var(--muted);font-size:12px}
+.mn-toc a{display:block;padding:5px 8px;border-radius:6px;color:var(--ink2);text-decoration:none;line-height:1.35}
+.mn-toc a:hover{background:var(--sunk)}
+.mn-toc a[aria-current=page]{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.mn-toc-i{font-weight:600}
+.mn-art{max-width:760px;min-width:0}
+.mn-art h2{font-size:17px;margin:26px 0 8px}
+.mn-art p{line-height:1.6;max-width:70ch}
+.mn-mod-t{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+.mn-acesso{background:var(--sunk);border-radius:8px;padding:10px 14px;font-weight:500}
+.mn-k{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:var(--mark);color:#fff;font-weight:700;font-size:12px;line-height:1;vertical-align:1px;font-feature-settings:"tnum" 1}
+.mn-passos{margin:0;padding-left:26px}
+.mn-passos li{padding:5px 0 5px 4px;line-height:1.6}
+.mn-passos li::marker{font-weight:700;color:var(--ink2)}
+.mn-fig{margin:14px 0 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.mn-fig img{display:block;width:100%;height:auto;background:var(--sunk)}
+.mn-fig.estreita{max-width:480px}
+.mn-fig figcaption{font-size:12.5px;color:var(--muted);padding:8px 12px;border-top:1px solid var(--line2)}
+.mn-semimg{display:none;margin:0;padding:12px;font-size:13px;color:var(--warn)}
+.mn-fig.semimg a{display:none}.mn-fig.semimg .mn-semimg{display:block}
+.mn-campos td:first-child{width:34px;text-align:center}
+.mn-campos th[scope=row]{text-align:left;font-weight:600;white-space:normal;min-width:140px}
+.mn-campos td,.mn-erros td{line-height:1.5;vertical-align:top}
+.mn-ex{border-left:4px solid var(--brand);background:var(--brand-soft);border-radius:0 8px 8px 0;padding:2px 16px 4px;margin-top:22px}
+.mn-ex h2{margin-top:12px}
+.mn-aviso{border:1px solid;border-radius:8px;padding:10px 14px;margin:8px 0;display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:baseline}
+.mn-aviso p{margin:0}
+.mn-aviso.warn{background:var(--warn-soft);border-color:#EBD39A}.mn-aviso.warn b{color:var(--warn)}
+.mn-aviso.nc{background:var(--nc-soft);border-color:#EFBDB6}.mn-aviso.nc b{color:var(--nc)}
+.mn-aviso.info{background:var(--info-soft);border-color:#D3CCF2}.mn-aviso.info b{color:var(--info)}
+.mn-glos{margin:6px 0}.mn-glos div{padding:10px 0;border-top:1px solid var(--line)}.mn-glos dt{font-weight:700}.mn-glos dd{margin:3px 0 0;color:var(--ink2);line-height:1.5}
+.mn-faq summary{padding:2px 0}
+.mn-nav{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin:34px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+.mn-nav a{text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface);display:flex;flex-direction:column;justify-content:center}
+.mn-nav a:hover,.mn-nav a:focus-visible{border-color:var(--brand)}
+.mn-nav small{color:var(--muted);font-size:12px}
+.mn-nav b{color:var(--brand);font-weight:600;font-size:13.5px}
+.mn-prox{text-align:right}
+.mn-idx{font-weight:600;color:var(--ink2)!important;align-items:center}
+@media(max-width:900px){.mn-grid{grid-template-columns:minmax(0,1fr)}.mn-toc{display:none}.mn-mod a{grid-template-columns:1fr}}
+@media(max-width:560px){.mn-aviso{grid-template-columns:1fr;gap:2px}.mn-nav{grid-template-columns:1fr 1fr}.mn-idx{grid-column:1/-1;order:3}.mn-lead{font-size:15px}}
+/* boas-vindas */
+.bvdlg{width:min(540px,94vw);padding:0;border:0;border-radius:14px;box-shadow:0 24px 60px rgba(15,42,68,.35)}
+.bv{padding:24px 26px 20px}
+.bv-cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bv-sis{font-size:13px;font-weight:600;color:var(--muted)}
+.bv h2{font-size:21px;margin:0 0 10px}
+.bv p{line-height:1.6;margin:0 0 10px;color:var(--ink2)}
+.bv-lista{margin:0 0 12px;padding:10px 14px 10px 34px;background:var(--sunk);border-radius:8px;line-height:1.7}
+.bv-pe{font-size:13.5px}
+.bv-b{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:16px}
+@media(max-width:480px){.bv{padding:20px 18px 16px}.bv-b .btn{flex:1}}
+@media print{.mn-toc,.mn-ver,.mn-busca,.mn-nav{display:none!important}.mn-grid{display:block}.mn-comece{background:#fff;color:var(--ink);border:1px solid #bbb}.mn-comece a{background:#fff;color:var(--ink)}.mn-fig{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -1087,6 +1174,7 @@ const ICON={
  db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'
 };
 const PAGES=[
+ {id:"ajuda",t:"Manual de uso",ic:"help",grp:"Ajuda"},
  {id:"painel",t:"Painel",ic:"dash",grp:"Operação"},
  {id:"nova",t:"Nova inspeção",ic:"new",grp:"Operação"},
  {id:"operador",t:"Tela do operador",ic:"op",grp:"Operação"},
@@ -1097,13 +1185,12 @@ const PAGES=[
  {id:"biblioteca",t:"Biblioteca causa/efeito",ic:"book",grp:"Análise"},
  {id:"cadastros",t:"Cadastros",ic:"cad",grp:"Referência"},
  {id:"planos",t:"Planos NBR 5426",ic:"table",grp:"Referência"},
- {id:"dados",t:"Dados e configuração",ic:"db",grp:"Referência"},
- {id:"ajuda",t:"Como usar",ic:"help",grp:"Referência"}
+ {id:"dados",t:"Dados e configuração",ic:"db",grp:"Referência"}
 ];
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
 const navStack=[],DETAIL={inspecao:1,arvore:1,produto:1,causa:1,disposicao:1,cem:1,falha:1};
-const PNAME={painel:"Painel",pesagem:"Pesagem",oppeso:"Pesagem",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",ocorrencias:"Ocorrências",falha:"Falha",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Como usar"};
+const PNAME={painel:"Painel",pesagem:"Pesagem",oppeso:"Pesagem",nova:"Nova inspeção",inspecoes:"Inspeções",inspecao:"Inspeção do lote",ocorrencias:"Ocorrências",falha:"Falha",disposicao:"Decisão do lote",cem:"Inspeção 100%",operador:"Tela do operador",opnova:"Nova inspeção",oparvore:"Perguntas",oplote:"Lote",opcem:"Inspeção 100%",opocorr:"Ocorrência",opoc:"Ocorrência",investigacoes:"Árvores de falha",arvore:"Árvore de falha",biblioteca:"Biblioteca",planos:"Planos NBR 5426",cadastros:"Cadastros",dados:"Dados e configuração",ajuda:"Manual"};
 function go(p,id=null){if(p!==route.p||id!==route.id){navStack.push({p:route.p,id:route.id,y:window.scrollY});if(navStack.length>40)navStack.shift()}route={p,id};location.hash=p+(id?"/"+id:"");render();window.scrollTo(0,0)}
 function backTarget(peek){
   for(let i=navStack.length-1;i>=0;i--){const t=navStack[i];
@@ -1131,15 +1218,16 @@ function render(){
   if(cloudState==="login"||cloudState==="negado"){pgLogin();return}
   if(cloudState==="mfa"){pgMfa();return}
   // Inspetor usa só a tela do operador
-  if(soOperador()&&!OPR[route.p]){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
+  if(soOperador()&&!OPR[route.p]&&route.p!=="ajuda"){route={p:"operador",id:null};history.replaceState(null,"","#operador")}
   else if(!soOperador()&&(route.p==="nova"||route.p==="cem"||(OPR[route.p]&&!simulaOp()))){route={p:"painel",id:null};history.replaceState(null,"","#painel")}
-  document.body.classList.toggle("opmode",!!OPR[route.p]);document.body.classList.remove("loginmode");
+  document.body.classList.toggle("opmode",!!OPR[route.p]||(soOperador()&&route.p==="ajuda"));document.body.classList.remove("loginmode");
   const demo=S.inspecoes.some(x=>x.demo)||S.pesagens.some(x=>x.demo)||S.investigacoes.some(x=>x.demo);
   ({pesagem:pgPesagem,oppeso:pgOpPeso,falha:pgFalha,ocorrencias:pgOcorrencias,operador:pgOperador,opnova:pgOpNova,opocorr:pgOpOcorr,opoc:pgOpOc,oparvore:pgOpArvore,oplote:pgOpLote,opcem:pgOpCem,painel:pgPainel,nova:pgNova,inspecoes:pgInspecoes,inspecao:pgInspecao,disposicao:pgDisposicao,cem:pgCem,investigacoes:pgInvestigacoes,arvore:pgArvore,biblioteca:pgBiblioteca,planos:pgPlanos,dados:pgDados,cadastros:pgCadastros,produto:pgProduto,ajuda:pgAjuda,causa:pgCausa}[route.p]||pgPainel)();
   if(demo&&!$("#demoBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="demostrip noprint" id="demoBanner"><span class="demotag">Demonstração</span><span>Os registros marcados como DEMO são fictícios e ficam só neste aparelho.</span>${route.p!=="dados"&&!OPR[route.p]?`<a href="#dados">Remover</a>`:""}</div>`)}
   if(cloudState==="offline"&&!$("#offBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="offBanner"><span>${esc(cloudMsg)}</span><button class="btn sm" id="retry">Tentar de novo</button></div>`);$("#retry").onclick=async()=>{if(!sb)await initCloud();else if(user)await checkColab();render()}}
   if(cloudState==="off"&&!$("#cfgBanner")&&route.p!=="dados"){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="cfgBanner"><span><b>Banco compartilhado ainda não configurado.</b> Os registros estão só neste aparelho. Configure em “Dados e configuração”.</span></div>`)}
   if(cloudState==="ok"&&colab?.papel==="admin"&&mfaAtivo===false&&route.p!=="dados"&&!$("#mfaBanner")){$("#page").insertAdjacentHTML("afterbegin",`<div class="banner warn noprint" id="mfaBanner"><span><b>Ative a verificação em duas etapas.</b> Ela é obrigatória para administradores e protege o sistema se a sua senha vazar.</span><button class="btn sm" id="mfaGo">Ativar agora</button></div>`);$("#mfaGo").onclick=()=>go("dados")}
+  if(cloudState==="ok")orientTalvez();
 }
 
 /* =========================================================================
@@ -1733,6 +1821,7 @@ function opInstrCard(x,comLote){
 function opBind(){
   if($("#opSair"))$("#opSair").onclick=()=>signOut();
   if($("#opHome"))$("#opHome").onclick=()=>go("operador");
+  if($("#opManual"))$("#opManual").onclick=()=>go("ajuda");
   if($("#opVolta"))$("#opVolta").onclick=()=>go("painel");
   $$("[data-opcem]").forEach(b=>b.onclick=()=>go("opcem",b.dataset.opcem));
   $$("[data-oplote]").forEach(b=>b.onclick=()=>go("oplote",b.dataset.oplote));
@@ -1740,7 +1829,7 @@ function opBind(){
   $$("[data-oparv]").forEach(b=>b.onclick=()=>{const x=S.inspecoes.find(i=>i.id===b.dataset.oparv),v=x&&lotTrees(x).find(t=>!treeFilled(t));if(v)go("oparvore",v.id)});
   $$("[data-ciente]").forEach(b=>b.onclick=async()=>{const x=S.inspecoes.find(i=>i.id===b.dataset.ciente);if(!x)return;x.opCiente=opChave(x);await persist("inspecoes",x);toast("Aviso marcado como lido.");render()});
 }
-const opTop=()=>(route.p!=="operador"?`<button class="btn" id="opHome"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:4px"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Início</button>`:"")+(soOperador()?`<button class="btn" id="opSair">Sair</button>`:`<button class="btn" id="opVolta">Voltar ao sistema</button>`);
+const opTop=()=>(route.p!=="ajuda"?`<button class="btn" id="opManual"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></svg>Manual</button>`:"")+(route.p!=="operador"?`<button class="btn" id="opHome"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:4px"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Início</button>`:"")+(soOperador()?`<button class="btn" id="opSair">Sair</button>`:`<button class="btn" id="opVolta">Voltar ao sistema</button>`);
 
 /* ---------- Início do operador ---------- */
 function pgOperador(){
@@ -2535,49 +2624,1033 @@ function pgProduto(){
     await persist("produtos",rec);pdraft=null;toast(isNew?"Produto cadastrado.":"Produto salvo.");cadTab="produtos";go("cadastros")};
 }
 
-function pgAjuda(){
-  head("Referência","Como usar o sistema",`<button class="btn" onclick="window.print()">Imprimir</button>`);
-  const st=(n,t,x)=>`<div class="step"><span class="stepn">${n}</span><div><b>${t}</b><p>${x}</p></div></div>`;
-  const g=(t,x)=>`<div class="gl"><dt>${t}</dt><dd>${x}</dd></div>`;
-  const q=(t,x)=>`<details class="faq"><summary>${t}</summary><p>${x}</p></details>`;
-  setPage(`<div class="card"><h2>Inspeção de um lote, passo a passo</h2><p class="muted" style="margin:4px 0 14px">Para o inspetor, no posto. Leva de 2 a 5 minutos por lote.</p><div class="steps col">
-    ${st(1,"Abra “Nova inspeção” e identifique o lote","Escolha o produto e o ponto (Moldagem, Estufa ou Final de linha). Preencha data, lote ou rack, turno, máquina e seu nome. Tudo começa em branco de propósito, para ninguém registrar com dados de outro lote.")}
-    ${st(2,"Informe o tamanho do lote","O NQA vem do cadastro do produto e o nível é sempre o II; nenhum dos dois muda na inspeção. Com o tamanho do lote, o sistema mostra quantas peças retirar (n) e os limites para aceitar (Ac) e rejeitar (Re).")}
-    ${st(3,"Retire a amostra ao acaso e inspecione","Compare cada peça com a FS 070 e o Plano de Controle. Peça boa não precisa de registro.")}
-    ${st(4,"Registre cada peça não conforme","Toque em “+ Peça NC” e marque as falhas daquela peça. Para peso úmido ou peso seco, digite o peso medido: o sistema compara com a faixa da FTP.")}
-    ${st(5,"Registre a inspeção","A barra de baixo mostra o resultado da amostragem: aceitar ou rejeitar o lote pela NBR 5426.")}
-    ${st(6,"Preencha a árvore de falha na hora","Havendo falha, a árvore abre sozinha, uma por tipo de falha: responda onde o defeito apareceu e verifique as causas com evidência. A ação e a reação vêm da Biblioteca.")}
-    ${st(7,"Lote rejeitado: decida o destino","Só quando a amostragem rejeita o lote. Com as árvores preenchidas, o sistema abre a decisão: aceitar o lote (escolhendo o motivo), segregar e inspecionar 100%, ou rejeitar. A justificativa é opcional.")}
-    ${st(8,"Se escolher a inspeção 100%, o operador faz","O aviso vai para a tela do operador. Ele inspeciona todas as peças do lote (o tamanho já vem fixo), troca cada peça não conforme por uma peça boa e informa só quantas trocou. O lote é liberado completo, as peças trocadas ficam segregadas (FS 342) e o sistema calcula o PPM e o nível sigma do lote.")}</div></div>
-   <div class="grid g2"><div class="card"><h2>O que significa cada termo</h2><dl class="gloss">
-    ${g("Tamanho do lote (N)","Conjunto de peças do mesmo produto, feitas nas mesmas condições, que será aceito ou rejeitado como um todo.")}
-    ${g("Tamanho da amostra (n)","Quantas peças retirar do lote para inspecionar. Vem da tabela da norma.")}
-    ${g("NQA","Nível de qualidade aceitável: a porcentagem de peças não conformes que a empresa aceita como média do processo. É escolhido pela Qualidade ou pelo cliente, não é calculado.")}
-    ${g("d","Número de peças não conformes encontradas na amostra. Uma peça com duas falhas conta uma vez.")}
-    ${g("Ac e Re","Se d for menor ou igual a Ac, o lote é aceito. Se d for maior ou igual a Re, o lote é rejeitado.")}
-    ${g("Nível de inspeção","Define o tamanho da amostra para o mesmo lote. O sistema usa sempre o nível II, o padrão da norma.")}
-    ${g("Regime","Normal, severo ou atenuado. O sistema muda sozinho: 2 lotes rejeitados em 5 levam ao severo; 5 aceitos seguidos voltam ao normal.")}
-    ${g("FTP","Ficha Técnica de Processo: os valores nominais e as faixas de cada parâmetro do produto.")}
-    ${g("Árvore de falha","Investigação que parte do defeito encontrado e volta pelo processo, etapa por etapa, até a causa.")}</dl></div>
-   <div class="card"><h2>Dúvidas comuns</h2>
-    ${q("Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica guardado no aparelho e é enviado sozinho quando a conexão voltar. O ponto colorido no menu mostra a situação do banco.")}
-    ${q("Fechei a página no meio de uma inspeção.","Abra “Nova inspeção” de novo: o rascunho fica guardado neste aparelho até você registrar ou limpar o formulário.")}
-    ${q("O que é a Tela do operador?","Uma tela simples, em passos, para quem inspeciona: escolhe ponto, produto, máquina e lote, informa o tamanho do lote e o sistema diz quantas peças inspecionar. Depois registra as peças não conformes (marcando os defeitos de cada uma), responde às perguntas da árvore de cada defeito e vê a ação e a reação recomendadas. Quem tem o papel Inspetor entra direto nela. Quando a Qualidade decide o destino de um lote reprovado, o aviso com o que fazer aparece no início da tela; se a decisão for inspeção 100%, o aviso traz o botão para fazê-la ali mesmo.")}
-    ${q("O que é uma ocorrência no processo?","É quando o operador vê uma peça com defeito fora da inspeção por amostragem, durante o trabalho. Ele registra na Tela do operador (onde viu, produto, máquina, lote, defeito e quantas peças) e responde às perguntas da árvore de cada defeito. A ocorrência aparece no painel e na lista de árvores de falha, mas não conta como inspeção: não entra no plano de amostragem, na troca de regime nem nas taxas de aprovação.")}
-    ${q("Quem pode fazer o quê?","Há três papéis. Administrador: tudo, inclusive o cadastro de usuários. Gestor: tudo, menos o cadastro de usuários (altera produtos, máquinas, falhas e a Biblioteca, e decide o destino dos lotes). Inspetor: usa a Tela do operador (inspeções, ocorrências e perguntas da árvore de falha). Só o administrador muda o papel ou o nome dos usuários, em Cadastros › Usuários.")}
-    ${q("Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada com o usuário. O resultado da amostragem continua “rejeitado” para as regras de comutação da norma.")}
-    ${q("Como funciona a Pesagem (carta X̄-R)?","Em Pesagem, escolha Peso seco (final de linha) ou Peso úmido (moldagem) e digite os pesos de 5 peças pesadas no mesmo horário. Cada registro é um subgrupo: o sistema calcula a média (X̄) e a amplitude (R) e desenha as duas cartas. Com 10 subgrupos aparecem limites provisórios; com 20, os limites ficam estabelecidos e fixos (LSC = X̄̄ + A₂·R̄, LIC = X̄̄ − A₂·R̄; carta R: D₄·R̄ e D₃·R̄, com as constantes de n = 5). Pontos fora dos limites e sequências (regras da ISO 8258) aparecem em vermelho. Limite de controle não é especificação: um sinal pede investigação do processo, não reprova a peça.")}
-    ${q("O que acontece depois da inspeção 100%?","O operador inspeciona todas as peças, troca cada peça não conforme por uma peça boa e informa só quantas trocou. O lote segue completo. Com essa contagem o sistema calcula o PPM (peças não conformes ÷ inspecionadas × 1.000.000) e o nível sigma do lote, do produto e do mês, no painel.")}
-    ${q("Registrei algo errado. E agora?","Abra a inspeção em “Inspeções” e use “Corrigir”. O sistema pede o motivo e guarda o histórico. Se a inspeção inteira não deveria existir, use “Excluir”.")}
-    ${q("O tamanho do lote ou o NQA não vieram preenchidos.","Eles vêm do cadastro do produto. Um administrador define em Cadastros › Produtos › Pré-definições de amostragem. Sem NQA cadastrado, a inspeção daquele ponto não pode ser registrada.")}
-    ${q("A máquina ou o produto não aparece na lista.","Cadastre em Cadastros. Depois de salvo, aparece para todos os aparelhos.")}
-    ${q("Como libero o acesso de um colega?","Ele cria a conta na tela de entrada e confirma o e-mail. O administrador aceita o pedido em Cadastros › Usuários.")}
-    ${q("Posso treinar sem sujar o banco?","Sim. Na tela de entrada, abra “Sem acesso ao banco?” e use o modo local; em Dados e configuração, carregue a demonstração.")}</div></div>
-   <div class="card"><h2>Para o administrador</h2><div class="steps col">
-    ${st("A","Mantenha os cadastros","Produtos com FTP e pré-definições, máquinas e usuários ficam em Cadastros. Excluir um item não apaga as inspeções já feitas.")}
-    ${st("B","Acompanhe o painel","Pareto de falhas, resultado por ponto e por máquina, regime de cada série e árvores em aberto. Use os filtros de período e produto.")}
-    ${st("C","Faça backup","Em Dados e configuração, baixe o backup em JSON uma vez por mês e exporte os CSV quando precisar analisar no Excel.")}</div></div>`);
+/* =========================================================================
+   MANUAL DE USO (por perfil)
+   Cada tópico tem: módulo, perfis que o veem (i = Inspetor, g = Gestor,
+   a = Administrador), textos e a receita da captura de tela.
+   Campos com "m" (seletor) ganham um número na imagem, na ordem em que
+   aparecem; "{n}" no texto mostra o mesmo número. As capturas ficam em
+   manual/img e são refeitas pelo script manual/gerar_capturas.py.
+   Ao mudar uma tela, atualize o tópico correspondente e gere as capturas.
+   ========================================================================= */
+const MAN_MOD=[
+ {id:"inicio",t:"Primeiros passos"},
+ {id:"operador",t:"Tela do operador"},
+ {id:"acomp",t:"Acompanhar a qualidade"},
+ {id:"analise",t:"Decidir e analisar"},
+ {id:"cad",t:"Cadastros e referência"},
+ {id:"adm",t:"Administração"},
+ {id:"consulta",t:"Consulta rápida"}
+];
+const MAN_PERFIL={
+ i:{nome:"Inspetor",resumo:"Você registra as inspeções por amostragem, as ocorrências e as pesagens, responde às perguntas da árvore de falha e recebe da Qualidade o que fazer com cada lote. Tudo acontece na Tela do operador.",
+   comece:["acesso","op-inicio","op-inspecao","op-arvore","op-lote"]},
+ g:{nome:"Gestor",resumo:"Você acompanha os resultados no Painel, decide o destino dos lotes reprovados, analisa as árvores de falha, mantém a Biblioteca de causas e os cadastros de produtos, máquinas e falhas. Também pode usar a Tela do operador.",
+   comece:["acesso","navegar","painel","decisao","arvore-analise","carta-xr"]},
+ a:{nome:"Administrador",resumo:"Você tem acesso a tudo o que o Gestor faz e, além disso, libera o acesso das pessoas, define o papel de cada uma, exclui e restaura inspeções e consulta o registro de auditoria. A verificação em duas etapas é obrigatória para o seu perfil.",
+   comece:["acesso","duas-etapas","usuarios","navegar","painel","decisao"]}
+};
+const MANUAL=[
+/* ---------------- PRIMEIROS PASSOS ---------------- */
+{id:"acesso",mod:"inicio",r:"iga",t:"Criar a conta e entrar",
+ d:"Primeiro acesso, entrada do dia a dia e senha esquecida.",
+ oque:"É a tela que aparece ao abrir o sistema. Cada pessoa tem a própria conta, com e-mail e senha, e tudo o que ela registra fica gravado com o nome dela.",
+ serve:"Use no primeiro acesso, para criar a conta, e todos os dias para entrar. Também é por aqui que você cria uma nova senha se esquecer a sua.",
+ acesso:"Abra o navegador (Chrome, Edge ou Safari) no computador, tablet ou celular e digite o endereço jsp-qualidade.github.io.",
+ img:{id:"login",perfil:"login",cap:"Tela de entrada, aba “Criar conta”."},
+ passos:[
+  "<b>Criar a conta (só na primeira vez).</b> Abra o endereço do sistema e clique na aba <b>Criar conta</b> {1}.",
+  "Em <b>Nome completo</b> {2}, digite seu nome como deve aparecer nos registros, por exemplo “Ana Paula Souza”. O sistema pede pelo menos 3 letras.",
+  "Em <b>E-mail</b> {3}, digite o e-mail que você vai usar sempre para entrar.",
+  "Em <b>Crie uma senha</b> {4}, digite uma senha com pelo menos 8 caracteres. Não use a mesma senha de outros sites.",
+  "Espere a caixinha de verificação anti-robô, logo abaixo da senha, mostrar ✓. Na maioria das vezes ela se completa sozinha, sem você clicar.",
+  "Clique em <b>Criar conta</b> {5}.",
+  "Abra a caixa de entrada do seu e-mail e clique no link de confirmação que o sistema enviou. Se não chegar em alguns minutos, olhe a pasta de spam.",
+  "Volte ao sistema e entre com e-mail e senha. Aparece a mensagem “Pedido de acesso enviado”: o administrador precisa aceitar o seu pedido e definir o seu papel (Inspetor, Gestor ou Administrador).",
+  "Quando o administrador avisar que liberou, clique em <b>Verificar liberação</b>. O sistema abre a sua área.",
+  "<b>Entrar no dia a dia.</b> Na aba <b>Entrar</b>, digite e-mail e senha e clique em <b>Entrar</b>. Se você ativou a verificação em duas etapas, o sistema pede também o código de 6 dígitos do aplicativo do celular.",
+  "<b>Esqueceu a senha?</b> Na aba Entrar, digite o seu e-mail e clique em <b>Esqueci a senha</b>. Abra o link que chegar no e-mail e crie uma senha nova.",
+  {r:"a",t:"<b>Primeiro administrador.</b> Se o sistema ainda não tem nenhum usuário cadastrado, a primeira pessoa que confirmar o e-mail e entrar vira Administrador automaticamente, sem esperar aprovação. A partir daí, todo novo acesso precisa ser aceito por um administrador."}
+ ],
+ campos:[
+  {m:'[data-lm="criar"]',n:"Abas Entrar / Criar conta",d:"Troca entre entrar com uma conta existente e criar uma conta nova."},
+  {m:"#lgNome",n:"Nome completo",d:"Só aparece em Criar conta. É o nome que vai nos registros e chega pronto para o administrador na aprovação."},
+  {m:"#lgEmail",n:"E-mail",d:"É o seu usuário. Precisa ser um e-mail que você consegue abrir, por causa do link de confirmação."},
+  {m:"#lgPass",n:"Senha",d:"Mínimo de 8 caracteres. Na aba Entrar, aperte Enter para entrar direto."},
+  {m:".lgbtn",n:"Criar conta / Entrar",d:"Envia os dados. Fica desativado enquanto o sistema está conferindo."},
+  {n:"Verificação anti-robô",d:"Caixinha que confirma que quem está entrando é uma pessoa. Protege o sistema contra tentativas automáticas de adivinhar senhas."},
+  {n:"Não recebeu o e-mail? Reenviar confirmação",d:"Aparece em Criar conta. Manda o link de confirmação de novo para o e-mail digitado."},
+  {n:"Sem acesso ao banco? › Usar modo local",d:"Abre o sistema só neste aparelho, sem compartilhar nada. Serve para treinar e demonstrar."}
+ ],
+ exemplo:"A Ana começa no 2º turno da moldagem. Ela abre o sistema no tablet do posto, cria a conta com o nome “Ana Paula Souza”, confirma o e-mail no celular e avisa o líder. O administrador aceita o pedido como Inspetor. A Ana clica em “Verificar liberação” e a Tela do operador abre.",
+ resultado:"Com o acesso liberado, o sistema abre direto na sua área: a Tela do operador para o Inspetor, o Painel para Gestor e Administrador. O seu nome aparece no alto da tela e na barra de situação do menu.",
+ cuidados:[
+  {t:"warn",x:"Não compartilhe a sua conta. Cada inspeção, decisão e alteração fica registrada com o usuário que a fez; usar a conta de outra pessoa apaga essa rastreabilidade."},
+  {t:"info",x:"O modo local não envia nada para o banco. Não use para registros reais: o que for feito nele fica só naquele aparelho."}
+ ],
+ erros:[
+  ["“E-mail ou senha incorretos.”","Confira se o e-mail está certo e se o Caps Lock está desligado. Se não lembrar a senha, use “Esqueci a senha”."],
+  ["“Confirme o e-mail pelo link recebido antes de entrar.”","Abra o e-mail de confirmação e clique no link. Use “Reenviar confirmação” se ele não chegou."],
+  ["“A verificação anti-robô não foi concluída.”","Espere a caixinha mostrar ✓ e tente de novo. Se ela não aparecer, recarregue a página."],
+  ["“Este e-mail já tem conta. Use a aba Entrar.”","Você já criou a conta antes. Entre pela aba Entrar ou use “Esqueci a senha”."],
+  ["“O acesso do e-mail … não foi liberado.”","O administrador recusou ou bloqueou o pedido. Fale com o responsável pela Qualidade."]
+ ]},
+
+{id:"boas-vindas",mod:"inicio",r:"iga",t:"Mensagem de boas-vindas e este manual",
+ d:"O aviso do primeiro acesso e como usar o manual.",
+ oque:"Na primeira vez que você entra na sua área, o sistema mostra uma mensagem de boas-vindas recomendando a leitura deste manual. O manual tem uma versão para cada perfil e mostra só o que o seu perfil pode fazer.",
+ serve:"Use o manual antes de começar e sempre que tiver dúvida sobre uma tela. Ele fica no menu o tempo todo, mesmo depois que a mensagem de boas-vindas deixa de aparecer.",
+ acesso:{i:"Na Tela do operador, botão Manual no alto da tela.",ga:"Menu lateral › Manual de uso (primeiro item do menu)."},
+ img:{id:"boasvindas",perfil:"g",prep:"boasvindas",cap:"Mensagem de boas-vindas no primeiro acesso."},
+ passos:[
+  "No primeiro acesso aparece a janela “Bem-vindo ao sistema!”.",
+  "Clique em <b>Ler manual agora</b> {1} para abrir o manual do seu perfil, ou em <b>Acessar sistema</b> {2} para ir direto à tela principal.",
+  "Qualquer uma das duas opções registra que você já viu a mensagem. Ela não volta a aparecer, nem em outro computador ou celular.",
+  "No manual, comece pela lista <b>Comece por aqui</b>, que mostra a ordem sugerida de leitura para o seu perfil.",
+  "Para achar uma dúvida específica, digite uma palavra na <b>busca</b> do manual, por exemplo “senha”, “lote reprovado” ou “peso”.",
+  "Dentro de um tópico, use <b>Anterior</b> e <b>Próximo</b> no fim da página para seguir a sequência, ou <b>Índice</b> para voltar à lista de tópicos."
+ ],
+ campos:[
+  {m:"#bvLer",n:"Ler manual agora",d:"Abre o manual do seu perfil."},
+  {m:"#bvIr",n:"Acessar sistema",d:"Fecha a mensagem e segue para a tela principal. Apertar Esc tem o mesmo efeito."},
+  {n:"Números nas imagens",d:"Cada número desenhado numa captura corresponde à mesma linha da tabela “Campos e botões” do tópico."},
+  {n:"Imprimir",d:"No alto do manual. Imprime o tópico aberto ou o índice."}
+ ],
+ resultado:"Depois da primeira entrada, o sistema abre direto na tela principal. O manual continua no menu.",
+ cuidados:[
+  {t:"info",x:"As capturas de tela do manual usam dados de demonstração (lotes e pesagens marcados como DEMO). Os números do seu dia a dia vão ser outros."}
+ ]},
+
+{id:"navegar",mod:"inicio",r:"ga",t:"Conhecer a tela e o menu",
+ d:"Menu lateral, avisos, barra de ações e situação do banco.",
+ oque:"A tela é dividida em três partes: o menu lateral à esquerda, a área de trabalho no centro e, em algumas telas, uma barra de ações fixa no rodapé com o botão principal da tela.",
+ serve:"Entender onde fica cada coisa economiza tempo e evita registrar no lugar errado.",
+ acesso:"Aparece em todas as telas depois de entrar.",
+ img:{id:"navegar",perfil:"g",rota:"inspecoes",cap:"Tela Inspeções, com o menu lateral."},
+ passos:[
+  "No menu lateral {1}, as telas estão agrupadas por assunto: <b>Ajuda</b> (este manual), <b>Operação</b> (Painel, Tela do operador, Inspeções, Ocorrências, Pesagem), <b>Análise</b> (Árvores de falha, Biblioteca causa/efeito) e <b>Referência</b> (Cadastros, Planos NBR 5426, Dados e configuração).",
+  "Um número vermelho ao lado de um item {2} mostra pendências: em Inspeções, lotes aguardando decisão ou em inspeção 100%; em Ocorrências, ocorrências com análise em aberto; em Árvores de falha, árvores sem preencher; em Cadastros, pedidos de acesso.",
+  "No pé do menu {3}, o ponto colorido mostra a situação do banco. Verde: conectado e tudo enviado. Amarelo: sem conexão, modo local ou alterações ainda sendo enviadas.",
+  "No alto da área de trabalho ficam o caminho da tela e o título {4}. Nas páginas de detalhe (um lote, uma árvore, um produto) aparece o botão <b>Voltar para …</b>, que leva à tela de onde você veio.",
+  "No canto direito do alto {5} ficam os botões da tela, como Exportar CSV, Imprimir ou Adicionar.",
+  "No celular, o menu fica escondido: toque no botão de menu no alto para abrir e fechar."
+ ],
+ campos:[
+  {m:"#nav",n:"Menu lateral",d:"Leva a cada tela do sistema. O item da tela aberta fica destacado."},
+  {m:"#nav .nbadge",n:"Contador de pendências",d:"Quantidade de itens que precisam de ação naquela tela. Passe o mouse para ver o que está sendo contado."},
+  {m:"#dbstatus",n:"Situação do banco",d:"Mostra se o sistema está conectado ao banco da JSP, o seu nome e o seu papel."},
+  {m:"#title",n:"Caminho e título",d:"Diz em que tela você está."},
+  {m:"#topright",n:"Botões da tela",d:"Ações da tela aberta, como Exportar CSV ou Imprimir."},
+  {n:"Barra de ações (rodapé)",d:"Aparece em formulários e etapas. Mostra o que falta preencher e o botão principal, que só fica ativo quando está tudo certo."}
+ ],
+ resultado:"Você chega a qualquer tela em no máximo dois cliques e sabe, pelo ponto colorido, se o que registrou já foi enviado.",
+ cuidados:[
+  {t:"info",x:"Se o botão principal da barra de ações estiver cinza, leia a frase ao lado dele: ela diz exatamente o que falta, por exemplo “Escolha o produto”."}
+ ]},
+
+{id:"sem-internet",mod:"inicio",r:"iga",t:"Sem internet: o que acontece",
+ d:"Os registros ficam no aparelho e são enviados quando a conexão volta.",
+ oque:"O sistema guarda uma cópia dos dados em cada aparelho. Se a internet cair, você continua trabalhando e as alterações ficam numa fila de envio.",
+ serve:"Para não perder uma inspeção quando a rede do posto oscila.",
+ acesso:{i:"Não precisa fazer nada: o envio é automático.",ga:"A fila de envio aparece em Dados e configuração › Banco de dados compartilhado › A enviar."},
+ passos:[
+  "Se a conexão cair, aparece no alto uma faixa amarela “Sem conexão”. Continue registrando normalmente.",
+  "Quando a internet voltar, o sistema envia sozinho tudo o que ficou na fila.",
+  "Se quiser forçar o envio, clique em <b>Tentar de novo</b> na faixa amarela.",
+  {r:"ga",t:"Em <b>Dados e configuração</b>, o item <b>A enviar</b> mostra quantas alterações ainda não chegaram ao banco, e o botão <b>Sincronizar agora</b> envia e baixa tudo na hora."},
+  "Uma inspeção começada e não terminada também fica guardada no aparelho: ao voltar à Tela do operador, aparece o aviso “Inspeção em andamento” com o botão Continuar."
+ ],
+ resultado:"Quando o ponto do menu fica verde de novo, tudo o que você registrou sem internet já está no banco e aparece para os outros usuários.",
+ cuidados:[
+  {t:"nc",x:"Não limpe os dados do navegador nem use “Limpar dados deste aparelho” enquanto houver alterações a enviar. O que ainda está na fila só existe naquele aparelho."},
+  {t:"warn",x:"Use sempre o mesmo aparelho até a fila esvaziar. Uma inspeção feita sem internet no tablet não aparece no computador até o tablet voltar a se conectar."}
+ ]},
+
+{id:"duas-etapas",mod:"inicio",r:"ga",t:"Ativar a verificação em duas etapas",
+ d:"Código do celular além da senha. Obrigatória para administradores.",
+ oque:"É uma segunda proteção da conta. Além da senha, o login pede um código de 6 dígitos que muda a cada 30 segundos, gerado por um aplicativo autenticador no seu celular.",
+ serve:"Mesmo que alguém descubra a sua senha, não consegue entrar sem o celular. Para administradores é obrigatória, porque essa conta pode liberar acessos e excluir registros.",
+ acesso:"Menu lateral › Dados e configuração › cartão Verificação em duas etapas. Para administradores, o aviso amarelo no alto das telas tem o botão Ativar agora.",
+ img:{id:"duasetapas",perfil:"a",rota:"dados",prep:"mfa",alvo:".card:has(#mfaBox)",cap:"Cartão da verificação em duas etapas, em Dados e configuração."},
+ passos:[
+  "Instale no celular um aplicativo autenticador gratuito: Google Authenticator ou Microsoft Authenticator.",
+  "No sistema, abra <b>Dados e configuração</b> e vá até o cartão <b>Verificação em duas etapas</b>.",
+  "Clique em <b>Ativar</b> {1}. Aparece um código QR.",
+  "No aplicativo do celular, toque em adicionar conta e escaneie o código QR. Sem câmera, digite no aplicativo a chave que aparece abaixo do QR.",
+  "Digite no campo <b>Código de 6 dígitos</b> o número que o aplicativo mostra e clique em <b>Confirmar e ativar</b>.",
+  "Daí em diante, ao entrar, depois da senha o sistema pede o código. Abra o aplicativo, digite os 6 dígitos e clique em <b>Confirmar</b>."
+ ],
+ campos:[
+  {m:"#mfaOn",n:"Ativar",d:"Começa o cadastro do celular. Mostra o código QR e a chave."},
+  {n:"Código de 6 dígitos",d:"Número que o aplicativo mostra no momento. Ele muda a cada 30 segundos; use sempre o mais recente."},
+  {n:"Confirmar e ativar / Cancelar",d:"Confirma o cadastro ou desiste dele."},
+  {n:"Desativar",d:"Aparece depois de ativada. Tira a exigência do código. Para administradores, o sistema avisa que é obrigatória."}
+ ],
+ exemplo:"O Carlos, administrador, entra pela primeira vez e vê a faixa “Ative a verificação em duas etapas”. Ele clica em Ativar agora, escaneia o QR com o Microsoft Authenticator, digita 482913 e confirma. No dia seguinte, depois da senha, o sistema pede o código e ele digita o que aparece no celular.",
+ resultado:"O cartão mostra a etiqueta verde <b>Ativada</b>. A faixa amarela de aviso some das telas.",
+ cuidados:[
+  {t:"warn",x:"Vai trocar de celular? Antes de apagar o aparelho antigo, entre no sistema, desative a verificação e ative de novo no celular novo. Sem o aplicativo você não consegue entrar."},
+  {t:"info",x:"“Código incorreto ou expirado” quase sempre quer dizer que o código mudou enquanto você digitava. Digite o número novo que aparece no aplicativo."}
+ ]},
+
+/* ---------------- TELA DO OPERADOR ---------------- */
+{id:"op-inicio",mod:"operador",r:"iga",t:"A Tela do operador",
+ d:"Início do inspetor: botões principais, avisos e registros recentes.",
+ oque:"É a área de trabalho de quem inspeciona no posto. Foi feita para tablet e celular, com botões grandes e uma tarefa por tela.",
+ serve:"Daqui você começa uma inspeção, registra uma ocorrência ou uma pesagem e vê os avisos da Qualidade sobre os lotes que inspecionou.",
+ acesso:{i:"Abre sozinha depois de entrar no sistema. De qualquer etapa, o botão Início volta para ela.",ga:"Menu lateral › Tela do operador. Para voltar às outras telas, use Voltar ao sistema."},
+ img:{id:"op_inicio",perfil:"i",rota:"operador",cap:"Início da Tela do operador."},
+ passos:[
+  "Para inspecionar um lote por amostragem, toque em <b>Nova inspeção</b> {1}.",
+  "Viu uma peça com defeito durante o trabalho, fora da inspeção? Toque em <b>Registrar ocorrência</b> {2}.",
+  "Na hora de pesar as 5 peças do horário, toque em <b>Registrar pesagem</b> {3}.",
+  "Leia os <b>Avisos da Qualidade</b> {4}. Cada aviso diz o que fazer com um lote: manter separado, liberar, fazer a inspeção 100% ou responder perguntas que faltaram. O número ao lado do título é a quantidade de avisos.",
+  "Em <b>Inspeções recentes</b> {5} estão os lotes dos últimos 14 dias, com a situação de cada um. Toque num lote para ver o resultado e o que fazer.",
+  "Em <b>Ocorrências recentes</b> aparece cada ocorrência registrada. “Faltam perguntas” quer dizer que a árvore de falha não foi respondida até o fim.",
+  "Se você começou uma inspeção e não terminou, aparece no topo o aviso <b>Inspeção em andamento</b> com os botões Continuar e Descartar."
+ ],
+ campos:[
+  {m:"#opNew",n:"Nova inspeção",d:"Abre a inspeção por amostragem em 3 passos."},
+  {m:"#opOcorr",n:"Registrar ocorrência",d:"Para defeitos vistos fora da inspeção. Não conta como inspeção do lote."},
+  {m:"#opPeso",n:"Registrar pesagem",d:"Peso seco (final de linha) ou peso úmido (moldagem), 5 peças por vez."},
+  {m:"h2.opsec",n:"Avisos da Qualidade",d:"O que fazer com cada lote. Os mais urgentes aparecem primeiro."},
+  {m:".oplist",n:"Inspeções recentes",d:"Lotes dos últimos 14 dias com a situação: Aceito, Aguardando decisão, Em inspeção 100% e outras."},
+  {m:"#opManual",n:"Manual",d:"Abre este manual."},
+  {n:"Sair / Voltar ao sistema",d:"O Inspetor vê Sair, que encerra a sessão. Gestor e Administrador veem Voltar ao sistema, que leva ao Painel."}
+ ],
+ resultado:"Você sabe, sem procurar, o que precisa ser feito no turno: os avisos ficam no topo até serem resolvidos.",
+ cuidados:[
+  {t:"warn",x:"Aviso “Lote reprovado · aguardando a Qualidade”: mantenha o lote separado com a etiqueta vermelha (FS 342) até a Qualidade decidir. Não envie nem use as peças."},
+  {t:"info",x:"Num aparelho compartilhado entre turnos, toque em Sair no fim do seu turno para o próximo colega entrar com a conta dele."}
+ ]},
+
+{id:"op-inspecao",mod:"operador",r:"iga",t:"Registrar uma inspeção por amostragem",
+ d:"Os 3 passos: dados do lote, peças não conformes e resultado.",
+ oque:"É o registro da inspeção de um lote pela NBR 5426. Você informa o lote, o sistema calcula quantas peças inspecionar e qual o limite de peças não conformes, e no fim diz se o lote foi aprovado ou reprovado.",
+ serve:"Use a cada lote que precisa ser inspecionado na moldagem, na estufa ou no final de linha.",
+ acesso:{i:"Tela do operador › Nova inspeção.",ga:"Menu lateral › Tela do operador › Nova inspeção."},
+ img:[{id:"op_passo1",perfil:"i",rota:"opnova",prep:"opPasso1",cap:"Passo 1 · Dados do lote, já preenchido."},
+      {id:"op_passo2",perfil:"i",rota:"opnova",prep:"opPasso2",cap:"Passo 2 · Peças não conformes."},
+      {id:"op_passo3",perfil:"i",rota:"opnova",prep:"opPasso3",cap:"Passo 3 · Resultado."}],
+ passos:[
+  "<b>Passo 1 · Dados do lote.</b> Toque em <b>Nova inspeção</b>. Em “Onde você está inspecionando?” {1}, toque em Moldagem, Estufa ou Final de linha.",
+  "Em <b>Produto</b> {2}, escolha o produto do lote. Logo abaixo aparece o NQA e o nível II, que vêm do cadastro feito pela Qualidade e não mudam na inspeção.",
+  "Em <b>Máquina</b> {3}, escolha a máquina que produziu o lote.",
+  "Em <b>Nº do lote</b> {4}, digite o número que está na etiqueta do lote ou do rack.",
+  "Em <b>Turno</b> {5}, confira o turno. O sistema marca o turno pela hora atual; troque se estiver errado.",
+  "Em <b>Quantas peças tem o lote?</b> {6}, digite o tamanho do lote (N). OP e molde são opcionais, mas ajudam a achar a causa quando o defeito vem do molde.",
+  "Leia o quadro <b>O sistema calculou</b> {7}: quantas peças inspecionar e a partir de quantas não conformes o lote é reprovado.",
+  "Toque em <b>Começar a inspeção</b> {8}. Se o botão estiver cinza, a frase ao lado diz o que falta.",
+  "<b>Passo 2 · Peças não conformes.</b> Retire do lote, ao acaso, a quantidade de peças indicada no topo {9} e compare cada uma com a FS 070 e o Plano de Controle.",
+  "Em <b>Quantas peças não conformes?</b> {10}, use − e + ou digite o número. Conte a peça, não o defeito: uma peça com dois defeitos conta uma vez.",
+  "Em <b>Quais defeitos apareceram nessas peças?</b> {11}, toque em todos os defeitos que você viu. Cada defeito marcado abre depois as perguntas da árvore de falha.",
+  "Se o ponto tiver defeitos que não separam o lote (cartão “Defeito que não separa o lote”), informe quantas peças tinham esse defeito. Exemplo: rebarba na moldagem. Essas peças continuam no lote e não entram na contagem acima.",
+  "Marque a confirmação <b>Confirmo que inspecionei as … peças da amostra</b> {12} e toque em <b>Terminei de inspecionar</b> {13}.",
+  "<b>Passo 3 · Resultado.</b> O sistema mostra <b>Lote aprovado</b> ou <b>Lote reprovado</b> {14} e o que fazer agora.",
+  "Se quiser, escreva uma <b>Observação</b> {15}, por exemplo onde estava o defeito ou de qual cavidade vieram as peças.",
+  "Toque em <b>Registrar inspeção</b> ou, se houver defeitos, em <b>Registrar e responder as perguntas</b> {16}. O sistema grava a inspeção e abre as perguntas do primeiro defeito."
+ ],
+ campos:[
+  {m:".optiles",i:0,n:"Ponto de inspeção",d:"Moldagem (op. 30), Estufa (op. 40) ou Final de linha (op. 50). Define quais defeitos aparecem na lista e qual NQA vale."},
+  {m:"#opProd",i:0,n:"Produto",d:"Produtos cadastrados pela Qualidade. Produto sem NQA cadastrado não pode ser inspecionado: avise a Qualidade."},
+  {m:"#opMaq",i:0,n:"Máquina",d:"Máquina de moldagem que produziu o lote."},
+  {m:"#opLote",i:0,n:"Nº do lote",d:"Número da etiqueta do lote ou do rack. Obrigatório."},
+  {m:".optiles.t4",i:0,n:"Turno",d:"1º, 2º, 3º ou ADM. Vem marcado pela hora; confira."},
+  {m:"#opN",i:0,n:"Quantas peças tem o lote?",d:"Tamanho do lote (N). Só números. É com ele que a norma define a amostra."},
+  {m:"#opPlanBox",i:0,n:"O sistema calculou",d:"Tamanho da amostra (n), aceitação (Ac) e rejeição (Re) pela NBR 5426, com a letra-código, o nível II, o NQA e o regime."},
+  {m:"#opNext",i:0,n:"Começar a inspeção",d:"Vai para o passo 2. Só fica ativo com tudo preenchido."},
+  {m:".opsum",i:1,n:"Inspecione … peças",d:"Lembrete do tamanho da amostra, com o resumo de conformes e não conformes."},
+  {m:"#opNc",i:1,n:"Quantas peças não conformes?",d:"Número de peças com qualquer defeito na amostra (d). Os botões − e + somam e subtraem uma peça."},
+  {m:".opchips",i:1,n:"Quais defeitos apareceram",d:"Lista de defeitos da FS 070 para o ponto escolhido. Marque todos os que viu."},
+  {m:".opconf",i:1,n:"Confirmação da amostra",d:"Você confirma que inspecionou todas as peças da amostra, retiradas ao acaso. Obrigatória."},
+  {m:"#opNext",i:1,n:"Terminei de inspecionar",d:"Vai para o resultado. Fica cinza se faltar marcar defeito, informar a quantidade ou confirmar."},
+  {m:".opres",i:2,n:"Resultado",d:"Aprovado quando as peças não conformes não passam do limite (Ac). Reprovado quando chegam ao número de rejeição (Re)."},
+  {m:"#opObs",i:2,n:"Observação",d:"Texto livre e opcional, que fica no registro do lote."},
+  {m:"#opNext",i:2,n:"Registrar",d:"Grava a inspeção. Com defeitos, abre em seguida as perguntas da árvore de falha."},
+  {n:"← Voltar (barra de baixo)",d:"Volta um passo sem perder o que já foi preenchido."}
+ ],
+ exemplo:"No final de linha, a Ana inspeciona o lote 2611-03 da Caixa de ferramentas, com 500 peças. O sistema calcula: inspecionar 50 peças; até 1 não conforme o lote é aprovado, a partir de 2 é reprovado. Ela encontra 1 peça com rebarba acima do especificado, marca 1 e o defeito Rebarba, confirma a amostra e chega a “Lote aprovado”. O sistema orienta separar só aquela peça na gaiola vermelha e liberar o lote. Ela registra e responde às perguntas da rebarba.",
+ resultado:"A inspeção aparece em Inspeções recentes, na sua tela, e em Inspeções, para a Qualidade. Lote reprovado aparece para a Qualidade como “Aguardando decisão” e, para você, como aviso.",
+ cuidados:[
+  {t:"warn",x:"Retire as peças da amostra ao acaso, de vários pontos do lote. Pegar só as de cima do rack distorce o resultado e a confirmação do passo 2 passa a não ser verdadeira."},
+  {t:"nc",x:"Lote reprovado: separe o lote e coloque a etiqueta vermelha (FS 342). Não envie. Quem decide o destino é a Qualidade."},
+  {t:"info",x:"Fechou o aplicativo no meio? O rascunho fica guardado no aparelho. Na Tela do operador, toque em Continuar no aviso “Inspeção em andamento”."}
+ ],
+ erros:[
+  ["Aparece “Não é possível inspecionar · Produto sem NQA cadastrado”.","A Qualidade ainda não definiu o NQA desse produto naquele ponto. Avise o gestor para preencher em Cadastros › Produtos."],
+  ["O botão “Terminei de inspecionar” não ativa.","Leia a frase da barra de baixo: falta marcar os defeitos, informar quantas peças são não conformes ou marcar a confirmação da amostra."],
+  ["O produto ou a máquina não está na lista.","Peça ao gestor para cadastrar em Cadastros."]
+ ]},
+
+{id:"op-arvore",mod:"operador",r:"iga",t:"Responder às perguntas da árvore de falha",
+ d:"Onde o defeito apareceu e quais causas você verificou.",
+ oque:"Para cada tipo de defeito encontrado, o sistema faz perguntas em duas partes. Primeiro, onde o defeito apareceu no processo. Depois, uma lista de causas possíveis tirada da Biblioteca causa/efeito, para você verificar no posto.",
+ serve:"As respostas mostram à Qualidade a causa provável do defeito e indicam a ação de reação. É o que permite corrigir o processo, e não só separar peças.",
+ acesso:"Abre sozinha depois de registrar uma inspeção ou ocorrência com defeito. Perguntas que ficaram para trás aparecem como aviso na Tela do operador, com o botão Responder as perguntas.",
+ img:{id:"op_arvore",perfil:"i",rota:"oparvore",prep:"opArvore",cap:"Perguntas sobre o defeito, na Tela do operador."},
+ passos:[
+  "No topo {1} aparece qual árvore você está respondendo (por exemplo “Árvore de falha 1 de 2”), o lote e o nome do defeito.",
+  "Responda às perguntas de origem {2} com <b>Sim</b> ou <b>Não</b>. Embaixo de cada pergunta, “Onde ver” diz onde conferir, por exemplo no rack ainda não rebarbado ou no Formulário A da moldagem.",
+  "Com a origem localizada, aparece a lista <b>Agora verifique as possíveis causas</b>. Para cada causa {3}, confira no posto o item indicado em “Verifique” e responda <b>Sim, encontrei</b>, <b>Não</b> ou <b>Não deu para ver</b>.",
+  "Responda com base no que você viu ou no registro, não em suposição. “Não deu para ver” é uma resposta válida.",
+  "Quando todas as causas tiverem resposta, o botão da barra de baixo {4} ativa. Ele mostra <b>Próximo defeito</b>, se houver outro defeito no mesmo lote, ou <b>Ver o que fazer</b>, no último."
+ ],
+ campos:[
+  {m:".opkick",n:"Árvore … de … · Lote",d:"Qual defeito está sendo analisado e quantos faltam."},
+  {m:".opans3.two",n:"Pergunta de origem",d:"Sim ou Não. Volta no processo para achar a etapa onde o defeito nasceu."},
+  {m:".opsec+.opcard .opans3",n:"Possível causa",d:"Sim, encontrei: a condição estava fora do padrão. Não: estava normal. Não deu para ver: não foi possível conferir."},
+  {m:"#opNext",n:"Próximo defeito / Ver o que fazer",d:"Segue para o próximo defeito ou para a página do lote. Cada resposta é gravada na hora."}
+ ],
+ exemplo:"A Ana registrou Rebarba acima do especificado. Pergunta: “A peça já chegou ao Final de Linha com o defeito?” Ela olha o rack ainda não rebarbado e responde Sim. A origem fica na moldagem. Entre as causas, “Enchimento acima do especificado” pede para conferir a pressão na IHM; ela vê a pressão acima da FTP e responde Sim, encontrei.",
+ resultado:"Na página do lote aparece “Causa encontrada”, com a reação (o que fazer agora) e a ação para corrigir. A árvore aparece preenchida para a Qualidade.",
+ cuidados:[
+  {t:"info",x:"É uma árvore por tipo de defeito, não por peça. Três peças com rebarba geram uma árvore só."},
+  {t:"warn",x:"Se aparecer “Nenhuma causa cadastrada na Biblioteca para esta origem”, avise a Qualidade: a Biblioteca precisa ser completada para esse defeito."}
+ ]},
+
+{id:"op-lote",mod:"operador",r:"iga",t:"Ver o que fazer com o lote",
+ d:"Avisos da Qualidade e a página do lote.",
+ oque:"Depois de registrar, cada lote tem uma página com o resultado, o que fazer com as peças e o que fazer com a causa. Quando a Qualidade decide um lote reprovado, a decisão chega para você como aviso.",
+ serve:"Para saber se o lote segue, fica separado ou passa por inspeção 100%, sem precisar perguntar.",
+ acesso:"Tela do operador › Avisos da Qualidade › Ver o lote, ou toque no lote em Inspeções recentes.",
+ img:{id:"op_lote",perfil:"i",rota:"oplote",prep:"opLote",cap:"Página do lote na Tela do operador."},
+ passos:[
+  "No alto {1} estão o produto, o ponto, a data, a máquina e o resumo: amostra, não conformes e resultado da amostragem.",
+  "Em <b>O que fazer com o lote</b> {2}, leia a orientação e siga. Ela muda conforme a situação (veja a tabela abaixo).",
+  "Em <b>O que fazer com a causa</b> {3}, cada causa encontrada mostra a reação imediata (Faça agora), a ação para corrigir e quem avisar.",
+  "Quando a Qualidade decide o destino, o aviso aparece no início da Tela do operador. Depois de cumprir, toque em <b>Entendi</b> para tirar o aviso da lista.",
+  "Toque em <b>Ir para o início</b> {4} para voltar."
+ ],
+ campos:[
+  {m:".opwrap>.opcard",n:"Resumo do lote",d:"Amostra inspecionada, peças não conformes, resultado e defeitos encontrados."},
+  {m:".opinst",n:"O que fazer com o lote",d:"Orientação da situação atual do lote."},
+  {m:".oprec",n:"O que fazer com a causa",d:"Reação (contenção imediata), ação corretiva e área a avisar, vindas da Biblioteca."},
+  {m:"#opNew2",n:"Ir para o início",d:"Volta à Tela do operador."},
+  {n:"Lote aprovado",d:"Separe só as peças não conformes (se houver) na gaiola vermelha e libere o lote."},
+  {n:"Lote reprovado · aguardando a Qualidade",d:"Mantenha o lote separado, com a etiqueta vermelha (FS 342). Não envie nem use as peças."},
+  {n:"Lote aceito pela Qualidade",d:"A Qualidade aceitou o lote mesmo com o defeito. Retire a etiqueta vermelha e libere."},
+  {n:"Faça a inspeção 100% deste lote",d:"Inspecione todas as peças (veja o tópico da inspeção 100%)."},
+  {n:"Lote rejeitado pela Qualidade",d:"Mantenha o lote bloqueado na área de segregação. Siga a orientação do líder de produção."},
+  {n:"Responda as perguntas sobre o defeito",d:"Ficaram perguntas sem resposta. Toque em Responder as perguntas."}
+ ],
+ resultado:"O aviso some da lista depois de Entendi, e o lote mostra a situação final em Inspeções recentes.",
+ cuidados:[
+  {t:"nc",x:"Nunca libere um lote reprovado por conta própria. Só a decisão da Qualidade, que aparece como aviso, libera o lote."}
+ ]},
+
+{id:"op-cem",mod:"operador",r:"iga",t:"Fazer a inspeção 100%",
+ d:"Inspecionar todas as peças de um lote segregado e informar quantas foram trocadas.",
+ oque:"Quando a Qualidade decide “Segregar e inspecionar 100%”, todas as peças do lote reprovado precisam ser inspecionadas. Cada peça não conforme é trocada por uma peça boa e o lote sai completo.",
+ serve:"Aproveitar as peças boas de um lote reprovado sem deixar passar peça com defeito.",
+ acesso:"Tela do operador › aviso “Faça a inspeção 100% deste lote” › Fazer a inspeção 100%.",
+ img:{id:"op_cem",perfil:"i",rota:"opcem",prep:"opCem",cap:"Inspeção 100% na Tela do operador."},
+ passos:[
+  "Toque em <b>Fazer a inspeção 100%</b> no aviso. O quadro do topo {1} lembra o passo a passo.",
+  "Pegue o lote separado com a etiqueta vermelha e inspecione peça por peça. O tamanho do lote {2} já vem fixo, igual ao da inspeção por amostragem.",
+  "Cada peça não conforme: tire do lote, coloque na gaiola vermelha (FS 342) e ponha uma peça boa no lugar.",
+  "No fim, informe em <b>Quantas peças não conformes você trocou?</b> {3} o total de peças trocadas. Use − e + ou digite.",
+  "Confira o resumo {4}: inspecionadas, conformes e trocadas, com o PPM e o nível sigma do lote.",
+  "Toque em <b>Concluir inspeção 100%</b> {5}."
+ ],
+ campos:[
+  {m:".opinst.cem",n:"Instruções",d:"Os quatro passos da inspeção 100%."},
+  {m:".opsum",n:"Tamanho do lote",d:"Total de peças a inspecionar. Não pode ser alterado aqui."},
+  {m:"#cNc",n:"Peças trocadas",d:"Conte a peça, não o defeito. Não precisa dizer qual era o defeito."},
+  {m:".optri",n:"Resumo",d:"Inspecionadas, conformes e trocadas."},
+  {m:"#ocFim",n:"Concluir inspeção 100%",d:"Encerra a inspeção 100% e libera o lote completo."}
+ ],
+ exemplo:"O lote 2611-05 tem 1.200 peças e foi reprovado com falha de injeção. A Qualidade escolheu a inspeção 100%. O Bruno inspeciona as 1.200, troca 16 peças por boas e informa 16. O sistema calcula PPM 13.333 e nível sigma 3,72, e libera o lote com 1.200 peças boas.",
+ resultado:"Aparece o aviso “Inspeção 100% concluída · lote liberado”. As peças trocadas ficam na gaiola vermelha e o lote segue completo. O PPM entra no Painel.",
+ cuidados:[
+  {t:"warn",x:"O número de peças trocadas não pode passar do tamanho do lote. Se aparecer “Não pode passar de …”, confira a contagem."},
+  {t:"info",x:"Encontrou durante a inspeção 100% um defeito diferente do que reprovou o lote? Avise a Qualidade, que pode abrir uma árvore de falha para ele."}
+ ]},
+
+{id:"op-ocorrencia",mod:"operador",r:"iga",t:"Registrar uma ocorrência",
+ d:"Defeito visto durante o trabalho, fora da inspeção por amostragem.",
+ oque:"Ocorrência é uma peça com defeito que você vê durante o trabalho, fora da inspeção por amostragem. Ela vai para a Qualidade e abre as perguntas da árvore de falha, mas não conta como inspeção do lote.",
+ serve:"Para a Qualidade saber de defeitos que surgem entre uma inspeção e outra e agir na causa cedo.",
+ acesso:"Tela do operador › Registrar ocorrência.",
+ img:{id:"op_ocorr",perfil:"i",rota:"opocorr",prep:"opOcorr",cap:"Registro de ocorrência, preenchido."},
+ passos:[
+  "Toque em <b>Registrar ocorrência</b>.",
+  "Em “Onde você viu o defeito?” {1}, toque em Moldagem, Estufa ou Final de linha.",
+  "Escolha o <b>Produto</b> e a <b>Máquina</b>, digite o <b>Lote / rack</b> e confira o <b>Turno</b> {2}.",
+  "Em “Qual defeito você viu?” {3}, toque em todos os defeitos que viu. A lista muda conforme o ponto escolhido.",
+  "Em <b>Quantas peças com defeito?</b> {4}, digite a quantidade.",
+  "Se quiser, preencha OP, molde e uma observação.",
+  "Toque em <b>Registrar e responder as perguntas</b> {5} e responda à árvore de cada defeito.",
+  "No fim, a tela mostra o que fazer: separe as peças com defeito na gaiola vermelha e siga a reação de cada causa encontrada."
+ ],
+ campos:[
+  {m:".optiles",n:"Onde viu o defeito",d:"Ponto do processo. Define a lista de defeitos."},
+  {m:"#ocMaq",n:"Produto, máquina, lote e turno",d:"Identificam de onde vieram as peças."},
+  {m:".opchips",n:"Defeitos",d:"Marque um ou mais. Cada defeito vira uma árvore de falha."},
+  {m:"#ocQtd",n:"Quantas peças",d:"Quantidade de peças com defeito que você viu."},
+  {m:"#ocOk",n:"Registrar e responder as perguntas",d:"Grava a ocorrência e abre as perguntas."}
+ ],
+ exemplo:"No começo do 2º turno, o Diego percebe peças com rebarba grossa saindo da cavidade 2 na moldagem. Ele registra a ocorrência: Moldagem, máquina K1014, rack 43, Rebarba acima do especificado, 4 peças, observação “cavidade 2 desde o começo do turno”. Nas perguntas, encontra o ancorador amassado.",
+ resultado:"A ocorrência aparece em Ocorrências recentes como “Enviada” e, para a Qualidade, na tela Ocorrências.",
+ cuidados:[
+  {t:"info",x:"Ocorrência não substitui a inspeção. Se o lote ainda precisa ser inspecionado, faça a inspeção normalmente."}
+ ]},
+
+{id:"op-pesagem",mod:"operador",r:"iga",t:"Registrar uma pesagem",
+ d:"Pesar 5 peças no mesmo horário para a carta X̄-R.",
+ oque:"É o registro do peso de 5 peças tiradas no mesmo horário. Cada registro forma um subgrupo da carta de controle X̄-R, que acompanha se o processo está estável.",
+ serve:"Use no horário de pesagem definido pela JSP: peso úmido na moldagem, antes da estufa, e peso seco no final de linha, depois da estufa.",
+ acesso:"Tela do operador › Registrar pesagem.",
+ img:{id:"op_peso",perfil:"i",rota:"oppeso/seco",prep:"opPeso",alvo:"#psFormCard",cap:"Registro de um subgrupo de peso seco."},
+ passos:[
+  "Toque em <b>Registrar pesagem</b>.",
+  "Escolha <b>Peso seco</b> ou <b>Peso úmido</b> nas abas do topo {1}.",
+  "Confira a <b>Data e hora</b> {2}; ela vem com o momento atual.",
+  "Digite o <b>Lote</b>, confira o <b>Turno</b> e o <b>Responsável</b> {3}.",
+  "Pese 5 peças seguidas e digite cada peso em kg, com vírgula, em <b>Peça 1</b> a <b>Peça 5</b> {4}. Exemplo: 1,215. Apertar Enter leva à peça seguinte.",
+  "Confira a média (X̄) e a amplitude (R) calculadas na hora {5}. Peso fora da especificação da FTP fica destacado.",
+  "Toque em <b>Registrar subgrupo</b> {6}. Se não conseguiu pesar as 5, use <b>Guardar incompleto</b> e complete depois pelo botão Completar na lista de subgrupos."
+ ],
+ campos:[
+  {m:".pstabs",n:"Peso seco / Peso úmido",d:"Escolhe a carta. Seco: final de linha, após a estufa. Úmido: moldagem, antes da estufa."},
+  {m:"#psEm",n:"Data e hora",d:"Momento da pesagem. Não pode estar no futuro."},
+  {m:"#psLote",n:"Lote, turno e responsável",d:"Identificam o subgrupo. O responsável vem com o seu nome."},
+  {m:"[data-psv]",n:"Peça 1 a 5",d:"Peso de cada peça em kg."},
+  {m:".psprev",n:"X̄ e R",d:"Média e amplitude (maior menos menor peso) do subgrupo."},
+  {m:"#psSave",n:"Registrar subgrupo",d:"Grava o subgrupo. Só ativa com os 5 pesos válidos."}
+ ],
+ exemplo:"Às 14h, a Carla pesa 5 caixas no final de linha: 1,214; 1,198; 1,221; 1,206; 1,210. O sistema mostra X̄ = 1,2098 kg e R = 0,0230 kg. Ela registra o subgrupo.",
+ resultado:"A mensagem “SG-… registrado” confirma o número do subgrupo, que aparece no topo da lista de subgrupos e na carta X̄-R do Painel.",
+ cuidados:[
+  {t:"warn",x:"Pese as 5 peças no mesmo horário e da mesma máquina. Misturar horários diferentes num subgrupo esconde a variação que a carta precisa mostrar."},
+  {t:"info",x:"Um aviso de “Sinais de causa especial” não reprova o produto. Ele pede que se investigue o processo. Quem diz se o peso atende é a especificação da FTP."}
+ ]},
+
+/* ---------------- ACOMPANHAR A QUALIDADE ---------------- */
+{id:"painel",mod:"acomp",r:"ga",t:"Ler o Painel",
+ d:"Pendências, aceitação, Pareto, resultado por ponto, carta X̄-R, PPM e regime.",
+ oque:"É a tela inicial de Gestor e Administrador. Reúne num só lugar o que precisa de ação e os indicadores de qualidade do período.",
+ serve:"Abra no início do dia para ver o que está pendente e acompanhe as tendências antes das reuniões de qualidade.",
+ acesso:"Menu lateral › Painel. É a primeira tela depois de entrar.",
+ img:{id:"painel",perfil:"g",rota:"painel",cap:"Topo do Painel."},
+ passos:[
+  "Escolha o <b>Período</b> e o <b>Produto</b> {1}. Todos os números do Painel passam a respeitar esse filtro.",
+  "Comece por <b>Precisa de atenção</b> {2}: lotes para decidir, árvores de falha em aberto, ocorrências sem análise e a situação das duas cartas de pesagem. Clique num cartão para ir direto à tela correspondente.",
+  "Veja os indicadores {3}: lotes inspecionados, taxa de aceitação e porcentagem de peças não conformes nas amostras.",
+  "No <b>Pareto de falhas</b> {4}, as falhas estão em ordem de frequência. Alterne entre <b>Nas inspeções</b> e <b>Nas ocorrências</b>. A frase embaixo diz quanto as 3 primeiras somam: é por elas que vale começar a agir.",
+  "Mais abaixo: <b>Resultado por ponto de inspeção</b> e <b>Por máquina</b> (porcentagem de lotes aceitos na inspeção original), <b>Últimos lotes</b>, a carta X̄-R da pesagem, a tabela de PPM e nível sigma das inspeções 100% e o <b>Regime de inspeção</b> de cada série.",
+  "No regime, clique em <b>Como funciona?</b> para ver as regras de troca entre normal, severo e atenuado."
+ ],
+ campos:[
+  {m:"#pfD",n:"Período e Produto",d:"Filtram todo o Painel. Os acumulados de PPM mostram também o período filtrado na última coluna."},
+  {m:".atencao",n:"Precisa de atenção",d:"Pendências que pedem ação agora."},
+  {m:".statsrow",n:"Indicadores",d:"Lotes inspecionados, taxa de aceitação e % de peças não conformes."},
+  {m:"text=Pareto de falhas@.card",n:"Pareto de falhas",d:"Em quantos lotes (ou ocorrências) cada falha apareceu."},
+  {n:"PPM e nível sigma",d:"PPM = peças trocadas ÷ peças inspecionadas × 1.000.000 nas inspeções 100%. Nível sigma com deslocamento de 1,5σ."},
+  {n:"Regime por série",d:"Cada combinação de produto, ponto e NQA tem o seu regime pela NBR 5426: normal, severo ou atenuado."}
+ ],
+ exemplo:"Na segunda de manhã, a gestora filtra os últimos 7 dias. Vê 2 lotes para decidir e clica no cartão. No Pareto, rebarba, inchaço e bico estourado somam 40% das falhas; ela leva esses três para a reunião de melhoria.",
+ resultado:"Você sai do Painel sabendo o que decidir hoje e quais falhas atacar primeiro.",
+ cuidados:[
+  {t:"info",x:"Ocorrências não entram na taxa de aceitação nem no regime. Elas têm o Pareto próprio (Nas ocorrências)."},
+  {t:"info",x:"Dados marcados como DEMO aparecem no Painel quando a demonstração está carregada naquele aparelho. Remova em Dados e configuração antes de analisar números reais."}
+ ]},
+
+{id:"carta-xr",mod:"acomp",r:"ga",t:"Interpretar a carta X̄-R",
+ d:"Limites de controle, especificação da FTP e sinais de causa especial.",
+ oque:"São dois gráficos feitos com as pesagens. O gráfico 1 mostra a média (X̄) de cada subgrupo de 5 peças; o gráfico 2, a amplitude (R), que é a diferença entre a peça mais pesada e a mais leve do subgrupo.",
+ serve:"Mostra se a variação do peso é a variação natural do processo ou se apareceu uma causa especial que precisa ser investigada.",
+ acesso:"Menu lateral › Painel › seção Pesagem · carta X̄-R. Escolha Peso seco ou Peso úmido.",
+ img:{id:"carta",perfil:"g",rota:"painel",prep:"carta",alvo:"#cepCard",cap:"Carta das médias com o balão de um ponto."},
+ passos:[
+  "Escolha a carta: <b>Peso seco</b> ou <b>Peso úmido</b>. Em <b>Mostrar</b>, escolha os últimos 25, 40 ou todos os subgrupos.",
+  "Cada bolinha é um subgrupo. Passe o mouse em cima (ou toque, no celular) para ver o balão {1} com o número do subgrupo, o valor, data, hora e lote, e se é sinal de causa especial.",
+  "As linhas <b>LSC</b>, <b>LC</b> e <b>LIC</b> {2} são os limites de controle e a linha central, calculados com os dados do próprio processo. O valor de cada uma aparece ao lado da linha.",
+  "As linhas roxas <b>LSE</b> e <b>LIE</b> {3} são a especificação da FTP, fixa, cadastrada no produto. Só aparecem no gráfico das médias.",
+  "Bolinha vermelha é <b>sinal de causa especial</b>: ponto fora dos limites ou uma sequência fora do comum (regras da ISO 8258). Investigue o que mudou no processo naquele horário.",
+  "Para ver a lista de subgrupos, os limites e os sinais em detalhe, use o link <b>Subgrupos, limites e sinais</b>, que abre a tela Pesagem."
+ ],
+ campos:[
+  {m:".ceptip",n:"Ponto (subgrupo)",d:"Média ou amplitude de um subgrupo de 5 peças. Verde no balão: dentro dos limites. Vermelho: sinal."},
+  {m:"text=LSC 1,232",n:"LSC, LC e LIC",d:"Carta X̄: LSC = X̄̄ + A₂·R̄ e LIC = X̄̄ − A₂·R̄. Carta R: LSC = D₄·R̄ e LIC = D₃·R̄. Constantes de n = 5: A₂ = 0,577, D₃ = 0, D₄ = 2,114."},
+  {m:"text=LSE · especificação máx. 1,392",n:"LSE e LIE",d:"Mínimo e máximo de peso da FTP. Dizem se a peça atende à JSP."},
+  {n:"Limites provisórios e estabelecidos",d:"Com 10 a 19 subgrupos completos, os limites são provisórios. Com 20, ficam estabelecidos e fixos; não mudam a cada registro."},
+  {n:"Situação",d:"Em formação, Sob controle ou Instável (há sinais nos últimos 10 subgrupos)."}
+ ],
+ exemplo:"O subgrupo 27 do peso seco teve X̄ = 1,2856 kg, acima do LSC de 1,232 kg, mas abaixo do LSE de 1,392 kg. As peças atendem à especificação, mas o processo saiu do comportamento normal naquele horário. A Qualidade verifica o que aconteceu no turno (troca de matéria-prima, ajuste de enchimento) antes que o desvio chegue a peças fora da FTP.",
+ resultado:"Você distingue dois problemas diferentes: processo instável (sinal na carta) e produto fora do especificado (fora de LSE/LIE).",
+ cuidados:[
+  {t:"warn",x:"Limite de controle não é especificação. Um ponto fora do LSC pede investigação, não reprova o produto. Um peso fora do LSE/LIE é produto fora do especificado, mesmo que a carta esteja sob controle."},
+  {t:"info",x:"Os limites só aparecem com pelo menos 10 subgrupos completos. Antes disso, a carta mostra “Gráfico em formação”."}
+ ]},
+
+{id:"inspecoes",mod:"acomp",r:"ga",t:"Consultar as inspeções",
+ d:"Lista de lotes inspecionados, filtros e exportação para o Excel.",
+ oque:"É a lista de todas as inspeções por amostragem registradas, com o plano aplicado, o resultado e a situação de cada lote.",
+ serve:"Para encontrar um lote, acompanhar os que estão aguardando decisão e exportar os dados para análise no Excel.",
+ acesso:"Menu lateral › Inspeções.",
+ img:{id:"inspecoes",perfil:"g",rota:"inspecoes",cap:"Lista de inspeções com os filtros."},
+ passos:[
+  "Use os filtros {1}: busca por lote, OP, máquina ou inspetor; ponto; situação; período (De e Até); produto e máquina.",
+  "A linha de resumo {2} mostra quantas inspeções o filtro encontrou, quantas foram rejeitadas, quantas estão em andamento e o total de peças não conformes.",
+  "Na tabela {3}, cada linha é um lote: data, lote, OP, ponto, máquina, tamanho do lote (N), NQA, regime, plano (n / Ac / Re), peças não conformes (d), resultado da amostragem, situação do lote e número de árvores.",
+  "Clique numa linha para abrir a página do lote.",
+  "Para levar ao Excel, clique em <b>Exportar CSV</b> {4}. O arquivo traz todas as inspeções do filtro com as decisões e a inspeção 100%.",
+  "Para limpar os filtros, use o link <b>Limpar</b> na linha de resumo."
+ ],
+ campos:[
+  {m:".filtgrid",n:"Filtros",d:"Combinam entre si. Situação “Aguardando decisão da Qualidade” mostra só os lotes que pedem ação."},
+  {m:".filtsum",n:"Resumo do filtro",d:"Totais da lista filtrada."},
+  {m:".tw .t",n:"Tabela de inspeções",d:"Uma linha por lote. No celular, vira uma lista de cartões."},
+  {m:"#exI",n:"Exportar CSV",d:"Baixa a lista para abrir no Excel."}
+ ],
+ resultado:"A lista mostra até 100 lotes; use “Mostrar mais” no fim para ver os seguintes.",
+ cuidados:[
+  {t:"info",x:"“Amostragem” é o resultado da norma (aceito ou rejeitado). “Situação do lote” é o que aconteceu com ele depois, por exemplo “Lote liberado após inspeção 100%”."}
+ ]},
+
+{id:"lote",mod:"acomp",r:"ga",t:"A página do lote",
+ d:"Etapas, histórico, plano aplicado, falhas, árvores e relatório.",
+ oque:"É o registro completo de uma inspeção: em que etapa o lote está, quem fez o quê e quando, o plano de amostragem usado e as falhas e árvores de falha ligadas a ele.",
+ serve:"Para conferir um lote antes de decidir, responder a uma auditoria ou imprimir o relatório de inspeção.",
+ acesso:"Menu lateral › Inspeções › clique no lote. Também pelos cartões do Painel e pelos avisos.",
+ img:{id:"lote",perfil:"g",rota:"inspecao",prep:"loteRej",cap:"Página de um lote reprovado aguardando decisão."},
+ passos:[
+  "No topo {1}, a faixa colorida mostra a situação do lote e o resultado da amostragem (d, Ac, Re).",
+  "Logo abaixo {2}, as etapas do lote: inspeção por amostragem, árvores de falha, decisão do lote, inspeção 100% (quando houver) e resultado final. Etapa concluída tem ✓.",
+  "Quando o lote está aguardando decisão, a barra de baixo mostra o botão <b>Decidir destino do lote</b>. Quando já foi decidido, o cartão <b>Destino do lote</b> mostra a decisão, o motivo, quem decidiu e quando.",
+  "O <b>Histórico do lote</b> {3} lista cada evento com data, hora e usuário.",
+  "Os cartões <b>Lote</b> e <b>Plano aplicado</b> trazem os dados do registro e o plano da NBR 5426 que foi usado.",
+  "Em <b>Falhas encontradas na amostra</b> e <b>Árvores de falha deste lote</b>, clique numa linha para abrir a árvore.",
+  "Para lote rejeitado em definitivo, o cartão <b>Plano de reação</b> traz a lista de verificação da FS 342 / PR 8.7 para marcar.",
+  "Clique em <b>Imprimir relatório</b> {4} para gerar o relatório em papel ou PDF."
+ ],
+ campos:[
+  {m:".verdict",n:"Situação do lote",d:"Aguardando decisão, Lote aceito, Lote liberado após inspeção 100%, Lote rejeitado e outras."},
+  {m:".lotflow",n:"Etapas",d:"Caminho do lote no processo de inspeção."},
+  {m:".tl",n:"Histórico do lote",d:"Linha do tempo com os registros e os responsáveis."},
+  {m:'#topright button:first-child',n:"Imprimir relatório",d:"Relatório de inspeção com o logo da JSP."},
+  {r:"a",n:"Excluir",d:"Só Administrador. Exclui a inspeção com motivo (veja Excluir e restaurar inspeções)."},
+  {n:"Reabrir decisão",d:"No cartão Destino do lote. Volta o lote para a decisão; a decisão anterior fica no histórico."}
+ ],
+ resultado:"Tudo o que aconteceu com o lote está numa página, com rastreabilidade de usuário e horário.",
+ cuidados:[
+  {t:"info",x:"A inspeção registrada não pode ser editada. Se houver erro de registro, o Administrador exclui com o motivo e o inspetor registra de novo."}
+ ]},
+
+{id:"ocorrencias",mod:"acomp",r:"ga",t:"Acompanhar as ocorrências",
+ d:"Defeitos vistos fora da inspeção e a análise de cada um.",
+ oque:"É a lista das ocorrências registradas pelos operadores na Tela do operador, com o defeito, as peças e a causa encontrada.",
+ serve:"Para tratar defeitos que surgem entre as inspeções e acompanhar se cada ocorrência teve a análise concluída.",
+ acesso:"Menu lateral › Ocorrências.",
+ img:{id:"ocorrencias",perfil:"g",rota:"ocorrencias",cap:"Ocorrências no processo."},
+ passos:[
+  "Os indicadores do topo {1} mostram o total de ocorrências, de peças com defeito, quantas têm perguntas sem responder e quantas estão em análise.",
+  "Filtre {2} por texto (lote, defeito, máquina, molde), ponto e situação.",
+  "Na tabela {3}, veja quando foi registrada, ponto, lote, máquina, defeitos, peças, causa encontrada, quem registrou e a situação.",
+  "Clique numa linha para abrir a árvore de falha e completar a análise (classificação da causa, status e síntese).",
+  "Use <b>Exportar CSV</b> {4} para levar a lista ao Excel."
+ ],
+ campos:[
+  {m:".kpis",n:"Indicadores",d:"Totais das ocorrências."},
+  {m:"#ocQ",n:"Filtros",d:"Situação “Sem análise concluída” junta as que ainda pedem trabalho."},
+  {m:".tw .t",n:"Tabela",d:"Situação: Perguntas sem responder, Em análise ou Concluída."},
+  {m:"#exO",n:"Exportar CSV",d:"Baixa a lista."}
+ ],
+ resultado:"Quando todas as árvores de uma ocorrência são marcadas como Concluída, a ocorrência sai das pendências do Painel.",
+ cuidados:[
+  {t:"info",x:"Ocorrências não entram no plano de amostragem, no regime nem nas taxas de aprovação."}
+ ]},
+
+/* ---------------- DECIDIR E ANALISAR ---------------- */
+{id:"decisao",mod:"analise",r:"ga",t:"Decidir o destino de um lote reprovado",
+ d:"Aceitar mesmo assim, segregar e inspecionar 100% ou rejeitar.",
+ oque:"Quando a amostragem reprova um lote, a Qualidade decide o que fazer com ele, com base nas causas encontradas nas árvores de falha. A decisão fica registrada com o usuário e a data e chega ao operador como aviso.",
+ serve:"Usar a decisão certa para cada caso: um defeito estético escondido após a montagem não é tratado como uma falha que impede o uso da peça.",
+ acesso:"Painel › Lotes para decidir, ou Inspeções › lote com situação “Aguardando decisão” › Decidir destino do lote (barra de baixo).",
+ img:{id:"decisao",perfil:"g",rota:"disposicao",prep:"decisao",cap:"Decisão de disposição com “Aceitar lote mesmo assim” escolhido."},
+ passos:[
+  "Abra o lote aguardando decisão. Se ainda faltar preencher alguma árvore de falha, a tela pede para preencher antes, porque a decisão usa a causa identificada.",
+  "Confira o resultado da amostragem e o quadro <b>O que as árvores de falha encontraram</b> {1}, com a causa identificada de cada falha.",
+  "Em <b>Qual o destino do lote?</b>, clique numa das três opções {2}. Cada cartão lista quando usar.",
+  "<b>Aceitar lote mesmo assim:</b> escolha o <b>Motivo da aceitação</b> {3} (obrigatório) e, se quiser, escreva a justificativa.",
+  "<b>Segregar e inspecionar 100%:</b> o operador recebe o aviso para inspecionar todas as peças, trocar as não conformes e informar quantas trocou. Pode escrever uma observação, como onde o lote está.",
+  "<b>Rejeitar lote:</b> o lote fica bloqueado. Pode escrever a justificativa. Depois, siga o plano de reação na página do lote.",
+  "Clique em <b>Registrar decisão</b> ou <b>Enviar para inspeção 100%</b> {4}.",
+  "Se precisar mudar a decisão depois, abra o lote e clique em <b>Reabrir decisão</b>. O sistema pede o motivo e guarda a decisão anterior no histórico."
+ ],
+ campos:[
+  {m:".dsum",n:"Resultado e árvores",d:"Resumo da amostragem e das causas, para decidir com informação."},
+  {m:".dopts",n:"Três opções",d:"Aceitar mesmo assim, Segregar e inspecionar 100%, Rejeitar."},
+  {m:".dform",n:"Motivo e justificativa",d:"Na aceitação o motivo é obrigatório: não afeta função, segurança ou desempenho; só estético; região oculta após a montagem; ou dentro da condição aceita pela JSP."},
+  {m:"#dOk",n:"Registrar decisão / Enviar para inspeção 100%",d:"Grava a decisão e avisa o operador."}
+ ],
+ exemplo:"O lote 1119-3 foi reprovado com rebarba de 4 mm na aba inferior. A árvore mostrou cavidades desiguais no molde. A rebarba fica escondida pelo carpete do porta-malas. A gestora escolhe Aceitar lote mesmo assim, motivo “Região oculta após a montagem”, escreve a justificativa e registra. O operador recebe “Lote aceito pela Qualidade” e libera o lote; a Ferramentaria recebe a ação de corrigir a cavidade.",
+ resultado:"O lote muda de situação, a decisão aparece no cartão Destino do lote e no histórico, e o operador recebe o aviso do que fazer.",
+ cuidados:[
+  {t:"warn",x:"Aceitar um lote reprovado não muda o resultado da amostragem: para as regras de comutação da NBR 5426 ele continua rejeitado, e o regime pode ir para severo. A aceitação é registrada como concessão."},
+  {t:"nc",x:"Aceite só quando o defeito não afeta função, segurança ou desempenho e está dentro da condição aceita pela JSP ou pelo cliente. Na dúvida, segregue e inspecione 100%."}
+ ]},
+
+{id:"arvore-analise",mod:"analise",r:"ga",t:"Analisar uma árvore de falha",
+ d:"Origem, causas com evidência, classificação e conclusão.",
+ oque:"É a investigação de um defeito, do efeito de volta às etapas do processo e às causas possíveis. O operador responde às perguntas no posto; a Qualidade completa com a evidência, classifica a causa e conclui.",
+ serve:"Para chegar à causa raiz com base em registro e definir a ação de reação, em vez de só separar peças.",
+ acesso:"Menu lateral › Árvores de falha › clique na árvore. Também pela página do lote ou pela tela Ocorrências.",
+ img:{id:"arvore",perfil:"g",rota:"arvore",prep:"arvore",cap:"Árvore de falha de um lote, com o diagrama."},
+ passos:[
+  "Se o lote tem mais de um defeito, as abas do topo {1} trocam entre as árvores. Árvore preenchida tem ✓.",
+  "O resumo {2} mostra onde o defeito foi detectado, a especificação, a origem localizada e o status.",
+  "O diagrama {3} vai do efeito, à esquerda, até as causas possíveis. Vermelho: desvio observado. Verde: sem desvio. Tracejado: fora da etapa de origem. Clique numa causa para ir até ela.",
+  "<b>Passo 1 · Localizar a origem:</b> responda Sim, Não ou Sem registro às perguntas, conferindo a evidência indicada.",
+  "<b>Passo 2 · Verificar as causas:</b> para cada causa, marque <b>Desvio observado</b>, <b>Sem desvio</b> ou <b>Sem registro</b> {4}. Ao marcar desvio, descreva a evidência (documento, valor, período), por exemplo “IHM mostrou vapor 4,5 bar (FTP 3,8) das 14h às 16h”.",
+  "Na conclusão {5}, escolha a <b>Classificação da causa</b> (confirmada com evidência, provável ou não confirmada), o <b>Status</b> (Aberta, Em andamento, Concluída) e escreva a <b>Síntese</b> da causa e da evidência.",
+  "As respostas são gravadas a cada clique. Na barra de baixo, <b>Próxima árvore</b> leva ao próximo defeito do lote."
+ ],
+ campos:[
+  {m:".flowbar",n:"Árvores do lote",d:"Uma aba por defeito."},
+  {m:".list-kv",n:"Resumo",d:"Ponto de detecção, especificação (FS 070), origem e status."},
+  {m:".treebox",n:"Diagrama",d:"Efeito à esquerda, etapas e causas à direita."},
+  {m:".seg.yn",n:"Resposta da causa",d:"Uma condição observada no mesmo período não comprova sozinha a causa: registre a evidência."},
+  {m:"text=Classificação da causa@.card",n:"Conclusão",d:"Classificação, status e síntese."},
+  {n:"Imprimir / Excluir árvore",d:"No alto. Excluir remove a árvore; use só para árvore aberta por engano."}
+ ],
+ exemplo:"Na árvore de Falha de injeção do lote 1030-1, o operador respondeu que o defeito já vinha da moldagem. A gestora confere o histórico da máquina, marca “Falta de material no silo ou pressão de rede baixa” como Desvio observado, com a evidência “pressão de rede 5,2 bar às 9h, registro do turno”, classifica como confirmada, escreve a síntese e muda o status para Concluída.",
+ resultado:"A causa aparece na lista de árvores, na página do lote e no Painel. Status Concluída tira a árvore das pendências.",
+ cuidados:[
+  {t:"warn",x:"Responda com base em registro (IHM, Formulário A, OS, checklist), não em suposição. “Sem registro” é melhor do que um “desvio” sem evidência."}
+ ]},
+
+{id:"arvores-lista",mod:"analise",r:"ga",t:"Lista de árvores de falha",
+ d:"Todas as árvores, de inspeções e de ocorrências.",
+ oque:"Reúne todas as árvores de falha, abertas a partir de inspeções de lote ou de ocorrências no processo.",
+ serve:"Para acompanhar quais análises estão em aberto e exportar o histórico de causas.",
+ acesso:"Menu lateral › Árvores de falha.",
+ img:{id:"arvores",perfil:"g",rota:"investigacoes",cap:"Lista de árvores de falha."},
+ passos:[
+  "Filtre por <b>Origem</b> {1} (inspeções de lote ou ocorrências) e por <b>Situação</b> (em aberto ou concluídas).",
+  "Na tabela {2}: data, defeito, ponto, lote, origem localizada, desvios observados, classificação, responsável e status.",
+  "Clique numa linha para abrir a árvore.",
+  "Use <b>Exportar CSV</b> {3} para levar ao Excel."
+ ],
+ campos:[
+  {m:"#ivO",n:"Filtros",d:"Origem e situação."},
+  {m:".tw .t",n:"Tabela",d:"Uma linha por árvore."},
+  {m:"#exV",n:"Exportar CSV",d:"Baixa as árvores com as respostas."}
+ ],
+ resultado:"Você encontra qualquer análise e sabe quais ainda faltam concluir.",
+ cuidados:[{t:"info",x:"Para abrir uma árvore nova, entre na inspeção do lote: as árvores nascem dos defeitos registrados."}]},
+
+{id:"pesagem-gestao",mod:"analise",r:"ga",t:"Gerenciar as pesagens e os limites",
+ d:"Subgrupos, limites, sinais, tirar da base e redefinir a base.",
+ oque:"É a tela de detalhe da carta X̄-R: indicadores, linhas de controle com as fórmulas, premissas, sinais de causa especial e a lista de subgrupos registrados.",
+ serve:"Para conferir os cálculos, tratar subgrupos com causa especial identificada e refazer a base dos limites quando o processo muda.",
+ acesso:"Menu lateral › Pesagem, ou o link “Subgrupos, limites e sinais” da carta no Painel.",
+ img:{id:"pesagem",perfil:"g",rota:"pesagem/seco",cap:"Pesagem · subgrupos e limites."},
+ passos:[
+  "Escolha <b>Peso seco</b> ou <b>Peso úmido</b> {1}.",
+  "Leia a faixa de situação e os indicadores {2}: medições, subgrupos, X̄̄, R̄, maior e menor valor, situação e especificação da FTP.",
+  "Em <b>Linhas de controle</b> {3}, confira LSC, LC e LIC das duas cartas e a conta feita.",
+  "Em <b>Sinais de causa especial</b>, veja em qual subgrupo, carta e regra aconteceu cada sinal.",
+  "Se a causa especial de um subgrupo foi identificada e eliminada, clique em <b>Tirar da base</b> na linha dele e informe a causa. O subgrupo continua no gráfico, mas sai do cálculo dos limites.",
+  "Se o processo mudou (molde novo, nova matéria-prima), clique em <b>Redefinir a base dos limites</b> {4} e informe o motivo. Os limites passam a ser calculados a partir dali. <b>Voltar à base inicial</b> desfaz.",
+  "<b>Excluir</b> remove um subgrupo registrado por engano."
+ ],
+ campos:[
+  {m:".pstabs",n:"Peso seco / Peso úmido",d:"Carta mostrada."},
+  {m:".kpis",n:"Indicadores",d:"Resumo estatístico do processo."},
+  {m:"text=Linhas de controle@.card",n:"Linhas de controle",d:"Valores e fórmulas, com σ̂ = R̄ ÷ d₂."},
+  {m:"#psRebase",n:"Redefinir a base dos limites",d:"Recalcula os limites a partir de um novo período."},
+  {n:"Tirar da base / Devolver à base",d:"Exclui ou devolve um subgrupo do cálculo dos limites, com motivo."}
+ ],
+ resultado:"Os limites refletem o processo atual, e cada ajuste fica registrado com motivo e usuário.",
+ cuidados:[
+  {t:"warn",x:"Só tire um subgrupo da base quando a causa especial foi identificada. Tirar pontos só porque estão fora deixa os limites apertados demais e esconde a variação real."},
+  {t:"info",x:"Protótipo: a pesagem está configurada só para a Caixa de ferramentas Toyota (1500130050 · 64993-BZ100)."}
+ ]},
+
+{id:"biblioteca",mod:"analise",r:"ga",t:"Usar e manter a Biblioteca causa/efeito",
+ d:"Causas, ações de reação e evidências de cada falha.",
+ oque:"É a base de conhecimento do sistema: para cada falha da FS 070, as causas raiz prováveis, a etapa do processo, a ação de reação e onde buscar a evidência. Cada causa cadastrada aqui aparece nas perguntas da árvore de falha daquela falha.",
+ serve:"Consultar o que fazer diante de uma falha e incluir causas novas aprendidas na fábrica, para que o próximo operador já as verifique.",
+ acesso:"Menu lateral › Biblioteca causa/efeito.",
+ img:[{id:"biblioteca",perfil:"g",rota:"biblioteca",prep:"biblioteca",cap:"Biblioteca com a falha Rebarba aberta."},
+      {id:"causa",perfil:"g",rota:"causa",prep:"causa",cap:"Formulário de uma causa."}],
+ passos:[
+  "Busque pelo campo <b>Buscar</b> ou clique numa falha na lista agrupada.",
+  "Na falha aberta {1}, filtre pela etapa do processo e marque <b>Mostrar detalhes</b> para ver etapa, mecanismo, responsável e critério de eficácia.",
+  "Para incluir uma causa, clique em <b>+ Adicionar causa</b> {2} na linha da falha. Para corrigir, clique em <b>Editar</b> {3} na causa.",
+  "No formulário, parte 1 {4}: escolha a <b>Falha</b>, a <b>Etapa do processo</b> onde está a causa (define em que ramo da árvore ela aparece), escreva a <b>Causa raiz provável</b> e como ela gera a falha.",
+  "Parte 2 {5}: escreva a <b>Ação de reação (corretiva)</b>, o responsável, o critério de eficácia e, se quiser, a contenção imediata do lote.",
+  "Parte 3: inclua as fontes de dados (onde confirmar a causa), com <b>+ Fonte de dados</b>.",
+  "Clique em <b>Adicionar causa</b> ou <b>Salvar causa</b> na barra de baixo.",
+  "Para tirar uma causa de uma falha, abra a causa e clique em <b>Remover desta falha</b>."
+ ],
+ campos:[
+  {m:"#bdef",i:0,n:"Falha e etapa",d:"Escolhem a falha e filtram as causas pela etapa."},
+  {m:"text=+ Adicionar causa",i:0,n:"+ Adicionar causa",d:"Nova causa para a falha."},
+  {m:"text=Editar",i:0,n:"Editar",d:"Abre a causa para alterar."},
+  {m:"#c_df",i:1,n:"1 · Falha e causa",d:"Falha, etapa, causa e mecanismo. Os campos com * são obrigatórios."},
+  {m:"#c_acao",i:1,n:"2 · Ação de reação",d:"O que fazer quando a causa é confirmada. Aparece para o operador em “O que fazer com a causa”."},
+  {n:"3 · Fonte de dados / 4 · Confiança",d:"Onde buscar a evidência e de onde veio a informação."},
+  {n:"Exportar CSV",d:"No alto da Biblioteca. Baixa todas as relações falha × causa."}
+ ],
+ exemplo:"Numa ocorrência de inchaço, a manutenção descobriu aspersor de refrigeração entupido, causa que não estava na Biblioteca. O gestor abre Inchaço (peça maior), clica em + Adicionar causa, escolhe a etapa Moldagem · Refrigeração, descreve a causa e a reação (limpar o aspersor e abrir OS) e salva. Na próxima ocorrência de inchaço, essa pergunta já aparece para o operador.",
+ resultado:"A causa passa a aparecer na árvore de falha daquela falha, para todos os usuários.",
+ cuidados:[
+  {t:"warn",x:"Uma alteração vale para todos e para as próximas árvores. Quando a mesma causa existe em várias falhas, editar numa falha não muda as outras; o sistema avisa no topo do formulário."},
+  {t:"info",x:"Causa original do sistema que foi alterada pode voltar ao texto original pelo botão “Restaurar texto original”."}
+ ]},
+
+/* ---------------- CADASTROS E REFERÊNCIA ---------------- */
+{id:"produtos",mod:"cad",r:"ga",t:"Cadastrar e editar produtos",
+ d:"Identificação, NQA por ponto e parâmetros da FTP.",
+ oque:"O cadastro do produto guarda a identificação, o NQA de cada ponto de inspeção e os parâmetros da Ficha Técnica de Processo (FTP), inclusive as faixas de peso úmido e seco.",
+ serve:"O NQA cadastrado é o que define o plano de amostragem na inspeção, e as faixas de peso viram as linhas LSE e LIE da carta X̄. Sem produto cadastrado, ninguém consegue inspecioná-lo.",
+ acesso:"Menu lateral › Cadastros › aba Produtos › + Adicionar produto, ou Editar no produto.",
+ img:{id:"produto",perfil:"g",rota:"produto",prep:"produto",cap:"Cadastro de produto."},
+ passos:[
+  "Clique em <b>+ Adicionar produto</b> ou em <b>Editar</b> no produto.",
+  "Em <b>1 · Identificação</b> {1}: código JSP e descrição (obrigatórios), cliente, código do cliente e máquina padrão. <b>+ Adicionar outra máquina</b> cadastra uma máquina sem sair da tela.",
+  "Em <b>2 · Pré-definições de amostragem</b> {2}, para Moldagem, Estufa e Final de linha, escolha o <b>NQA (%)</b> e, se quiser, o tamanho de lote padrão. O nível é sempre II.",
+  "Em <b>3 · Parâmetros de processo (FTP)</b> {3}, informe nº e revisão da FTP e, para cada parâmetro, nominal, mínimo e máximo. Ajuste nomes e unidades, remova o que não se aplica com ✕ e inclua o que faltar com <b>+ Incluir parâmetro</b>.",
+  "Clique em <b>Salvar produto</b> (ou Adicionar produto) {4} na barra de baixo."
+ ],
+ campos:[
+  {m:"#pd_id",n:"1 · Identificação",d:"O código JSP não pode repetir outro produto."},
+  {m:"text=2 · Pré-definições de amostragem (NBR 5426)@.card",n:"2 · Pré-definições de amostragem",d:"NQA e lote padrão por ponto. “NQA proposto pelo grupo · validar” indica valor ainda não confirmado pela JSP."},
+  {m:"#ftp_rev",n:"3 · Parâmetros (FTP)",d:"Copiar da FTP vigente. Peso úmido e seco aparecem para o inspetor e na carta X̄-R."},
+  {m:"#pdS",n:"Salvar produto",d:"Grava para todos. Sair sem salvar perde as alterações."},
+  {n:"Excluir produto",d:"No alto. As inspeções já feitas com o produto continuam guardadas."}
+ ],
+ resultado:"O produto aparece na lista com o número de parâmetros da FTP preenchidos e fica disponível para inspeção em todos os aparelhos.",
+ cuidados:[
+  {t:"warn",x:"O NQA deve ser confirmado pela Qualidade da JSP ou pelo contrato com o cliente (NBR 5426, 4.2). Ele muda o tamanho da amostra e o critério de aceitação de todas as inspeções seguintes."}
+ ]},
+
+{id:"maquinas",mod:"cad",r:"ga",t:"Cadastrar máquinas",
+ d:"Máquinas de moldagem que aparecem na inspeção.",
+ oque:"Lista das máquinas que o operador escolhe ao registrar uma inspeção, uma ocorrência ou um produto.",
+ serve:"Permite ver o resultado por máquina no Painel e achar causas ligadas a um equipamento.",
+ acesso:"Menu lateral › Cadastros › aba Máquinas.",
+ img:{id:"maquinas",perfil:"g",rota:"cadastros",prep:"maquinas",cap:"Formulário de nova máquina."},
+ passos:[
+  "Clique em <b>+ Adicionar máquina</b>.",
+  "Preencha a <b>Identificação</b> {1} (obrigatória e única, por exemplo K1014), o tipo ou modelo e uma descrição.",
+  "Clique em <b>Adicionar máquina</b> {2}. Para alterar depois, use <b>Editar</b>; para remover, <b>Excluir</b>."
+ ],
+ campos:[
+  {m:"#mq_cod",n:"Identificação",d:"Código da máquina. Não pode repetir."},
+  {m:"#mq_save",n:"Adicionar máquina / Cancelar",d:"Grava ou desiste."}
+ ],
+ resultado:"A máquina aparece na lista de máquinas de todos os aparelhos.",
+ cuidados:[{t:"info",x:"Excluir uma máquina não apaga as inspeções feitas com ela."}]},
+
+{id:"falhas",mod:"cad",r:"ga",t:"Cadastrar e editar falhas",
+ d:"Falhas da FS 070, onde são detectadas e onde não segregam.",
+ oque:"Lista de falhas que aparecem na inspeção, nas ocorrências e na Biblioteca. Vem com as falhas da FS 070 e aceita falhas novas.",
+ serve:"Manter a lista igual à FS 070 vigente e indicar em quais pontos cada falha é procurada.",
+ acesso:"Menu lateral › Cadastros › aba Falhas › + Adicionar falha, ou Editar.",
+ img:{id:"falha",perfil:"g",rota:"falha",prep:"falha",cap:"Cadastro de uma falha."},
+ passos:[
+  "Clique em <b>+ Adicionar falha</b> ou em <b>Editar</b> na falha.",
+  "Preencha o <b>Nome da falha</b> {1} e escolha o <b>Grupo</b>.",
+  "Em <b>Onde é detectada</b> {2}, marque os pontos onde a falha é procurada. Ela só aparece na inspeção e nas ocorrências desses pontos.",
+  "Em <b>Não segrega em</b> {3}, marque os pontos onde a falha conta como defeito mas não separa o lote (coluna “Não segregar” da FS 070, como a rebarba na moldagem).",
+  "Escreva o critério ou especificação e a fonte.",
+  "Deixe marcada <b>Falha ativa</b> {4}. Para tirar uma falha de uso, desmarque em vez de excluir.",
+  "Clique em <b>Salvar falha</b> (ou Adicionar falha) na barra de baixo."
+ ],
+ campos:[
+  {m:"#fl_nome",n:"Nome e grupo",d:"O grupo organiza a lista de falhas na inspeção."},
+  {m:"text=Onde é detectada *@.f",n:"Onde é detectada",d:"Pelo menos um ponto."},
+  {m:"text=Não segrega em@.f",n:"Não segrega em",d:"Nesse ponto a falha entra na árvore e no Pareto, mas não em d."},
+  {m:"#fl_ativo",n:"Falha ativa",d:"Desmarcada, some das listas mas continua no histórico."},
+  {n:"Restaurar original da FS 070",d:"Aparece em falhas originais alteradas."}
+ ],
+ resultado:"A falha aparece nas listas de inspeção e ocorrência dos pontos marcados e na Biblioteca.",
+ cuidados:[{t:"warn",x:"Falha já usada em inspeções ou árvores não pode ser excluída; desative."}]},
+
+{id:"planos",mod:"cad",r:"ga",t:"Planos NBR 5426 e simulador",
+ d:"Como o sistema chega ao tamanho da amostra e ao critério.",
+ oque:"Tela de consulta com o simulador de planos e as tabelas da NBR 5426: código literal, planos normal, severo e atenuado e regras de comutação.",
+ serve:"Explicar a um auditor ou a um colega de onde vem o plano de uma inspeção, e simular o efeito de outro NQA ou tamanho de lote antes de mudar o cadastro.",
+ acesso:"Menu lateral › Planos NBR 5426.",
+ img:{id:"planos",perfil:"g",rota:"planos",cap:"Simulador de planos."},
+ passos:[
+  "Na aba <b>Simulador</b>, digite o <b>Tamanho do lote (N)</b> {1} e escolha nível, NQA e regime.",
+  "O quadro <b>Resultado</b> {2} mostra a letra-código, o tamanho da amostra (n), Ac e Re e a fração amostrada.",
+  "As outras abas {3} mostram a Tabela 1, as Tabelas 2 a 4 e as regras de comutação."
+ ],
+ campos:[
+  {m:"#sN",n:"Dados do plano",d:"N, nível, NQA e regime. A inspeção real usa sempre o nível II."},
+  {m:"text=Resultado",n:"Resultado",d:"Plano lido nas tabelas da norma."},
+  {m:".tabs",n:"Abas",d:"Tabelas e regras da norma."}
+ ],
+ exemplo:"Lote de 500 peças, nível II, NQA 1,0, regime normal: letra H, amostra de 50 peças, aceita com até 1 não conforme e rejeita com 2.",
+ resultado:"Simular não altera nada no sistema."},
+
+/* ---------------- ADMINISTRAÇÃO ---------------- */
+{id:"usuarios",mod:"adm",r:"a",t:"Liberar acessos e gerenciar usuários",
+ d:"Aceitar pedidos, definir papéis, editar, bloquear e excluir.",
+ oque:"É o cadastro de quem pode usar o sistema e com qual papel. Só e-mails liberados nesta lista conseguem ver e registrar dados.",
+ serve:"Liberar quem entra na empresa, ajustar o papel quando alguém muda de função e bloquear quem sai.",
+ acesso:"Menu lateral › Cadastros › aba Usuários. O número vermelho em Cadastros indica pedidos aguardando.",
+ img:{id:"usuarios",perfil:"a",rota:"cadastros",prep:"usuarios",cap:"Aba Usuários, com um pedido de acesso."},
+ passos:[
+  "Em <b>Pedidos de acesso</b> {1} aparecem as pessoas que criaram conta. O nome já vem preenchido e a etiqueta diz se o e-mail foi confirmado.",
+  "Escolha o <b>papel</b> da pessoa e clique em <b>Aceitar</b>, ou clique em <b>Recusar</b>. Recusados ficam na lista como bloqueados.",
+  "Na tabela <b>Usuários</b> {2}, clique em <b>Editar</b> para mudar nome ou papel, <b>Bloquear</b> para suspender o acesso e <b>Excluir</b> para apagar a conta de acesso.",
+  "Para liberar alguém antes de a pessoa criar a conta, preencha <b>E-mail</b>, <b>Nome</b> e <b>Papel</b> {3} no fim da página e clique em <b>Adicionar</b>. Quando ela criar a conta com esse e-mail, entra direto."
+ ],
+ campos:[
+  {m:"text=Pedidos de acesso@.card",n:"Pedidos de acesso",d:"Contas criadas aguardando aprovação."},
+  {m:"text=Gestora@table",n:"Usuários",d:"Nome, e-mail, papel e acesso de cada pessoa. Você não pode mudar o próprio papel."},
+  {m:"#cbEmail",n:"Pré-cadastro",d:"Libera um e-mail com papel definido antes do primeiro acesso."},
+  {n:"Papéis",d:"Administrador: tudo, inclusive usuários. Gestor: tudo, menos usuários. Inspetor: Tela do operador (inspeções, ocorrências, pesagens e perguntas da árvore)."}
+ ],
+ exemplo:"A Ana criou a conta. O administrador abre Cadastros › Usuários, vê “Ana Paula Souza · e-mail confirmado”, escolhe Inspetor e clica em Aceitar. Quando um inspetor vira líder da Qualidade, o administrador usa Editar e muda o papel para Gestor.",
+ resultado:"A pessoa liberada clica em “Verificar liberação” e entra com o papel definido. A mudança de papel vale quando a pessoa recarregar a página ou entrar de novo.",
+ cuidados:[
+  {t:"nc",x:"Excluir apaga a conta de acesso; as inspeções que a pessoa registrou continuam guardadas. Para quem pode voltar, prefira Bloquear."},
+  {t:"warn",x:"Dê o papel de Administrador a poucas pessoas. Ele pode liberar acessos, excluir inspeções e ver a auditoria."}
+ ]},
+
+{id:"dados",mod:"adm",r:"ga",t:"Dados e configuração",
+ d:"Banco, backup, CSV, demonstração e limpeza do aparelho.",
+ oque:"Tela de manutenção: situação do banco, backup e exportação, verificação em duas etapas, demonstração e as ferramentas exclusivas do Administrador (inspeções excluídas e auditoria).",
+ serve:"Para conferir se tudo foi enviado, fazer backup, preparar uma demonstração e cuidar da segurança da conta.",
+ acesso:"Menu lateral › Dados e configuração.",
+ img:{id:"dados",perfil:"g",rota:"dados",cap:"Dados e configuração."},
+ passos:[
+  "Em <b>Banco de dados compartilhado</b> {1}, confira a situação, o seu usuário, o total de registros e as alterações a enviar. <b>Sincronizar agora</b> envia e baixa tudo; <b>Sair</b> encerra a sessão.",
+  "Em <b>Backup e exportação</b> {2}, <b>Baixar backup (JSON)</b> guarda todo o banco num arquivo. <b>Importar backup</b> mescla um backup, sem duplicar registros. Os botões CSV baixam inspeções, árvores e Biblioteca para o Excel.",
+  {r:"a",t:"Em <b>Inspeções excluídas</b> e <b>Registro de auditoria</b>, só para Administrador, veja os tópicos próprios."},
+  "Em <b>Demonstração</b>, <b>Gerar mais um mês de demonstração</b> cria registros fictícios (DEMO) só neste aparelho, para treinar e apresentar. <b>Remover dados DEMO</b> apaga todos eles.",
+  "Em <b>Zona de risco</b>, <b>Limpar dados deste aparelho</b> apaga a cópia local; o banco compartilhado não muda e é baixado de novo.",
+  "<b>Configuração técnica (TI)</b> guarda o endereço do banco e a chave pública de acesso. Só mude com orientação da TI."
+ ],
+ campos:[
+  {m:"text=Banco de dados compartilhado@.card",n:"Banco de dados compartilhado",d:"Situação da conexão e fila de envio."},
+  {m:"text=Backup e exportação@.card",n:"Backup e exportação",d:"JSON completo e CSV para o Excel."},
+  {r:"a",n:"Inspeções excluídas e auditoria",d:"Só Administrador."},
+  {n:"Demonstração",d:"Dados fictícios locais. Não vão para o banco nem entram no regime das inspeções reais."},
+  {n:"Zona de risco",d:"Limpa a cópia deste aparelho."}
+ ],
+ resultado:"Um arquivo JSP_backup_data.json é baixado no backup; os CSV abrem direto no Excel.",
+ cuidados:[
+  {t:"nc",x:"Antes de “Limpar dados deste aparelho”, confira que “A enviar” está em 0. O que não foi enviado se perde."},
+  {t:"info",x:"Além do backup manual, o banco tem uma cópia automática semanal (aos domingos), criptografada, feita pelo GitHub e guardada por 30 dias."}
+ ]},
+
+{id:"excluidas",mod:"adm",r:"a",t:"Excluir e restaurar inspeções",
+ d:"Excluir com motivo e trazer de volta uma inspeção excluída por engano.",
+ oque:"Uma inspeção registrada com erro pode ser excluída pelo Administrador. A exclusão pede um motivo e não apaga o registro: ele fica guardado no banco e pode ser restaurado.",
+ serve:"Corrigir um registro feito no lote errado sem perder a rastreabilidade.",
+ acesso:"Excluir: Inspeções › lote › Excluir (no alto). Restaurar: Dados e configuração › Inspeções excluídas › Ver inspeções excluídas.",
+ img:{id:"excluir",perfil:"a",rota:"inspecao",prep:"excluir",cap:"Janela de exclusão de uma inspeção."},
+ passos:[
+  "Abra o lote e clique em <b>Excluir</b> no alto da página.",
+  "Na janela {1}, escreva o motivo, por exemplo “registrado no lote 2611-03, o correto é 2611-04”.",
+  "Clique em <b>Excluir inspeção</b> {2}. A inspeção e as árvores de falha ligadas a ela deixam de aparecer para todos.",
+  "Para restaurar, abra <b>Dados e configuração</b>, clique em <b>Ver inspeções excluídas</b>, encontre o lote (com data, ponto, resultado, quem excluiu e o motivo) e clique em <b>Restaurar</b>."
+ ],
+ campos:[
+  {m:"#dlg textarea",n:"Motivo",d:"Obrigatório. Fica registrado junto com o usuário e a data."},
+  {m:"#dlg .btn.danger",n:"Excluir inspeção",d:"Confirma a exclusão."},
+  {n:"Restaurar",d:"Traz a inspeção de volta para todos, junto com as árvores de falha."}
+ ],
+ resultado:"A inspeção some das listas e do Painel. Restaurada, volta com tudo o que tinha.",
+ cuidados:[{t:"warn",x:"Depois de excluir um registro errado, peça ao inspetor para registrar a inspeção correta. A inspeção registrada não é editável."}]},
+
+{id:"auditoria",mod:"adm",r:"a",t:"Consultar o registro de auditoria",
+ d:"Quem incluiu, alterou ou excluiu o quê, e quando.",
+ oque:"O banco registra automaticamente toda inclusão, alteração e exclusão em inspeções, árvores, pesagens, produtos, máquinas, falhas, causas e usuários, com o usuário, a data e o conteúdo antes e depois.",
+ serve:"Responder a uma auditoria ou esclarecer quem mudou um cadastro.",
+ acesso:"Menu lateral › Dados e configuração › Registro de auditoria › Carregar registros.",
+ passos:[
+  "Abra <b>Dados e configuração</b> e vá até <b>Registro de auditoria</b>.",
+  "Clique em <b>Carregar registros</b>.",
+  "A tabela mostra os 100 registros mais recentes: quando, usuário, cadastro, operação (inclusão, alteração ou exclusão) e o identificador do registro."
+ ],
+ campos:[
+  {n:"Carregar registros",d:"Busca os 100 mais recentes."},
+  {n:"Operação",d:"Inclusão, Alteração ou Exclusão."}
+ ],
+ resultado:"O registro completo, com o conteúdo antes e depois, fica no banco e pode ser consultado pela TI.",
+ cuidados:[{t:"info",x:"O registro de auditoria não pode ser alterado nem apagado pelo sistema."}]},
+
+/* ---------------- CONSULTA RÁPIDA ---------------- */
+{id:"glossario",mod:"consulta",r:"iga",t:"O que significa cada termo",
+ d:"N, n, NQA, d, Ac, Re, regime, FTP, PPM, LSC e outros.",
+ oque:"Os termos que aparecem nas telas, explicados em linguagem simples.",
+ glossario:[
+  ["Tamanho do lote (N)","Conjunto de peças do mesmo produto, feitas nas mesmas condições, aceito ou rejeitado como um todo.","iga"],
+  ["Tamanho da amostra (n)","Quantas peças retirar do lote para inspecionar. Vem da tabela da NBR 5426.","iga"],
+  ["d","Número de peças não conformes encontradas na amostra. Uma peça com dois defeitos conta uma vez.","iga"],
+  ["Ac e Re","Se d for menor ou igual a Ac, o lote é aceito. Se d for maior ou igual a Re, é rejeitado.","iga"],
+  ["NQA","Nível de qualidade aceitável: a porcentagem de peças não conformes que a empresa aceita como média do processo. É definido pela Qualidade ou pelo cliente, não calculado.","iga"],
+  ["Nível de inspeção","Define o tamanho da amostra para um mesmo lote. O sistema usa sempre o nível II, o padrão da norma.","ga"],
+  ["Regime","Normal, severo ou atenuado. Muda sozinho: 2 lotes rejeitados em 5 levam ao severo; 5 aceitos seguidos no severo voltam ao normal.","iga"],
+  ["Letra-código","Letra da Tabela 1 da NBR 5426, obtida pelo tamanho do lote e pelo nível.","ga"],
+  ["FS 070","Ficha de defeitos da JSP, com as falhas de cada ponto e a coluna “Não segregar”.","iga"],
+  ["FS 342","Fluxo de produto não conforme: etiqueta vermelha, gaiola vermelha e segregação.","iga"],
+  ["FTP","Ficha Técnica de Processo: valores nominais e faixas de cada parâmetro do produto, inclusive o peso.","iga"],
+  ["Árvore de falha","Investigação que parte do defeito e volta pelo processo, etapa por etapa, até a causa.","iga"],
+  ["Reação","Contenção imediata quando a causa é encontrada, para não produzir mais peças com defeito.","iga"],
+  ["Ocorrência","Defeito visto fora da inspeção por amostragem. Não conta como inspeção.","iga"],
+  ["Inspeção 100%","Inspeção de todas as peças de um lote reprovado, trocando as não conformes por boas.","iga"],
+  ["PPM","Peças por milhão: peças não conformes ÷ peças inspecionadas × 1.000.000.","ga"],
+  ["Nível sigma","Medida de desempenho calculada a partir do PPM, com deslocamento de 1,5σ.","ga"],
+  ["Subgrupo","Pesagem de 5 peças no mesmo horário. É um ponto da carta X̄-R.","iga"],
+  ["X̄ e R","Média e amplitude (maior menos menor) dos pesos do subgrupo.","iga"],
+  ["LSC, LC, LIC","Limite superior de controle, linha central e limite inferior de controle, calculados com os dados do processo.","ga"],
+  ["LSE e LIE","Limites de especificação da FTP: peso máximo e mínimo aceitos.","ga"],
+  ["Causa especial","Variação fora do comum, sinalizada pela carta. Deve ser investigada no processo.","iga"]
+ ]},
+
+{id:"duvidas",mod:"consulta",r:"iga",t:"Dúvidas comuns e erros",
+ d:"Situações do dia a dia e como resolver.",
+ oque:"Respostas para as dúvidas mais frequentes.",
+ faq:[
+  ["Fiquei sem internet no posto. Perco a inspeção?","Não. O registro fica no aparelho e é enviado sozinho quando a conexão voltar.","iga"],
+  ["Fechei a página no meio de uma inspeção.","Volte à Tela do operador: o aviso “Inspeção em andamento” tem o botão Continuar.","iga"],
+  ["Registrei uma inspeção errada.","A inspeção registrada não é editável. Avise o Administrador, que exclui com o motivo, e registre de novo.","ig"],
+  ["Registrei uma inspeção errada. Como corrijo?","Abra o lote e use Excluir, com o motivo. Depois peça o registro correto. Se excluiu por engano, restaure em Dados e configuração.","a"],
+  ["O produto ou a máquina não aparece na lista.","O cadastro é feito por Gestor ou Administrador, em Cadastros. Depois de salvo, aparece em todos os aparelhos.","iga"],
+  ["Aparece “Produto sem NQA cadastrado”.","Falta definir o NQA daquele ponto no cadastro do produto (Cadastros › Produtos › Pré-definições).","iga"],
+  ["Por que aceitar um lote que a amostragem rejeitou?","Quando o defeito não afeta função, segurança ou desempenho, é só estético ou fica escondido após a montagem. A decisão pede o motivo e fica registrada.","ga"],
+  ["Um ponto da carta ficou vermelho. O lote está reprovado?","Não. É sinal de causa especial no processo. A conformidade do peso é dada pela especificação da FTP (LSE e LIE).","iga"],
+  ["Como libero o acesso de um colega?","Ele cria a conta na tela de entrada e confirma o e-mail. O Administrador aceita o pedido em Cadastros › Usuários.","iga"],
+  ["Posso treinar sem mexer no banco?","Sim. Na tela de entrada, abra “Sem acesso ao banco?” e use o modo local; em Dados e configuração, gere a demonstração.","ga"],
+  ["Troquei de celular e não tenho o código da verificação em duas etapas.","Fale com o responsável técnico do sistema. Para evitar, desative e ative de novo no celular novo antes de apagar o antigo.","ga"]
+ ]}
+];
+
+/* ---------- Manual: perfil, filtros e busca ---------- */
+let manVer="a",manBusca="";
+const MAN_PAPEL={admin:"a",gestor:"g",inspetor:"i"};
+// Cada perfil vê só o manual dele. Sem login (modo local ou banco não configurado) dá para alternar, para treinar e apresentar.
+const manLivre=()=>!(cloudState==="ok"&&colab?.papel);
+const manPerfil=()=>manLivre()?manVer:(MAN_PAPEL[colab.papel]||"i");
+const manTem=(x,p)=>!x.r||x.r.includes(p);
+const manTopicos=p=>MANUAL.filter(t=>manTem(t,p)).sort((a,b)=>MAN_MOD.findIndex(m=>m.id===a.mod)-MAN_MOD.findIndex(m=>m.id===b.mod));
+const manVar=(v,p)=>v&&typeof v==="object"?(Object.entries(v).find(([k])=>k.includes(p))||[,""])[1]:(v||"");
+const manK=s=>String(s).replace(/\{(\d+)\}/g,'<span class="mn-k" aria-label="marcador $1">$1</span>');
+const manTxt=h=>String(h||"").replace(/<[^>]+>/g," ").replace(/\{\d+\}/g,"");
+const manNorm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+function manIndiceTexto(t,p){
+  return manNorm([t.t,t.d,t.oque,t.serve,manVar(t.acesso,p),...(t.passos||[]).filter(x=>manTem(x,p)).map(x=>x.t||x),...(t.campos||[]).filter(x=>manTem(x,p)).map(c=>c.n+" "+c.d),t.exemplo,t.resultado,...(t.cuidados||[]).map(c=>c.x),...(t.erros||[]).flat(),...(t.glossario||[]).filter(g=>g[2].includes(p)).map(g=>g[0]+" "+g[1]),...(t.faq||[]).filter(g=>g[2].includes(p)).map(g=>g[0]+" "+g[1])].map(manTxt).join(" "));
 }
+const MAN_AVISO={warn:"Atenção",nc:"Cuidado",info:"Bom saber"};
+
+/* ---------- Manual: telas ---------- */
+function pgAjuda(){
+  const p=manPerfil(),L=manTopicos(p),t=route.id?L.find(x=>x.id===route.id):null,op=soOperador();
+  if(route.id&&!t){go("ajuda");return}
+  head("Manual de uso",t?t.t:"Manual do "+MAN_PERFIL[p].nome,(op?opTop():"")+`<button class="btn noprint" onclick="window.print()">Imprimir</button>`);
+  if(op)opBind();
+  let h=`<div class="mn ${op?"mn-op":""}">`;
+  if(manLivre())h+=`<div class="mn-ver noprint" role="group" aria-label="Manual de qual perfil"><span>Sem login, você pode ver o manual de qualquer perfil:</span>${["i","g","a"].map(k=>`<button type="button" data-mnver="${k}" aria-pressed="${k===p}">${MAN_PERFIL[k].nome}</button>`).join("")}</div>`;
+  h+=t?manTopico(t,p,L):manIndice(p,L);
+  setPage(h+`</div>`);
+  $$("[data-mnver]").forEach(b=>b.onclick=()=>{manVer=b.dataset.mnver;if(route.id&&!manTopicos(manVer).some(x=>x.id===route.id))go("ajuda");else pgAjuda()});
+  $$("[data-mngo]").forEach(b=>b.onclick=e=>{e.preventDefault();go("ajuda",b.dataset.mngo||null)});
+  const q=$("#mnQ");if(q){q.oninput=()=>{manBusca=q.value;manResultados(p,L)};if(manBusca)manResultados(p,L)}
+  $$(".mn-fig img").forEach(img=>img.onerror=()=>{const f=img.closest(".mn-fig");if(f)f.classList.add("semimg")});
+}
+function manIndice(p,L){
+  const P=MAN_PERFIL[p];
+  let h=`<section class="mn-cab"><p class="mn-lead">${P.resumo}</p>
+    <label class="mn-busca noprint"><span class="sr-only">Buscar no manual</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="mnQ" type="search" value="${esc(manBusca)}" placeholder="Buscar uma dúvida: senha, lote reprovado, peso…" autocomplete="off"></label></section>
+    <div id="mnRes" class="noprint" aria-live="polite"></div><div id="mnIdx">`;
+  h+=`<section class="mn-comece"><h2>Comece por aqui</h2><ol>${P.comece.map(id=>L.find(x=>x.id===id)).filter(Boolean).map(x=>`<li><a href="#ajuda/${x.id}" data-mngo="${x.id}"><b>${esc(x.t)}</b><span>${esc(x.d)}</span></a></li>`).join("")}</ol></section>`;
+  MAN_MOD.forEach(m=>{const T=L.filter(x=>x.mod===m.id);if(!T.length)return;
+    h+=`<section class="mn-mod"><h2>${esc(m.t)}</h2><ul>${T.map(x=>`<li><a href="#ajuda/${x.id}" data-mngo="${x.id}"><b>${esc(x.t)}</b><span>${esc(x.d)}</span></a></li>`).join("")}</ul></section>`});
+  return h+`</div>`;
+}
+function manResultados(p,L){
+  const box=$("#mnRes"),idx=$("#mnIdx");if(!box)return;
+  const w=manNorm(manBusca).split(/\s+/).filter(x=>x.length>1);
+  if(!w.length){box.innerHTML="";idx.hidden=false;return}
+  const R=L.filter(t=>{const s=manIndiceTexto(t,p);return w.every(x=>s.includes(x))});
+  idx.hidden=true;
+  box.innerHTML=`<section class="mn-mod"><h2>${R.length?R.length+" tópico(s) para “"+esc(manBusca.trim())+"”":"Nada encontrado para “"+esc(manBusca.trim())+"”"}</h2>${R.length?`<ul>${R.map(x=>`<li><a href="#ajuda/${x.id}" data-mngo="${x.id}"><b>${esc(x.t)}</b><span>${esc(MAN_MOD.find(m=>m.id===x.mod).t)} · ${esc(x.d)}</span></a></li>`).join("")}</ul>`:`<p class="muted">Tente outra palavra, por exemplo “inspeção”, “árvore”, “peso” ou “usuário”, ou percorra o índice.</p><button class="btn sm" type="button" id="mnLimpa">Limpar a busca</button>`}</section>`;
+  $$("#mnRes [data-mngo]").forEach(b=>b.onclick=e=>{e.preventDefault();go("ajuda",b.dataset.mngo)});
+  if($("#mnLimpa"))$("#mnLimpa").onclick=()=>{manBusca="";$("#mnQ").value="";manResultados(p,L);$("#mnQ").focus()};
+}
+function manTopico(t,p,L){
+  const i=L.indexOf(t),ant=L[i-1],prox=L[i+1],mod=MAN_MOD.find(m=>m.id===t.mod);
+  let toc=`<nav class="mn-toc noprint" aria-label="Tópicos do manual"><a href="#ajuda" data-mngo="" class="mn-toc-i">← Índice</a>`;
+  MAN_MOD.forEach(m=>{const T=L.filter(x=>x.mod===m.id);if(!T.length)return;toc+=`<p>${esc(m.t)}</p>${T.map(x=>`<a href="#ajuda/${x.id}" data-mngo="${x.id}" ${x===t?'aria-current="page"':""}>${esc(x.t)}</a>`).join("")}`});
+  toc+=`</nav>`;
+  let a=`<article class="mn-art"><p class="mn-mod-t">${esc(mod.t)} · ${i+1} de ${L.length}</p>`;
+  if(t.oque)a+=`<p class="mn-lead">${t.oque}</p>`;
+  if(t.serve)a+=`<h2>Para que serve</h2><p>${t.serve}</p>`;
+  const ac=manVar(t.acesso,p);if(ac)a+=`<h2>Como acessar</h2><p class="mn-acesso">${esc(ac)}</p>`;
+  const imgs=t.img?(Array.isArray(t.img)?t.img:[t.img]):[];
+  const fig=im=>`<figure class="mn-fig${im.perfil==="i"&&!im.alvo?" estreita":""}"><a href="manual/img/${im.id}.webp" target="_blank" rel="noopener" title="Abrir a imagem em tamanho real"><img src="manual/img/${im.id}.webp" alt="${esc(im.cap)}" loading="lazy" decoding="async"></a><figcaption>${esc(im.cap)} Tela real do sistema, com dados de demonstração. Os números correspondem à tabela “Campos e botões”.</figcaption><p class="mn-semimg">Imagem não encontrada. Ela fica na pasta manual/img, ao lado do sistema.</p></figure>`;
+  const passos=(t.passos||[]).filter(x=>manTem(x,p));
+  if(passos.length){a+=`<h2>Como utilizar, passo a passo</h2>`;
+    // Com várias imagens, cada uma aparece antes do primeiro passo que usa os marcadores dela
+    let n=0;const marc=[];(t.campos||[]).forEach(c=>{if(c.m){n++;marc.push({n,i:c.i||0})}});
+    const primeiro=imgs.map((_,k)=>{const ns=marc.filter(x=>x.i===k).map(x=>x.n);return ns.length?Math.min(...ns):null});
+    const usados=new Set();let ol="";
+    passos.forEach(x=>{const tx=x.t||x,ks=[...String(tx).matchAll(/\{(\d+)\}/g)].map(m=>+m[1]);
+      imgs.forEach((im,k)=>{if(!usados.has(k)&&(imgs.length===1?true:ks.includes(primeiro[k]))){usados.add(k);ol+=`</ol>${fig(im)}<ol class="mn-passos" start="${passos.indexOf(x)+1}">`}});
+      ol+=`<li>${manK(tx)}</li>`});
+    imgs.forEach((im,k)=>{if(!usados.has(k))ol+=`</ol>${fig(im)}<ol class="mn-passos">`});
+    a+=(`<ol class="mn-passos">`+ol+`</ol>`).replace(/<ol class="mn-passos"( start="\d+")?><\/ol>/g,"");
+  } else imgs.forEach(im=>a+=fig(im));
+  const campos=(t.campos||[]);
+  if(campos.length){let n=0;
+    a+=`<h2>Campos e botões</h2><div class="tw"><table class="t mn-campos"><thead><tr><th scope="col"><span class="sr-only">Marcador</span></th><th scope="col">Campo ou botão</th><th scope="col">O que faz</th></tr></thead><tbody>${campos.map(c=>{const k=c.m?++n:null;return manTem(c,p)?`<tr><td>${k?`<span class="mn-k">${k}</span>`:""}</td><th scope="row">${esc(c.n)}</th><td>${c.d}</td></tr>`:""}).join("")}</tbody></table></div>`}
+  if(t.glossario)a+=`<dl class="mn-glos">${t.glossario.filter(g=>g[2].includes(p)).map(g=>`<div><dt>${esc(g[0])}</dt><dd>${esc(g[1])}</dd></div>`).join("")}</dl>`;
+  if(t.faq)a+=t.faq.filter(g=>g[2].includes(p)).map(g=>`<details class="faq mn-faq"><summary>${esc(g[0])}</summary><p>${esc(g[1])}</p></details>`).join("");
+  if(t.exemplo)a+=`<div class="mn-ex"><h2>Exemplo prático</h2><p>${t.exemplo}</p></div>`;
+  if(t.resultado)a+=`<h2>Resultado esperado</h2><p>${t.resultado}</p>`;
+  if((t.cuidados||[]).length)a+=`<h2>Cuidados e observações</h2>${t.cuidados.map(c=>`<div class="mn-aviso ${c.t}"><b>${MAN_AVISO[c.t]}</b><p>${c.x}</p></div>`).join("")}`;
+  if((t.erros||[]).length)a+=`<h2>Erros comuns e como resolver</h2><div class="tw"><table class="t mn-erros"><thead><tr><th scope="col">O que aparece</th><th scope="col">O que fazer</th></tr></thead><tbody>${t.erros.map(e=>`<tr><td>${esc(e[0])}</td><td>${esc(e[1])}</td></tr>`).join("")}</tbody></table></div>`;
+  a+=`<nav class="mn-nav noprint" aria-label="Navegar entre tópicos">${ant?`<a href="#ajuda/${ant.id}" data-mngo="${ant.id}" class="mn-ant"><small>Anterior</small><b>${esc(ant.t)}</b></a>`:"<span></span>"}<a href="#ajuda" data-mngo="" class="mn-idx">Índice</a>${prox?`<a href="#ajuda/${prox.id}" data-mngo="${prox.id}" class="mn-prox"><small>Próximo</small><b>${esc(prox.t)}</b></a>`:"<span></span>"}</nav></article>`;
+  return `<div class="mn-grid">${toc}${a}</div>`;
+}
+
+/* ---------- Orientação de primeiro acesso ----------
+   Aparece uma vez por usuário autenticado. O registro fica no banco
+   (tabela orientacao_usuario), então vale em qualquer aparelho. O
+   localStorage só evita consultar o banco de novo no mesmo aparelho. */
+let orientFeito="";
+const orientChave=()=>cloudState==="ok"&&colab&&user?.id?"jsp-orient-"+user.id:null;
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
+async function orientTalvez(){
+  const k=orientChave();if(!k||orientFeito===k||!sb)return;orientFeito=k;
+  if(lsGet(k+"-pend")){orientMarcar();return}
+  if(lsGet(k))return;
+  try{const {data,error}=await sb.from("orientacao_usuario").select("visto_em").maybeSingle();if(error)throw error;
+    if(data&&data.visto_em){lsSet(k,"1");return}}
+  catch(e){return}
+  if(orientChave()===k)orientAbrir();
+}
+async function orientMarcar(){
+  const k=orientChave();if(!k)return;lsSet(k,"1");lsSet(k+"-pend","1");
+  try{const {error}=await sb.from("orientacao_usuario").upsert({user_id:user.id},{onConflict:"user_id",ignoreDuplicates:true});if(error)throw error;lsSet(k+"-pend",null)}catch(e){}
+}
+function orientAbrir(){
+  let d=$("#dlgBV");if(!d){d=document.createElement("dialog");d.id="dlgBV";d.className="bvdlg";d.setAttribute("aria-labelledby","bvT");document.body.appendChild(d)}
+  const p=manPerfil(),P=MAN_PERFIL[p],L=manTopicos(p),nome=(colab?.nome||"").split(" ")[0];
+  d.innerHTML=`<div class="bv"><div class="bv-cab"><span class="bv-sis">JSP Qualidade</span><span class="pill brand">${esc(P.nome)}</span></div>
+    <h2 id="bvT">Bem-vindo ao sistema${nome?", "+esc(nome):""}!</h2>
+    <p>Para compreender o funcionamento das ferramentas, conhecer todas as funcionalidades disponíveis e aprender a realizar corretamente cada operação, recomendamos que você leia o <b>Manual de Utilização</b> antes de começar.</p>
+    <p>O manual apresenta explicações detalhadas e tutoriais passo a passo para orientar suas atividades. Para o seu perfil, a leitura sugerida começa por:</p>
+    <ol class="bv-lista">${P.comece.slice(0,4).map(id=>L.find(x=>x.id===id)).filter(Boolean).map(x=>`<li>${esc(x.t)}</li>`).join("")}</ol>
+    <p class="bv-pe">Clique no botão abaixo para acessar o manual e conhecer o funcionamento do sistema. Ele continua disponível no menu sempre que você precisar.</p>
+    <div class="bv-b"><button type="button" class="btn" id="bvIr">Acessar sistema</button><button type="button" class="btn primary" id="bvLer">Ler manual agora</button></div></div>`;
+  const fechar=ler=>{d.close();orientMarcar();if(ler)go("ajuda")};
+  $("#bvIr").onclick=()=>fechar(false);$("#bvLer").onclick=()=>fechar(true);
+  d.oncancel=e=>{e.preventDefault();fechar(false)};
+  if(!d.open)d.showModal();setTimeout(()=>$("#bvLer")?.focus(),30);
+}
+
 // Demonstração: lotes fictícios sorteados a partir dos cadastros (produtos, pré-definições e máquinas).
 // Cada clique acrescenta cerca de um mês de histórico, anterior ao que já existe. Fica só neste aparelho.
 async function loadDemo(){
