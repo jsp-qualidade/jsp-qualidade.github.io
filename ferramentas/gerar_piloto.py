@@ -2,6 +2,7 @@
 Gera a versão piloto do sistema, para compartilhar com quem quer conhecer e testar.
 
     python ferramentas/gerar_piloto.py [pasta_de_saida]
+    python ferramentas/gerar_piloto.py piloto --site   (versão do site: piloto/index.html)
 
 A versão piloto é o mesmo index.html com três mudanças:
   - abre direto no modo local (sem tela de login e sem banco na nuvem);
@@ -16,7 +17,8 @@ Saída: Sistema_JSP_Piloto.html, com as pastas fontes/ e manual/img/ ao lado
 import pathlib, re, shutil, sys
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
-saida = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else RAIZ / "piloto"
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+saida = pathlib.Path(args[0]) if args else RAIZ / "piloto"
 s = (RAIZ / "index.html").read_text(encoding="utf-8")
 
 def troca(antigo, novo):
@@ -33,6 +35,9 @@ s, n = re.subn(r"<title>([^<]*)</title>", r"<title>\1 · Piloto</title>", s, cou
 
 saida.mkdir(parents=True, exist_ok=True)
 (saida / "Sistema_JSP_Piloto.html").write_text(s, encoding="utf-8")
+if "--site" in sys.argv:  # versão publicada no site (jsp-qualidade.github.io/piloto/)
+    (saida / "index.html").write_text(s, encoding="utf-8")
+    (saida / "Sistema_JSP_Piloto.html").unlink()
 for pasta in ["fontes", "manual/img"]:
     destino = saida / pasta
     shutil.copytree(RAIZ / pasta, destino, dirs_exist_ok=True)

@@ -22,7 +22,7 @@ Ao mudar uma tela, atualize o tópico correspondente em `MANUAL` e rode o script
 
 ## Versão piloto (para compartilhar)
 
-`python ferramentas/gerar_piloto.py pasta_de_saida` gera `Sistema_JSP_Piloto.html`: o mesmo sistema, mas que abre direto, sem login e sem o endereço do banco, com dados de demonstração. O que for registrado fica só no navegador de quem abriu. Serve para mostrar e testar o sistema sem dar acesso aos dados da JSP.
+`python ferramentas/gerar_piloto.py pasta_de_saida` gera `Sistema_JSP_Piloto.html`: o mesmo sistema, mas que abre direto, sem login e sem o endereço do banco, com dados de demonstração. O que for registrado fica só no navegador de quem abriu. Serve para mostrar e testar o sistema sem dar acesso aos dados da JSP. A mesma versão fica publicada em https://jsp-qualidade.github.io/piloto/ (`python ferramentas/gerar_piloto.py piloto --site`).
 
 ## Segurança
 
