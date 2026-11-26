@@ -1174,7 +1174,6 @@ const ICON={
  db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'
 };
 const PAGES=[
- {id:"ajuda",t:"Manual de uso",ic:"help",grp:"Ajuda"},
  {id:"painel",t:"Painel",ic:"dash",grp:"Operação"},
  {id:"nova",t:"Nova inspeção",ic:"new",grp:"Operação"},
  {id:"operador",t:"Tela do operador",ic:"op",grp:"Operação"},
@@ -1185,7 +1184,8 @@ const PAGES=[
  {id:"biblioteca",t:"Biblioteca causa/efeito",ic:"book",grp:"Análise"},
  {id:"cadastros",t:"Cadastros",ic:"cad",grp:"Referência"},
  {id:"planos",t:"Planos NBR 5426",ic:"table",grp:"Referência"},
- {id:"dados",t:"Dados e configuração",ic:"db",grp:"Referência"}
+ {id:"dados",t:"Dados e configuração",ic:"db",grp:"Referência"},
+ {id:"ajuda",t:"Manual de uso",ic:"help",grp:"Ajuda"}
 ];
 let route={p:"painel",id:null};
 // Histórico de telas, para o botão "Voltar" das páginas de detalhe (inspeção, árvore, produto)
@@ -2700,7 +2700,7 @@ const MANUAL=[
  d:"O aviso do primeiro acesso e como usar o manual.",
  oque:"Na primeira vez que você entra na sua área, o sistema mostra uma mensagem de boas-vindas recomendando a leitura deste manual. O manual tem uma versão para cada perfil e mostra só o que o seu perfil pode fazer.",
  serve:"Use o manual antes de começar e sempre que tiver dúvida sobre uma tela. Ele fica no menu o tempo todo, mesmo depois que a mensagem de boas-vindas deixa de aparecer.",
- acesso:{i:"Na Tela do operador, botão Manual no alto da tela.",ga:"Menu lateral › Manual de uso (primeiro item do menu)."},
+ acesso:{i:"Na Tela do operador, botão Manual no alto da tela.",ga:"Menu lateral › Manual de uso (último item do menu, no grupo Ajuda)."},
  img:{id:"boasvindas",perfil:"g",prep:"boasvindas",cap:"Mensagem de boas-vindas no primeiro acesso."},
  passos:[
   "No primeiro acesso aparece a janela “Bem-vindo ao sistema!”.",
@@ -2728,7 +2728,7 @@ const MANUAL=[
  acesso:"Aparece em todas as telas depois de entrar.",
  img:{id:"navegar",perfil:"g",rota:"inspecoes",cap:"Tela Inspeções, com o menu lateral."},
  passos:[
-  "No menu lateral {1}, as telas estão agrupadas por assunto: <b>Ajuda</b> (este manual), <b>Operação</b> (Painel, Tela do operador, Inspeções, Ocorrências, Pesagem), <b>Análise</b> (Árvores de falha, Biblioteca causa/efeito) e <b>Referência</b> (Cadastros, Planos NBR 5426, Dados e configuração).",
+  "No menu lateral {1}, as telas estão agrupadas por assunto: <b>Operação</b> (Painel, Tela do operador, Inspeções, Ocorrências, Pesagem), <b>Análise</b> (Árvores de falha, Biblioteca causa/efeito), <b>Referência</b> (Cadastros, Planos NBR 5426, Dados e configuração) e, por último, <b>Ajuda</b> (este manual).",
   "Um número vermelho ao lado de um item {2} mostra pendências: em Inspeções, lotes aguardando decisão ou em inspeção 100%; em Ocorrências, ocorrências com análise em aberto; em Árvores de falha, árvores sem preencher; em Cadastros, pedidos de acesso.",
   "No pé do menu {3}, o ponto colorido mostra a situação do banco. Verde: conectado e tudo enviado. Amarelo: sem conexão, modo local ou alterações ainda sendo enviadas.",
   "No alto da área de trabalho ficam o caminho da tela e o título {4}. Nas páginas de detalhe (um lote, uma árvore, um produto) aparece o botão <b>Voltar para …</b>, que leva à tela de onde você veio.",
