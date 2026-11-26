@@ -362,7 +362,12 @@ body.opmode .top{padding:12px 16px}
 .cep-lim{stroke:var(--nc);stroke-width:1.6;stroke-dasharray:6 4;fill:var(--nc)}.cep-lim.prov{stroke-dasharray:2 4}text.cep-lim{stroke:none}
 .cep-lc{stroke:var(--ok);stroke-width:1.6;fill:var(--ok)}text.cep-lc{stroke:none}
 .cep-spec{stroke:#8B5CF6;stroke-width:2.4;fill:#8B5CF6}text.cep-spec{stroke:none;font-weight:700}.lg.spec{border-color:#8B5CF6;border-top-width:3px}
-.cep-line{fill:none;stroke:var(--brand);stroke-width:1.4;opacity:.55}.cep-pt{fill:var(--brand);stroke:var(--surface);stroke-width:1.2}
+.cep-line{fill:none;stroke:var(--brand);stroke-width:1.4;opacity:.55}.cep-pt{fill:var(--brand);stroke:var(--surface);stroke-width:1.2;transition:r .12s}
+.cep-alvo{fill:transparent;cursor:pointer}.cep-hit{outline:none}.cep-hit:hover .cep-pt,.cep-hit:focus .cep-pt,.cep-hit.on .cep-pt{r:6.5;stroke-width:2}
+.ceptip{position:fixed;z-index:60;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(15,30,60,.16);padding:8px 11px;min-width:150px;max-width:230px;font-size:12px;line-height:1.35;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s}
+.ceptip.on{opacity:1;transform:none}.ceptip .tg{color:var(--muted);font-weight:600}.ceptip .tv{font-size:17px;font-weight:700;margin:2px 0 1px;font-variant-numeric:tabular-nums}.ceptip .tq{color:var(--muted);font-size:11px}
+.ceptip .ts{display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-weight:600;color:var(--ok)}.ceptip .ts::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.ceptip.sn .ts{color:var(--nc)}
+@media print{.ceptip{display:none}}
 .cep-pt.sinal{fill:var(--nc);stroke:var(--nc);stroke-width:2;fill-opacity:.9}.cep-pt.fora{fill:var(--surface);stroke:var(--muted);stroke-width:1.6}
 .cepleg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin:8px 0 2px}.cepleg span{display:flex;align-items:center;gap:6px}
 .lg{display:inline-block;width:18px;height:0;border-top:2px solid}.lg.lim{border-color:var(--nc);border-top-style:dashed}.lg.lim.prov{border-top-style:dotted}.lg.lc{border-color:var(--ok)}
@@ -2697,7 +2702,7 @@ function cepDados(tipo){
 }
 // Gráfico de controle em SVG (desenhado com os dados registrados; sem biblioteca externa)
 function cepSvg(o){
-  const W=Math.max(300,Math.min(1100,($("#page")?.clientWidth||900)-(innerWidth<700?36:72))),H=innerWidth<700?210:240,ml=innerWidth<700?44:56,mr=innerWidth<700?44:62,mt=12,mb=30;
+  const W=Math.max(300,Math.min(1100,($("#page")?.clientWidth||900)-(innerWidth<700?36:72))),H=innerWidth<700?210:240,ml=innerWidth<700?44:56,mr=innerWidth<700?72:92,mt=12,mb=30;
   const P=o.pts;if(!P.length)return `<div class="empty small">Sem subgrupos completos ainda.</div>`;
   const spL=o.spec?[o.spec.min,o.spec.max].filter(v=>v!=null&&isFinite(v)):[];
   const ys=P.map(p=>p.y).concat(o.L?[o.lsc,o.lic,o.lc]:[]).concat(spL),lo0=Math.min(...ys),hi0=Math.max(...ys),pad=(hi0-lo0||Math.abs(hi0)*.01||.001)*.12,lo=o.carta==="R"?Math.max(0,lo0-pad):lo0-pad,hi=hi0+pad;
@@ -2707,24 +2712,40 @@ function cepSvg(o){
   if(spL.length){const sl=(v,lab,acima)=>`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="cep-spec"/><text x="${ml+6}" y="${Y(v)+(acima?-5:13)}" class="cep-lab cep-spec">${lab} ${o.fmt(v)}</text>`;
     if(o.spec.max!=null&&isFinite(o.spec.max))s+=sl(o.spec.max,"LSE · especificação máx.",true);
     if(o.spec.min!=null&&isFinite(o.spec.min))s+=sl(o.spec.min,"LIE · especificação mín.",false)}
-  if(o.L){const ln=(v,cls,lab)=>`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}${o.prov?" prov":""}"/><text x="${W-mr+4}" y="${Y(v)+4}" class="cep-lab ${cls}">${lab}</text>`;
+  if(o.L){const ln=(v,cls,lab)=>`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}${o.prov?" prov":""}"/><text x="${W-mr+4}" y="${Y(v)+4}" class="cep-lab ${cls}">${lab} ${o.fmt(v)}</text>`;
     s+=ln(o.lsc,"cep-lim","LSC")+ln(o.lc,"cep-lc","LC")+(o.lic>0||o.carta==="X̄"?ln(o.lic,"cep-lim","LIC"):`<text x="${W-mr+4}" y="${Y(Math.max(lo,0))}" class="cep-lab cep-lim">LIC 0</text>`)}
   s+=`<polyline class="cep-line" points="${P.map((p,i)=>X(i)+","+Y(p.y)).join(" ")}"/>`;
   const passo=Math.max(1,Math.ceil(P.length/(innerWidth<700?8:16)));
-  P.forEach((p,i)=>{s+=`<g><title>${esc(p.tip)}</title><circle cx="${X(i)}" cy="${Y(p.y)}" r="${p.sinal?5.5:3.8}" class="cep-pt${p.sinal?" sinal":""}${p.fora?" fora":""}"/></g>`;
+  P.forEach((p,i)=>{const t=p.tt||{};s+=`<g class="cep-hit" tabindex="0" role="img" aria-label="${esc(p.tip)}" data-sg="${esc(t.sg??p.lab)}" data-c="${esc(t.c||o.carta)}" data-v="${esc(t.v||o.fmt(p.y))}" data-q="${esc(t.q||"")}" data-st="${esc(t.st||"")}" data-sn="${p.sinal?1:0}"><circle cx="${X(i)}" cy="${Y(p.y)}" r="12" class="cep-alvo"/><circle cx="${X(i)}" cy="${Y(p.y)}" r="${p.sinal?5.5:3.8}" class="cep-pt${p.sinal?" sinal":""}${p.fora?" fora":""}"/></g>`;
     if(i%passo===0||i===P.length-1)s+=`<text x="${X(i)}" y="${H-10}" class="cep-ax" text-anchor="middle">${p.lab}</text>`});
   return s+`</svg>`;
 }
+(function(){let tip=null,cur=null;
+  const mk=()=>{if(!tip){tip=document.createElement("div");tip.className="ceptip";tip.setAttribute("role","tooltip");document.body.appendChild(tip)}return tip};
+  const show=(g,x,y)=>{const t=mk(),d=g.dataset;if(cur&&cur!==g)cur.classList.remove("on");cur=g;g.classList.add("on");
+    t.className="ceptip on"+(d.sn==="1"?" sn":"");
+    t.innerHTML=`<div class="tg">Subgrupo ${esc(d.sg)}</div><div class="tv">${esc(d.c)} = ${esc(d.v)}</div>${d.q?`<div class="tq">${esc(d.q)}</div>`:""}<div class="ts">${esc(d.st)}</div>`;
+    if(x==null){const r=g.querySelector(".cep-pt").getBoundingClientRect();x=r.left+r.width/2;y=r.top}
+    const w=t.offsetWidth,h=t.offsetHeight;let l=x+14,tp=y-h-12;if(l+w>innerWidth-8)l=x-w-14;if(l<8)l=8;if(tp<8)tp=y+16;t.style.left=l+"px";t.style.top=tp+"px"};
+  const hide=()=>{if(tip)tip.classList.remove("on");if(cur)cur.classList.remove("on");cur=null};
+  document.addEventListener("pointerover",e=>{const g=e.target.closest?.(".cep-hit");if(g)show(g,e.clientX,e.clientY)});
+  document.addEventListener("pointermove",e=>{const g=e.target.closest?.(".cep-hit");if(g)show(g,e.clientX,e.clientY);else if(cur&&e.pointerType==="mouse")hide()});
+  document.addEventListener("pointerdown",e=>{const g=e.target.closest?.(".cep-hit");if(g)show(g,e.clientX,e.clientY);else hide()});
+  document.addEventListener("focusin",e=>{const g=e.target.closest?.(".cep-hit");if(g)show(g)});
+  document.addEventListener("focusout",e=>{if(e.target.closest?.(".cep-hit"))hide()});
+  addEventListener("scroll",hide,{passive:true});addEventListener("hashchange",hide);
+})();
 function cepCartasHtml(D){const T=PESO_T[D.tipo],L=D.L;
   const vis=D.comp.slice(psVer?-psVer:0),tip=(s,v,c)=>`SG-${s.seq} · ${new Date(s.r.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}${s.r.lote?" · lote "+s.r.lote:""} · ${c} = ${kgFmt(v,4)} kg${(c==="X̄"?s.sx:s.sr).length?" · sinal: regra "+(c==="X̄"?s.sx:s.sr).join(", "):""}${s.r.foraBase?" · fora da base":""}${s.r.demo?" · DEMO":""}`;
-  const ptsX=vis.map(s=>({y:s.xb,lab:s.seq,sinal:s.sx.length>0,fora:!!s.r.foraBase,tip:tip(s,s.xb,"X̄")})),ptsR=vis.map(s=>({y:s.R,lab:s.seq,sinal:s.sr.length>0,fora:!!s.r.foraBase,tip:tip(s,s.R,"R")}));
+  const tt=(s,v,c)=>{const rg=c==="X̄"?s.sx:s.sr;return{sg:s.seq,c,v:kgFmt(v,4)+" kg",q:new Date(s.r.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+(s.r.lote?" · lote "+s.r.lote:"")+(s.r.demo?" · DEMO":""),st:rg.length?"Sinal de causa especial · regra "+rg.join(", "):s.r.foraBase?"Fora da base dos limites":"Dentro dos limites de controle"}};
+  const ptsX=vis.map(s=>({y:s.xb,lab:s.seq,sinal:s.sx.length>0,fora:!!s.r.foraBase,tip:tip(s,s.xb,"X̄"),tt:tt(s,s.xb,"X̄")})),ptsR=vis.map(s=>({y:s.R,lab:s.seq,sinal:s.sr.length>0,fora:!!s.r.foraBase,tip:tip(s,s.R,"R"),tt:tt(s,s.R,"R")}));
   return `<div class="card pscharts" id="cepCard"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">Pesagem · carta X̄-R</h2><div class="pstabs sm" role="tablist">${Object.entries(PESO_T).map(([k,t])=>`<button role="tab" class="pstab ${k===D.tipo?"on":""}" aria-selected="${k===D.tipo}" data-pfp="${k}"><b>${t.nome}</b><small>${t.ponto}</small></button>`).join("")}</div>${D.comp.length>25?`<label class="row small" style="gap:6px">Mostrar <select id="psVer" style="width:auto;margin:0"><option value="25" ${psVer===25?"selected":""}>últimos 25</option><option value="40" ${psVer===40?"selected":""}>últimos 40</option><option value="0" ${!psVer?"selected":""}>todos (${D.comp.length})</option></select></label>`:""}</div>
     ${(()=>{const L=D.L;return `<div class="cepsum"><span class="pill ${!L?"":D.instavel?"nc":"ok"}">${!L?"Em formação":D.instavel?"Sinais de causa especial":"Sob controle"}</span><span>${D.comp.length} subgrupos (n = ${D.n})</span><span>X̄̄ ${kgFmt(D.kpi.xbb)} kg</span><span>R̄ ${kgFmt(D.kpi.rb)} kg</span><span>${D.fase==="estab"?"limites estabelecidos":D.fase==="prov"?"limites provisórios":"sem limites ainda"}</span><span>FTP ${kgFmt(D.sp.min)} a ${kgFmt(D.sp.max)} kg</span></div>`})()}
     <div class="cepleg"><span><i class="lg lim${D.fase==="prov"?" prov":""}"></i>LSC / LIC · limites de controle${D.fase==="prov"?" (provisórios)":""}</span><span><i class="lg lc"></i>LC · linha central</span>${D.sp.min!=null||D.sp.max!=null?`<span><i class="lg spec"></i>LSE / LIE · especificação da FTP (fixa, só na carta X̄)</span>`:""}<span><i class="lg pt"></i>subgrupo</span><span><i class="lg sinal"></i>sinal de causa especial</span>${D.comp.some(s=>s.r.foraBase)?`<span><i class="lg fora"></i>fora da base dos limites</span>`:""}</div>
     <h3 class="cepth">Gráfico 1 · Controle das médias (X̄) · kg</h3>${cepSvg({pts:ptsX,L,lsc:L?.lsc,lc:L?.lc,lic:L?.lic,spec:D.sp,prov:D.fase==="prov",carta:"X̄",fmt:v=>kgFmt(v),aria:"Carta das médias do "+T.nome})}
     ${D.sp.min!=null||D.sp.max!=null?`<p class="small muted" style="margin:4px 0 0">Os limites de controle (LSC e LIC) vêm do próprio processo e mostram desvios a investigar. A especificação (LSE e LIE) vem da FTP e diz se o peso atende à JSP: um sinal dentro da especificação é um desvio do processo, não peça fora do padrão.</p>`:""}
     <h3 class="cepth">Gráfico 2 · Controle das amplitudes (R) · kg</h3>${cepSvg({pts:ptsR,L,lsc:L?.rlsc,lc:L?.rlc,lic:L?.rlic,prov:D.fase==="prov",carta:"R",fmt:v=>kgFmt(v),aria:"Carta das amplitudes do "+T.nome})}
-    <p class="small muted" style="margin-top:6px">Eixo horizontal: número do subgrupo (SG). Passe o dedo ou o mouse sobre um ponto para ver data, lote e valor. <a href="#pesagem/${D.tipo}">Subgrupos, limites e sinais →</a></p></div>`;
+    <p class="small muted" style="margin-top:6px">Eixo horizontal: número do subgrupo (SG). Passe o mouse (ou toque) em um ponto para ver o subgrupo e o valor. <a href="#pesagem/${D.tipo}">Subgrupos, limites e sinais →</a></p></div>`;
 }
 let psVer=40,psForm=null,psEdit=null,pfPeso="seco",pfPar="insp";
 function psNovoForm(tipo){const d=new Date(),l=new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);return {tipo,em:l,lote:"",turno:opTurno(),por:colab?.nome||"",v:Array(PESO_N).fill("")}}
